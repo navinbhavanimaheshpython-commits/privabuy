@@ -1,0 +1,2954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrivaBuy — Platform v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black:#000; --white:#fff;
+  --accent:#c9b8ff; --accent-light:#d4c5ff; --accent-dim:rgba(201,184,255,0.12);
+  --accent2:#ffd6a0; --accent3:#a8f0e0;
+  --green:#4ade80; --green-dim:rgba(74,222,128,0.12);
+  --red:#f87171; --red-dim:rgba(248,113,113,0.12);
+  --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.12);
+  --g1:#080808; --g2:rgba(255,255,255,0.04); --g3:rgba(255,255,255,0.08); --g4:rgba(255,255,255,0.3); --g5:rgba(255,255,255,0.55); --g6:rgba(255,255,255,0.8);
+  --border:rgba(255,255,255,0.10);
+  --serif:'Instrument Serif',Georgia,serif;
+  --sans:'Barlow',sans-serif;
+  --ui:'Inter',sans-serif;
+  --r:14px; --r-sm:8px; --r-lg:20px;
+}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);font-weight:300;background:#000;color:#fff;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+
+/* ── Grain overlay ── */
+body::before {
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0.022;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:128px 128px;
+}
+
+/* Inter for seller + dealer dashboards — everything except logos */
+#screen-seller *:not(.topbar-logo):not(.topbar-logo span),
+#screen-dealer *:not(.topbar-logo):not(.topbar-logo span) {
+  font-family: 'Inter', sans-serif !important;
+  font-style: normal !important;
+}
+#screen-seller .topbar-logo,
+#screen-dealer .topbar-logo {
+  font-family: 'Instrument Serif', Georgia, serif !important;
+  font-style: italic !important;
+}
+#screen-seller .stat-value,
+#screen-dealer .stat-value { font-weight: 600 !important; font-size: 30px !important; }
+#screen-seller .card-title,
+#screen-dealer .card-title { font-weight: 600 !important; font-size: 15px !important; }
+#screen-seller .section-title,
+#screen-dealer .section-title { font-weight: 700 !important; font-size: 22px !important; }
+#screen-seller .timer-digits,
+#screen-dealer .timer-digits { font-weight: 700 !important; letter-spacing: 2px !important; }
+#screen-seller .bid-amount,
+#screen-dealer .bid-amount { font-weight: 600 !important; }
+#screen-seller .current-bid-amount,
+#screen-dealer .current-bid-amount { font-weight: 600 !important; }
+#screen-seller .value-col-num,
+#screen-dealer .value-col-num { font-weight: 700 !important; }
+#screen-seller .form-label,
+#screen-dealer .form-label { font-weight: 500 !important; }
+#screen-seller .data-table th,
+#screen-dealer .data-table th { font-weight: 600 !important; }
+.lg-card {
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,0.10);
+  position:relative;overflow:hidden;
+}
+.lg-card::before {
+  content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(180deg,rgba(255,255,255,0.35) 0%,rgba(255,255,255,0.08) 30%,rgba(255,255,255,0.00) 60%,rgba(255,255,255,0.12) 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* LOGIN */
+#screen-login{align-items:center;justify-content:center;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(201,184,255,0.18) 0%,transparent 70%),#000;padding:24px;min-height:100vh;}
+.login-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid rgba(255,255,255,0.12);box-shadow:inset 0 1px 0 rgba(255,255,255,0.18),0 40px 80px rgba(0,0,0,0.6);border-radius:var(--r-lg);padding:48px 40px;width:100%;max-width:440px;}
+.login-logo{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:28px;margin-bottom:8px;}
+.login-logo span{color:var(--accent);}
+.login-tagline{font-size:14px;color:var(--g5);margin-bottom:36px;font-weight:300;}
+.role-select{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:28px;}
+.role-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:var(--r);padding:16px 8px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.role-btn:hover{border-color:rgba(201,184,255,0.4);background:rgba(201,184,255,0.08);}
+.role-btn.selected{border-color:rgba(201,184,255,0.6);background:rgba(201,184,255,0.12);}
+.role-btn .role-icon{font-size:24px;margin-bottom:6px;}
+.role-btn .role-name{font-size:12px;font-weight:400;color:var(--g5);}
+.role-btn.selected .role-name{color:var(--white);}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(0,0,0,0.75);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,0.08);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.topbar-logo{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:20px;letter-spacing:-0.02em;}
+.topbar-logo span{color:var(--accent);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.topbar-user{font-size:13px;color:var(--g5);font-weight:300;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:50px;font-size:11px;font-weight:500;letter-spacing:0.05em;}
+.badge-live{background:rgba(168,240,224,0.12);color:var(--accent3);border:1px solid rgba(168,240,224,0.25);}
+.badge-pending{background:rgba(255,214,160,0.12);color:var(--accent2);border:1px solid rgba(255,214,160,0.25);}
+.badge-closed{background:rgba(255,255,255,0.05);color:var(--g5);border:1px solid rgba(255,255,255,0.10);}
+.badge-won{background:rgba(201,184,255,0.12);color:var(--accent);border:1px solid rgba(201,184,255,0.25);}
+
+.content{flex:1;padding:24px;max-width:1100px;margin:0 auto;width:100%;}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:28px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:50px;padding:4px;width:fit-content;backdrop-filter:blur(10px);}
+.tab-btn{padding:8px 20px;border-radius:50px;font-size:13px;font-weight:400;color:var(--g5);border:none;background:none;cursor:pointer;transition:all 0.2s;font-family:var(--sans);}
+.tab-btn.active{background:rgba(255,255,255,0.10);color:var(--white);box-shadow:inset 0 1px 0 rgba(255,255,255,0.15);}
+
+/* CARDS */
+.card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-lg);overflow:hidden;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);position:relative;}
+.card::after{content:'';position:absolute;top:0;left:1.5rem;right:1.5rem;height:1px;background:linear-gradient(to right,transparent,rgba(255,255,255,0.18),transparent);pointer-events:none;}
+.card-header{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;}
+.card-body{padding:24px;}
+.card-title{font-family:var(--serif);font-size:20px;font-weight:400;}
+
+/* FORMS */
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-size:11px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--g5);margin-bottom:7px;}
+.form-input,.form-select,.form-textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:var(--r-sm);padding:12px 14px;font-family:var(--sans);font-size:14px;font-weight:300;color:var(--white);outline:none;transition:border-color 0.2s;appearance:none;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(201,184,255,0.5);background:rgba(201,184,255,0.04);}
+.form-input::placeholder,.form-textarea::placeholder{color:rgba(255,255,255,0.25);}
+.form-select option{background:#111;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.form-textarea{resize:vertical;min-height:90px;}
+
+/* CHECKBOX GROUP */
+.check-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.check-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:50px;padding:7px 14px;cursor:pointer;transition:all 0.2s;font-size:13px;font-weight:300;user-select:none;}
+.check-pill:hover{border-color:rgba(201,184,255,0.35);background:rgba(201,184,255,0.07);}
+.check-pill.selected{border-color:rgba(201,184,255,0.5);background:rgba(201,184,255,0.12);color:var(--white);}
+.check-pill input{display:none;}
+.radio-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.radio-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:50px;padding:7px 16px;cursor:pointer;transition:all 0.2s;font-size:13px;font-weight:300;user-select:none;}
+.radio-pill:hover{border-color:rgba(201,184,255,0.35);}
+.radio-pill.selected{border-color:rgba(201,184,255,0.5);background:rgba(201,184,255,0.12);color:var(--white);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:50px;border:none;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:400;transition:all 0.2s;text-decoration:none;}
+.btn-primary{background:rgba(201,184,255,0.15);color:var(--accent);border:1px solid rgba(201,184,255,0.3);backdrop-filter:blur(10px);}
+.btn-primary:hover{background:rgba(201,184,255,0.22);transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,184,255,0.15);}
+.btn-secondary{background:rgba(255,255,255,0.06);color:var(--white);border:1px solid rgba(255,255,255,0.12);}
+.btn-secondary:hover{background:rgba(255,255,255,0.10);}
+.btn-success{background:rgba(168,240,224,0.12);color:var(--accent3);border:1px solid rgba(168,240,224,0.25);}
+.btn-success:hover{background:rgba(168,240,224,0.20);transform:translateY(-1px);}
+.btn-danger{background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.25);}
+.btn-sm{padding:7px 16px;font-size:12px;}
+.btn-lg{padding:15px 32px;font-size:16px;}
+.btn-full{width:100%;justify-content:center;}
+.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none!important;}
+
+/* WIZARD */
+.wizard-steps{display:flex;gap:0;margin-bottom:32px;}
+.wizard-step{flex:1;text-align:center;position:relative;}
+.wizard-step::after{content:'';position:absolute;top:16px;left:50%;width:100%;height:1px;background:rgba(255,255,255,0.08);z-index:0;}
+.wizard-step:last-child::after{display:none;}
+.wizard-step-dot{width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--g5);margin:0 auto 8px;position:relative;z-index:1;transition:all 0.3s;}
+.wizard-step.active .wizard-step-dot{border-color:rgba(201,184,255,0.6);background:rgba(201,184,255,0.15);color:var(--accent);}
+.wizard-step.done .wizard-step-dot{border-color:rgba(168,240,224,0.5);background:rgba(168,240,224,0.12);color:var(--accent3);}
+.wizard-step-label{font-size:11px;color:var(--g5);font-weight:300;}
+.wizard-step.active .wizard-step-label{color:var(--white);}
+
+/* VIN */
+.vin-row{display:flex;gap:10px;}
+.vin-row .form-input{flex:1;font-family:monospace;letter-spacing:2px;text-transform:uppercase;}
+
+/* PHOTO SLOTS */
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.photo-slot{aspect-ratio:4/3;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.12);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.photo-slot:hover{border-color:rgba(201,184,255,0.4);background:rgba(201,184,255,0.06);}
+.photo-slot.filled{border-style:solid;border-color:rgba(255,255,255,0.12);}
+.photo-slot-label{font-size:11px;color:var(--g5);margin-top:6px;text-align:center;padding:0 4px;font-weight:300;}
+.photo-slot-icon{font-size:24px;}
+.photo-required-badge{position:absolute;top:6px;right:6px;background:rgba(248,113,113,0.2);color:var(--red);font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;letter-spacing:0.05em;border:1px solid rgba(248,113,113,0.3);}
+.photo-slot.filled .photo-required-badge{background:rgba(168,240,224,0.15);color:var(--accent3);border-color:rgba(168,240,224,0.25);}
+
+/* DAMAGE DISCLOSURE */
+.damage-tabs{display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:24px;}
+.damage-tab{padding:12px 20px;font-size:14px;font-weight:300;color:var(--g5);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--sans);}
+.damage-tab.active{color:var(--accent);border-bottom-color:rgba(201,184,255,0.6);}
+.car-diagram{position:relative;width:100%;max-width:420px;margin:0 auto 24px;}
+.car-diagram svg{width:100%;height:auto;}
+.damage-pin{position:absolute;cursor:pointer;transform:translate(-50%,-50%);}
+.damage-pin-dot{width:28px;height:28px;border-radius:50%;background:rgba(201,184,255,0.12);border:1px solid rgba(201,184,255,0.4);display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.2s;position:relative;}
+.damage-pin-dot:hover{background:rgba(201,184,255,0.25);transform:scale(1.1);}
+.damage-pin.has-damage .damage-pin-dot{background:rgba(248,113,113,0.2);border-color:var(--red);}
+.damage-pin-label{position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:3px 8px;font-size:11px;white-space:nowrap;pointer-events:none;}
+.damage-section-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+.damage-area-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r);padding:14px;cursor:pointer;transition:all 0.2s;}
+.damage-area-card:hover{border-color:rgba(201,184,255,0.35);}
+.damage-area-card.has-damage{border-color:rgba(248,113,113,0.4);background:rgba(248,113,113,0.06);}
+.damage-area-name{font-size:13px;font-weight:500;margin-bottom:8px;}
+.damage-area-desc{font-size:11px;color:var(--g5);font-weight:300;}
+
+/* VALUE ESTIMATE */
+.value-card{background:linear-gradient(135deg,rgba(201,184,255,0.12) 0%,rgba(201,184,255,0.03) 100%);border:1px solid rgba(201,184,255,0.2);border-radius:var(--r-lg);padding:24px;}
+.value-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0;}
+.value-col{text-align:center;padding:16px;border-radius:var(--r);background:rgba(0,0,0,0.3);}
+.value-col.middle{background:rgba(201,184,255,0.10);border:1px solid rgba(201,184,255,0.2);}
+.value-col-label{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--g5);margin-bottom:6px;}
+.value-col-num{font-family:var(--serif);font-size:28px;}
+.value-col.middle .value-col-num{color:var(--accent);}
+.floor-price-row{background:rgba(0,0,0,0.3);border-radius:var(--r);padding:16px;margin-top:16px;}
+.floor-price-input-wrap{position:relative;margin-top:10px;}
+.floor-currency{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:var(--serif);font-size:20px;color:var(--g5);}
+.floor-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(201,184,255,0.3);border-radius:var(--r-sm);padding:12px 14px 12px 32px;font-family:var(--serif);font-size:24px;color:var(--white);outline:none;transition:border-color 0.2s;}
+.floor-input:focus{border-color:rgba(201,184,255,0.6);}
+.value-factors{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.factor-tag{font-size:11px;padding:4px 10px;border-radius:50px;}
+.factor-pos{background:rgba(168,240,224,0.10);color:var(--accent3);border:1px solid rgba(168,240,224,0.2);}
+.factor-neg{background:rgba(248,113,113,0.08);color:var(--red);border:1px solid rgba(248,113,113,0.2);}
+.factor-neu{background:rgba(255,255,255,0.05);color:var(--g5);border:1px solid rgba(255,255,255,0.1);}
+
+/* AUCTION TIMER */
+.auction-timer-block{background:linear-gradient(135deg,rgba(201,184,255,0.12) 0%,rgba(201,184,255,0.03) 100%);border:1px solid rgba(201,184,255,0.2);border-radius:var(--r-lg);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.timer-digits{font-family:var(--serif);font-size:52px;line-height:1;letter-spacing:2px;color:var(--white);}
+.timer-digits.urgent{color:var(--red);animation:timerPulse 1s infinite;}
+@keyframes timerPulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.timer-label{font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;font-weight:300;}
+
+/* BID FEED */
+.bid-feed{display:flex;flex-direction:column;gap:6px;}
+.bid-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:var(--r);animation:bidSlide 0.35s ease both;}
+@keyframes bidSlide{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+.bid-item.top{background:rgba(201,184,255,0.10);border:1px solid rgba(201,184,255,0.2);}
+.bid-item.mid{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);}
+.bid-item.new-bid{animation:newBidFlash 0.5s ease;}
+@keyframes newBidFlash{0%{background:rgba(201,184,255,0.3)}100%{background:rgba(201,184,255,0.10)}}
+.bid-dealer-name{font-size:13px;color:var(--g5);font-weight:300;}
+.bid-time{font-size:11px;color:rgba(255,255,255,0.25);margin-top:1px;}
+.bid-amount{font-family:var(--serif);font-size:22px;}
+.bid-item.top .bid-amount{color:var(--accent);}
+.bid-top-label{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-left:6px;}
+
+/* VEHICLE CARD */
+.vehicle-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-lg);overflow:hidden;transition:border-color 0.2s,transform 0.2s;cursor:pointer;backdrop-filter:blur(10px);}
+.vehicle-card:hover{border-color:rgba(201,184,255,0.35);transform:translateY(-2px);}
+.vehicle-card-img{height:160px;background:linear-gradient(135deg,rgba(201,184,255,0.12) 0%,rgba(0,0,0,0.5) 100%);display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;}
+.vehicle-card-img .badge{position:absolute;top:12px;left:12px;}
+.vehicle-card-body{padding:16px;}
+.vehicle-card-title{font-family:var(--serif);font-size:18px;margin-bottom:6px;}
+.vehicle-card-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.meta-tag{font-size:11px;color:var(--g5);background:rgba(255,255,255,0.05);padding:3px 8px;border-radius:50px;font-weight:300;}
+.vehicle-card-bid{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);}
+.current-bid-label{font-size:11px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.07em;}
+.current-bid-amount{font-family:var(--serif);font-size:20px;color:var(--accent);}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-lg);padding:20px 22px;backdrop-filter:blur(10px);position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;top:0;left:1rem;right:1rem;height:1px;background:linear-gradient(to right,transparent,rgba(255,255,255,0.15),transparent);}
+.stat-value{font-family:var(--serif);font-size:32px;margin-bottom:4px;}
+.stat-label{font-size:12px;color:var(--g5);font-weight:300;}
+.stat-change{font-size:12px;color:var(--accent3);margin-top:4px;}
+.progress-bar{height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin:8px 0;}
+.progress-fill{height:100%;background:linear-gradient(to right,var(--accent),var(--accent2));border-radius:2px;transition:width 0.5s ease;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{padding:10px 14px;font-size:11px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--g5);text-align:left;border-bottom:1px solid rgba(255,255,255,0.07);}
+.data-table td{padding:14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:300;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(255,255,255,0.02);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px);}
+.modal-overlay.open{display:flex;}
+.modal{background:rgba(15,15,15,0.95);border:1px solid rgba(255,255,255,0.10);border-radius:var(--r-lg);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 40px 80px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.12);animation:modalIn 0.25s ease both;backdrop-filter:blur(40px);}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(10px)}to{opacity:1;transform:none}}
+.modal-header{padding:24px 28px 16px;display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-family:var(--serif);font-size:22px;}
+.modal-close{background:none;border:none;color:var(--g5);font-size:20px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.modal-close:hover{background:rgba(255,255,255,0.08);color:var(--white);}
+.modal-body{padding:0 28px 24px;}
+.modal-footer{padding:16px 28px 24px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid rgba(255,255,255,0.06);}
+
+/* TOAST */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:8px;}
+.toast{background:rgba(20,20,20,0.95);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:14px 18px;min-width:280px;max-width:360px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.08);backdrop-filter:blur(20px);animation:toastIn 0.3s ease both;}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+.toast.removing{animation:toastOut 0.3s ease both;}
+@keyframes toastOut{from{opacity:1;transform:none}to{opacity:0;transform:translateX(20px)}}
+.toast-icon{font-size:18px;flex-shrink:0;}
+.toast-title{font-size:13px;font-weight:500;margin-bottom:2px;}
+.toast-desc{font-size:12px;color:var(--g5);font-weight:300;}
+
+/* DEALER BID PANEL */
+.bid-panel{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-lg);padding:24px;position:sticky;top:80px;backdrop-filter:blur(16px);}
+.bid-input-row{display:flex;gap:10px;margin-top:12px;}
+.bid-amount-input{flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(201,184,255,0.3);border-radius:var(--r);padding:12px 14px 12px 28px;font-family:var(--serif);font-size:24px;color:var(--white);outline:none;transition:border-color 0.2s;}
+.bid-amount-input:focus{border-color:rgba(201,184,255,0.6);}
+.bid-input-wrapper{position:relative;flex:1;}
+.bid-currency{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:var(--serif);font-size:20px;color:var(--g5);}
+.auto-bid-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px;background:rgba(255,255,255,0.03);border-radius:var(--r);}
+.toggle{width:40px;height:22px;background:rgba(255,255,255,0.10);border-radius:11px;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
+.toggle.on{background:rgba(201,184,255,0.4);}
+.toggle-thumb{width:18px;height:18px;background:var(--white);border-radius:50%;position:absolute;top:2px;left:2px;transition:transform 0.2s;}
+.toggle.on .toggle-thumb{transform:translateX(18px);}
+
+/* MESSAGES */
+.message-list{display:flex;flex-direction:column;gap:12px;max-height:300px;overflow-y:auto;}
+.message-item{padding:12px 14px;border-radius:var(--r);max-width:80%;}
+.message-item.sent{background:rgba(201,184,255,0.10);border:1px solid rgba(201,184,255,0.2);align-self:flex-end;}
+.message-item.received{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);align-self:flex-start;}
+.message-text{font-size:13px;line-height:1.5;font-weight:300;}
+.message-time{font-size:11px;color:rgba(255,255,255,0.25);margin-top:4px;}
+
+/* ELIGIBILITY */
+.eligibility-card{border-radius:var(--r-lg);padding:20px 24px;margin:16px 0;display:flex;align-items:center;gap:16px;}
+.eligibility-card.pass{background:rgba(168,240,224,0.08);border:1px solid rgba(168,240,224,0.2);}
+.eligibility-card.fail{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);}
+.eligibility-icon{font-size:32px;}
+
+/* ADMIN */
+.admin-sidebar{width:220px;flex-shrink:0;background:rgba(255,255,255,0.02);border-right:1px solid rgba(255,255,255,0.07);padding:20px 0;display:flex;flex-direction:column;}
+.admin-nav-item{padding:10px 20px;font-size:13px;color:var(--g5);cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.15s;font-weight:300;}
+.admin-nav-item:hover{background:rgba(255,255,255,0.04);color:var(--white);}
+.admin-nav-item.active{background:rgba(201,184,255,0.08);color:var(--white);border-right:2px solid rgba(201,184,255,0.5);}
+
+/* MISC */
+.section-title{font-family:var(--serif);font-size:26px;margin-bottom:4px;font-weight:400;}
+.section-sub{font-size:14px;color:var(--g5);margin-bottom:24px;font-weight:300;}
+.divider{height:1px;background:rgba(255,255,255,0.07);margin:24px 0;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.flex-between{display:flex;align-items:center;justify-content:space-between;}
+.flex-gap{display:flex;align-items:center;gap:12px;}
+.text-muted{color:var(--g5);font-size:13px;font-weight:300;}
+.text-sm{font-size:12px;}
+.text-green{color:var(--accent3);}
+.text-red{color:var(--red);}
+.text-purple{color:var(--accent);}
+.mt-4{margin-top:4px;}.mt-8{margin-top:8px;}.mt-16{margin-top:16px;}.mt-24{margin-top:24px;}
+.mb-16{margin-bottom:16px;}.mb-24{margin-bottom:24px;}
+.mb-4{margin-bottom:4px;}
+.alert{padding:14px 16px;border-radius:var(--r);font-size:13px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;font-weight:300;}
+.alert-info{background:rgba(201,184,255,0.08);border:1px solid rgba(201,184,255,0.2);color:var(--accent);}
+.alert-success{background:rgba(168,240,224,0.08);border:1px solid rgba(168,240,224,0.2);color:var(--accent3);}
+.alert-warning{background:rgba(255,214,160,0.08);border:1px solid rgba(255,214,160,0.2);color:var(--accent2);}
+.hidden{display:none!important;}
+@media(max-width:768px){
+  .form-row,.form-row-3{grid-template-columns:1fr;}
+  .photo-grid{grid-template-columns:repeat(2,1fr);}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+  .content{padding:16px;}
+  .value-breakdown{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN ══════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">Priva<span>Buy</span> <span style="font-size:14px;color:var(--g4);font-family:var(--sans);font-weight:400">v2</span></div>
+    <div class="login-tagline">The auction platform for serious vehicle inventory.</div>
+    <div class="role-select">
+      <div class="role-btn selected" data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">🚗</div><div class="role-name">Seller</div></div>
+      <div class="role-btn" data-role="dealer" onclick="selectRole('dealer',this)"><div class="role-icon">🏢</div><div class="role-name">Dealer</div></div>
+      <div class="role-btn" data-role="admin" onclick="selectRole('admin',this)"><div class="role-icon">⚙️</div><div class="role-name">Admin</div></div>
+    </div>
+    <div id="login-seller-fields">
+      <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" type="tel" placeholder="+1 (312) 555-0100"></div>
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="you@example.com"></div>
+    </div>
+    <div id="login-dealer-fields" class="hidden">
+      <div class="alert alert-info">🔐 Dealer access requires verification. Demo: any credentials work.</div>
+      <div class="form-group"><label class="form-label">Dealer License Number</label><input class="form-input" placeholder="IL-12345678"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="dealer@automotivegroup.com"></div>
+    </div>
+    <div id="login-admin-fields" class="hidden">
+      <div class="form-group"><label class="form-label">Admin Email</label><input class="form-input" type="email" placeholder="admin@privabuy.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="••••••••"></div>
+    </div>
+    <button class="btn btn-primary btn-full btn-lg mt-16" onclick="login()" style="border-radius:12px">Continue →</button>
+    <p class="text-muted mt-8" style="text-align:center;font-size:12px">Demo mode — no real data stored</p>
+  </div>
+</div>
+
+<!-- ══════════════════ SELLER ══════════════════ -->
+<div id="screen-seller" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo">Priva<span>Buy</span></div>
+    <div class="topbar-right">
+      <span class="topbar-user">👤 Sarah M. — Seller</span>
+      <button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="tabs" id="seller-tabs">
+      <button class="tab-btn active" onclick="sellerTab('list',this)">List Vehicle</button>
+      <button class="tab-btn" onclick="sellerTab('auction',this)">My Auction</button>
+      <button class="tab-btn" onclick="sellerTab('history',this)">History</button>
+      <button class="tab-btn" onclick="sellerTab('payment',this)">💳 Pay Fee</button>
+    </div>
+
+    <!-- ── LIST TAB ── -->
+    <div id="seller-tab-list">
+      <div class="wizard-steps">
+        <div class="wizard-step active" id="ws-1"><div class="wizard-step-dot">1</div><div class="wizard-step-label">Vehicle</div></div>
+        <div class="wizard-step" id="ws-2"><div class="wizard-step-dot">2</div><div class="wizard-step-label">Photos</div></div>
+        <div class="wizard-step" id="ws-3"><div class="wizard-step-dot">3</div><div class="wizard-step-label">Condition</div></div>
+        <div class="wizard-step" id="ws-4"><div class="wizard-step-dot">4</div><div class="wizard-step-label">Value & Price</div></div>
+        <div class="wizard-step" id="ws-5"><div class="wizard-step-dot">5</div><div class="wizard-step-label">Review</div></div>
+      </div>
+
+      <!-- STEP 1: VEHICLE (matches BestBid form exactly) -->
+      <div id="wizard-step-1">
+        <div class="card mb-24">
+          <div class="card-header"><div class="card-title">Your Vehicle Details</div><span class="text-muted text-sm">All fields required</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">VIN Number</label>
+              <div class="vin-row">
+                <input class="form-input" id="vin-input" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()">
+                <button class="btn btn-secondary" onclick="decodeVIN()">🔍 Decode VIN</button>
+              </div>
+              <div id="vin-result" class="hidden mt-8"></div>
+            </div>
+            <div class="divider"></div>
+            <div class="form-row-3">
+              <div class="form-group"><label class="form-label">Year *</label><input class="form-input" id="f-year" type="number" placeholder="2017" min="2010" max="2022"></div>
+              <div class="form-group"><label class="form-label">Make *</label><input class="form-input" id="f-make" placeholder="Honda"></div>
+              <div class="form-group"><label class="form-label">Model *</label><input class="form-input" id="f-model" placeholder="CR-V"></div>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group"><label class="form-label">Trim *</label><input class="form-input" id="f-trim" placeholder="EX-L"></div>
+              <div class="form-group"><label class="form-label">Color *</label><input class="form-input" id="f-color" placeholder="Silver"></div>
+              <div class="form-group"><label class="form-label">Mileage *</label><input class="form-input" id="f-mileage" type="number" placeholder="94200"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Transmission *</label>
+                <div class="radio-group" id="transmission-group">
+                  <div class="radio-pill selected" onclick="selectRadio('transmission-group',this,'Automatic')">Automatic</div>
+                  <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Manual')">Manual</div>
+                  <div class="radio-pill" onclick="selectRadio('transmission-group',this,'CVT')">CVT</div>
+                  <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Other')">Other</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Drivetrain *</label>
+                <div class="radio-group" id="drivetrain-group">
+                  <div class="radio-pill selected" onclick="selectRadio('drivetrain-group',this,'FWD')">FWD</div>
+                  <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'AWD')">AWD</div>
+                  <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'RWD')">RWD</div>
+                  <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'4WD')">4WD</div>
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Title Status *</label>
+                <div class="radio-group" id="title-group">
+                  <div class="radio-pill selected" onclick="selectRadio('title-group',this,'Clean')">Clean</div>
+                  <div class="radio-pill" onclick="selectRadio('title-group',this,'Salvage')">Salvage</div>
+                  <div class="radio-pill" onclick="selectRadio('title-group',this,'Rebuilt')">Rebuilt</div>
+                  <div class="radio-pill" onclick="selectRadio('title-group',this,'Lien')">Lien Present</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Loan or Lease? *</label>
+                <div class="radio-group" id="loan-group">
+                  <div class="radio-pill selected" onclick="selectRadio('loan-group',this,'None')">None</div>
+                  <div class="radio-pill" onclick="selectRadio('loan-group',this,'Loan')">Loan</div>
+                  <div class="radio-pill" onclick="selectRadio('loan-group',this,'Lease')">Lease</div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Add-ons / Upgrades (list any, or N/A) *</label>
+              <input class="form-input" id="f-addons" placeholder="e.g. Remote start, tinted windows, upgraded wheels, N/A">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">ZIP Code *</label>
+                <input class="form-input" id="f-zip" placeholder="60601" maxlength="5" type="number">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Two or More Keys? *</label>
+                <div class="radio-group" id="keys-group">
+                  <div class="radio-pill selected" onclick="selectRadio('keys-group',this,'Yes')">Yes</div>
+                  <div class="radio-pill" onclick="selectRadio('keys-group',this,'No')">No — 1 Key</div>
+                </div>
+              </div>
+            </div>
+            <div id="eligibility-result"></div>
+          </div>
+        </div>
+        <div class="flex-between">
+          <div></div>
+          <button class="btn btn-primary" onclick="checkEligibility()">Check Eligibility & Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: PHOTOS -->
+      <div id="wizard-step-2" class="hidden">
+        <div class="card mb-24">
+          <div class="card-header"><div class="card-title">Vehicle Photos</div><span class="text-muted text-sm">6 required • 2 optional</span></div>
+          <div class="card-body">
+            <div class="alert alert-info">📸 <strong>Better photos = higher bids.</strong> Dealers can't touch the car — photos are everything. Required shots marked in red.</div>
+            <div class="photo-grid" id="photo-grid">
+              <div class="photo-slot" onclick="simulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">📷</div><div class="photo-slot-label">Front Exterior</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Rear Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">📷</div><div class="photo-slot-label">Rear Exterior</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Driver Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">📷</div><div class="photo-slot-label">Driver Side</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Passenger Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">📷</div><div class="photo-slot-label">Passenger Side</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Interior / Dashboard',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">📷</div><div class="photo-slot-label">Interior / Dash</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Odometer',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">📷</div><div class="photo-slot-label">Odometer Reading</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Engine Bay',false)"><div class="photo-slot-icon">📷</div><div class="photo-slot-label">Engine Bay</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Any Damage',false)"><div class="photo-slot-icon">📷</div><div class="photo-slot-label">Any Damage</div></div>
+            </div>
+            <div id="photos-uploaded-count" class="text-muted mt-16 text-sm">0 of 8 photos uploaded (6 required)</div>
+          </div>
+        </div>
+        <div class="flex-between">
+          <button class="btn btn-secondary" onclick="wizardGo(1)">← Back</button>
+          <button class="btn btn-primary" id="photos-next-btn" onclick="wizardGo(3)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: CONDITION (KBB-style damage disclosure) -->
+      <div id="wizard-step-3" class="hidden">
+        <div class="card mb-24">
+          <div class="card-header"><div class="card-title">Condition & Damage Disclosure</div></div>
+          <div class="card-body">
+
+            <!-- Damage Tabs -->
+            <div class="damage-tabs">
+              <button class="damage-tab active" onclick="switchDamageTab('exterior',this)">🚗 Exterior</button>
+              <button class="damage-tab" onclick="switchDamageTab('interior',this)">💺 Interior</button>
+              <button class="damage-tab" onclick="switchDamageTab('mechanical',this)">⚙️ Mechanical</button>
+            </div>
+
+            <!-- EXTERIOR -->
+            <div id="damage-exterior">
+              <p style="font-size:14px;color:var(--g5);margin-bottom:16px;text-align:center">Do you have damage or wear in any of these areas? Click to mark.</p>
+              <!-- Car SVG diagram with clickable damage pins -->
+              <div class="car-diagram" style="position:relative;margin-bottom:8px;">
+                <svg viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Car body simplified front view -->
+                  <rect x="60" y="80" width="280" height="110" rx="18" fill="#2c2c2e" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                  <!-- Windshield -->
+                  <rect x="100" y="50" width="200" height="70" rx="10" fill="#1a3a4a" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                  <!-- Roof -->
+                  <rect x="90" y="30" width="220" height="55" rx="12" fill="#222" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                  <!-- Hood -->
+                  <rect x="60" y="125" width="280" height="40" rx="6" fill="#252525" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                  <!-- Bumper -->
+                  <rect x="55" y="162" width="290" height="24" rx="8" fill="#1e1e1e" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                  <!-- Left headlight -->
+                  <ellipse cx="92" cy="148" rx="20" ry="14" fill="#2a2a2a" stroke="rgba(255,180,50,0.5)" stroke-width="1.5"/>
+                  <ellipse cx="92" cy="148" rx="12" ry="8" fill="rgba(255,180,50,0.15)"/>
+                  <!-- Right headlight -->
+                  <ellipse cx="308" cy="148" rx="20" ry="14" fill="#2a2a2a" stroke="rgba(255,180,50,0.5)" stroke-width="1.5"/>
+                  <ellipse cx="308" cy="148" rx="12" ry="8" fill="rgba(255,180,50,0.15)"/>
+                  <!-- Grille -->
+                  <rect x="140" y="157" width="120" height="18" rx="5" fill="#1a1a1a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                  <line x1="160" y1="157" x2="160" y2="175" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+                  <line x1="180" y1="157" x2="180" y2="175" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+                  <line x1="200" y1="157" x2="200" y2="175" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+                  <line x1="220" y1="157" x2="220" y2="175" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+                  <line x1="240" y1="157" x2="240" y2="175" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+                  <!-- Wheels -->
+                  <circle cx="105" cy="190" r="16" fill="#1a1a1a" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+                  <circle cx="105" cy="190" r="8" fill="#222" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                  <circle cx="295" cy="190" r="16" fill="#1a1a1a" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+                  <circle cx="295" cy="190" r="8" fill="#222" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                  <!-- Door handles -->
+                  <rect x="65" y="110" width="18" height="5" rx="2" fill="rgba(255,255,255,0.15)"/>
+                  <rect x="317" y="110" width="18" height="5" rx="2" fill="rgba(255,255,255,0.15)"/>
+                </svg>
+                <!-- Damage pins overlaid -->
+                <div class="damage-pin" id="pin-hood" style="left:50%;top:54%" onclick="togglePin('hood','Hood')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Hood</div></div>
+                <div class="damage-pin" id="pin-windshield" style="left:50%;top:28%" onclick="togglePin('windshield','Windshield')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Windshield</div></div>
+                <div class="damage-pin" id="pin-bumper" style="left:50%;top:82%" onclick="togglePin('bumper','Front Bumper')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Bumper</div></div>
+                <div class="damage-pin" id="pin-headlight-l" style="left:24%;top:66%" onclick="togglePin('headlight-l','Left Headlight')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">L. Light</div></div>
+                <div class="damage-pin" id="pin-headlight-r" style="left:76%;top:66%" onclick="togglePin('headlight-r','Right Headlight')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">R. Light</div></div>
+              </div>
+              <div class="form-group mt-8">
+                <label class="form-label">Exterior Condition (select all that apply)</label>
+                <div class="check-group" id="ext-condition-group">
+                  <div class="check-pill selected" onclick="togglePill(this)"><input type="checkbox" checked>None</div>
+                  <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Minor Scratches</div>
+                  <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Dents &amp; Scrapes</div>
+                  <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Faded Paint</div>
+                  <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Rust</div>
+                  <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Hail Damage</div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Tires Replaced (how many?)</label>
+                  <div class="radio-group" id="tires-group">
+                    <div class="radio-pill selected" onclick="selectRadio('tires-group',this,'0')">0</div>
+                    <div class="radio-pill" onclick="selectRadio('tires-group',this,'1')">1</div>
+                    <div class="radio-pill" onclick="selectRadio('tires-group',this,'2')">2</div>
+                    <div class="radio-pill" onclick="selectRadio('tires-group',this,'3')">3</div>
+                    <div class="radio-pill" onclick="selectRadio('tires-group',this,'4 (Full Set)')">All 4</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Windshield Condition</label>
+                  <div class="radio-group" id="windshield-group">
+                    <div class="radio-pill selected" onclick="selectRadio('windshield-group',this,'No Damage')">No Damage</div>
+                    <div class="radio-pill" onclick="selectRadio('windshield-group',this,'Minor Chips')">Minor Chips</div>
+                    <div class="radio-pill" onclick="selectRadio('windshield-group',this,'Cracks')">Cracks</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- INTERIOR -->
+            <div id="damage-interior" class="hidden">
+              <div class="damage-section-grid">
+                <div class="damage-area-card" id="area-odor" onclick="toggleAreaDamage(this,'odor')">
+                  <div class="damage-area-name">🌬️ Persistent Odor</div>
+                  <div class="damage-area-desc">Smoke, pet, mildew, or other odors</div>
+                </div>
+                <div class="damage-area-card" id="area-stains" onclick="toggleAreaDamage(this,'stains')">
+                  <div class="damage-area-name">💧 Stains</div>
+                  <div class="damage-area-desc">Seat, carpet, or headliner staining</div>
+                </div>
+                <div class="damage-area-card" id="area-rips" onclick="toggleAreaDamage(this,'rips')">
+                  <div class="damage-area-name">✂️ Rips / Tears</div>
+                  <div class="damage-area-desc">Upholstery damage on seats or panels</div>
+                </div>
+                <div class="damage-area-card" id="area-dash" onclick="toggleAreaDamage(this,'dash')">
+                  <div class="damage-area-name">📟 Dashboard Damage</div>
+                  <div class="damage-area-desc">Cracked, faded, or damaged dash panels</div>
+                </div>
+              </div>
+              <div class="form-group mt-16">
+                <label class="form-label">Moonroof / Sunroof</label>
+                <div class="radio-group" id="moonroof-group">
+                  <div class="radio-pill selected" onclick="selectRadio('moonroof-group',this,'N/A')">N/A</div>
+                  <div class="radio-pill" onclick="selectRadio('moonroof-group',this,'Works')">Works Fine</div>
+                  <div class="radio-pill" onclick="selectRadio('moonroof-group',this,'Not Working')">Not Working</div>
+                </div>
+              </div>
+              <div class="form-group mt-8">
+                <label class="form-label">Smoked In?</label>
+                <div class="radio-group" id="smoked-group">
+                  <div class="radio-pill selected" onclick="selectRadio('smoked-group',this,'No')">No</div>
+                  <div class="radio-pill" onclick="selectRadio('smoked-group',this,'Yes')">Yes</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MECHANICAL -->
+            <div id="damage-mechanical" class="hidden">
+              <div class="form-group">
+                <label class="form-label">Warning Lights On Dashboard?</label>
+                <div class="check-group" id="warning-lights-group">
+                  <div class="check-pill selected" onclick="togglePill(this)">None</div>
+                  <div class="check-pill" onclick="togglePill(this)">Check Engine</div>
+                  <div class="check-pill" onclick="togglePill(this)">Airbags</div>
+                  <div class="check-pill" onclick="togglePill(this)">Brake Warning</div>
+                  <div class="check-pill" onclick="togglePill(this)">Oil Pressure</div>
+                </div>
+              </div>
+              <div class="form-group mt-16">
+                <label class="form-label">Mechanical Issues (select all that apply)</label>
+                <div class="check-group" id="mech-issues-group">
+                  <div class="check-pill selected" onclick="togglePill(this)">No Issues</div>
+                  <div class="check-pill" onclick="togglePill(this)">Engine Noise</div>
+                  <div class="check-pill" onclick="togglePill(this)">Transmission Issues</div>
+                  <div class="check-pill" onclick="togglePill(this)">A/C Issues</div>
+                  <div class="check-pill" onclick="togglePill(this)">Electrical Issues</div>
+                  <div class="check-pill" onclick="togglePill(this)">Suspension/Steering</div>
+                </div>
+              </div>
+              <div class="form-row mt-16">
+                <div class="form-group">
+                  <label class="form-label">Is Your Vehicle Driveable?</label>
+                  <div class="radio-group" id="driveable-group">
+                    <div class="radio-pill selected" onclick="selectRadio('driveable-group',this,'Yes')">Yes</div>
+                    <div class="radio-pill" onclick="selectRadio('driveable-group',this,'No')">No</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Accident History</label>
+                  <div class="radio-group" id="accident-group">
+                    <div class="radio-pill selected" onclick="selectRadio('accident-group',this,'None')">None</div>
+                    <div class="radio-pill" onclick="selectRadio('accident-group',this,'One')">One</div>
+                    <div class="radio-pill" onclick="selectRadio('accident-group',this,'Two or More')">Two or More</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+            <!-- Overall Condition (shared across all tabs) -->
+            <div class="form-group">
+              <label class="form-label">Overall Condition *</label>
+              <div class="radio-group" id="overall-condition-group">
+                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Like New')">✨ Like New</div>
+                <div class="radio-pill selected" onclick="selectRadio('overall-condition-group',this,'Pretty Great')">⭐ Pretty Great</div>
+                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Just Okay')">👍 Just Okay</div>
+                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Kind of Rough')">⚠️ Kind of Rough</div>
+                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Major Issues')">🔴 Major Issues</div>
+              </div>
+            </div>
+            <div class="form-group mt-16">
+              <label class="form-label">Additional Comments (accidents, dents, repairs, anything not covered above)</label>
+              <textarea class="form-textarea" id="f-comments" placeholder="e.g. Small dent on rear passenger door from parking lot, repaired 2023. New brakes 6mo ago. AC compressor replaced at 80k miles."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="margin-bottom:12px">Is all information above true and accurate? *</label>
+              <div class="radio-group" id="truthful-group">
+                <div class="radio-pill selected" onclick="selectRadio('truthful-group',this,'Yes')">✓ Yes, everything is accurate</div>
+                <div class="radio-pill" onclick="selectRadio('truthful-group',this,'No')">No</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex-between">
+          <button class="btn btn-secondary" onclick="wizardGo(2)">← Back</button>
+          <button class="btn btn-primary" onclick="wizardGo(4)">Calculate My Value →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: VALUE ESTIMATE + FLOOR PRICE -->
+      <div id="wizard-step-4" class="hidden">
+        <div class="card mb-24">
+          <div class="card-header"><div class="card-title">Your Vehicle's Market Value</div></div>
+          <div class="card-body" id="value-estimate-content">
+            <!-- populated by JS -->
+          </div>
+        </div>
+        <div class="flex-between">
+          <button class="btn btn-secondary" onclick="wizardGo(3)">← Back</button>
+          <button class="btn btn-primary" onclick="wizardGo(5)">Review Listing →</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: REVIEW -->
+      <div id="wizard-step-5" class="hidden">
+        <div class="card mb-24" id="listing-review-card">
+          <div class="card-header"><div class="card-title">Review Your Listing</div></div>
+          <div class="card-body" id="listing-review-body"></div>
+        </div>
+        <div class="card mb-24">
+          <div class="card-body">
+            <div class="alert alert-info">🚀 Once you submit, your auction goes live immediately. 5 local dealers in your area are notified and encouraged to place bids within 15 minutes, though your auction stays open with no time limit — you accept whenever you're ready.</div>
+
+            <!-- TERMS & CONDITIONS -->
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:var(--r-lg);padding:20px;margin-bottom:20px">
+              <div style="font-size:14px;font-weight:600;margin-bottom:12px">Terms & Conditions — Seller Agreement</div>
+              <div style="height:160px;overflow-y:auto;font-size:12px;color:var(--g5);line-height:1.8;padding-right:8px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);border-radius:var(--r-sm);padding:12px">
+                <strong style="color:var(--white);display:block;margin-bottom:8px">1. Accuracy of Vehicle Information</strong>
+                I confirm that all information submitted about my vehicle — including but not limited to year, make, model, trim, mileage, title status, condition disclosures, mechanical issues, accident history, interior condition, and any modifications or add-ons — is true, complete, and accurate to the best of my knowledge. I understand that misrepresentation of vehicle condition is a material breach of this agreement and may result in cancellation of any accepted offer without recourse.
+                <br><br>
+                <strong style="color:var(--white);display:block;margin-bottom:8px">2. Auction & Offer Terms</strong>
+                I understand that listing my vehicle on PrivaBuy initiates a live auction in which franchised dealers will submit competing bids. I am not obligated to accept any bid. However, once I accept a bid, I am entering a binding agreement to sell the vehicle to the winning dealer at the accepted price, subject to the dealer's right to inspect the vehicle upon pickup.
+                <br><br>
+                <strong style="color:var(--white);display:block;margin-bottom:8px">3. Platform Fee</strong>
+                I understand that upon accepting an offer, a one-time platform fee of $250 is due to PrivaBuy before dealer contact information is released and pickup is arranged. This fee is non-refundable once payment is processed.
+                <br><br>
+                <strong style="color:var(--white);display:block;margin-bottom:8px">4. Condition Disputes</strong>
+                If the vehicle's actual condition at the time of pickup materially differs from the disclosures submitted in this listing, the winning dealer reserves the right to renegotiate or withdraw the accepted offer. PrivaBuy shall not be liable for disputes arising from inaccurate seller disclosures.
+                <br><br>
+                <strong style="color:var(--white);display:block;margin-bottom:8px">5. No Time Limit</strong>
+                I understand my auction has no mandatory expiration window. Dealers are encouraged to bid within 15 minutes of notification, but my auction remains open until I choose to accept an offer or close the listing.
+                <br><br>
+                <strong style="color:var(--white);display:block;margin-bottom:8px">6. Data & Privacy</strong>
+                My personal contact information will only be shared with the winning dealer, and only after I have accepted their bid and the platform fee has been paid. PrivaBuy will not sell or share my information with third parties for marketing purposes.
+              </div>
+              <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer">
+                <input type="checkbox" id="terms-checkbox" onchange="updateStartBtn()" style="width:18px;height:18px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;cursor:pointer">
+                <span style="font-size:13px;line-height:1.5">I have read and understand the Terms & Conditions above. I confirm that all information I have provided about my vehicle is <strong style="color:var(--white)">accurate, complete, and truthful</strong>. I understand that misrepresenting my vehicle's condition may result in the cancellation of my accepted offer.</span>
+              </label>
+            </div>
+
+            <div class="flex-between">
+              <button class="btn btn-secondary" onclick="wizardGo(4)">← Back</button>
+              <button class="btn btn-primary btn-lg" id="start-auction-btn" onclick="startAuction()" disabled style="opacity:0.4;cursor:not-allowed">🚀 Start My Auction — It's Free</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AUCTION TAB ── -->
+    <div id="seller-tab-auction" class="hidden">
+      <div id="no-auction-msg" class="hidden" style="text-align:center;padding:80px 24px;">
+        <div style="font-size:64px;margin-bottom:16px">🚗</div>
+        <div class="section-title">No Active Auction</div>
+        <div class="section-sub">List your vehicle to start a live auction.</div>
+        <button class="btn btn-primary btn-lg" onclick="sellerTab('list',document.querySelector('.tab-btn'))">List Your Vehicle →</button>
+      </div>
+      <div id="live-auction-view" class="hidden">
+        <div class="auction-timer-block">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--accent3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px">● Auction Live</div>
+            <div id="seller-elapsed" style="font-size:36px;font-weight:700;letter-spacing:1px;color:var(--white)">0:00</div>
+            <div class="timer-label">Time elapsed · No time limit — accept when you're ready</div>
+          </div>
+          <div style="text-align:right">
+            <div class="badge badge-live" style="margin-bottom:8px">● Open</div>
+            <div id="dealer-count-display" style="font-size:13px;color:var(--g5)">5 dealers notified</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Live Bids</div><div id="seller-bid-count" class="badge badge-live">0 bids</div></div>
+            <div class="card-body"><div class="bid-feed" id="seller-bid-feed"><div class="text-muted" style="text-align:center;padding:24px">Waiting for first bid...</div></div></div>
+          </div>
+          <div>
+            <div class="card mb-16">
+              <div class="card-header"><div class="card-title">Your Vehicle</div></div>
+              <div class="card-body" id="auction-vehicle-summary"></div>
+            </div>
+            <div class="card" id="seller-action-panel">
+              <div class="card-header"><div class="card-title">Auction Actions</div></div>
+              <div class="card-body">
+                <div id="seller-auction-buttons">
+                  <div class="text-muted text-sm mb-16">Your auction is open. There is no time limit — accept a bid whenever you're satisfied with the offer.</div>
+                  <div id="floor-warning" class="alert alert-warning hidden">⚠️ Current top bid is below your floor price of <strong id="floor-display"></strong>. You are not required to accept.</div>
+                  <button class="btn btn-success btn-full mb-16" id="accept-bid-btn" onclick="acceptTopBid()" disabled>✓ Accept Top Bid — <span id="top-bid-display">$0</span></button>
+                  <button class="btn btn-secondary btn-full" onclick="openCounterModal()">↩ Counter Offer</button>
+                </div>
+                <div id="seller-auction-closed" class="hidden">
+                  <div class="alert alert-success">🎉 Offer accepted! You agreed to <strong id="accepted-amount"></strong> — contact the dealer to arrange payment and pickup.</div>
+                  <div class="alert alert-info mt-8" id="dealer-contact-reveal"></div>
+                  <button class="btn btn-primary btn-full mt-16" onclick="openMessageModal()">💬 Message Dealer</button>
+
+                  <!-- STEP 1: Waiting for dealer payment -->
+                  <div id="seller-awaiting-payment" style="margin-top:20px;background:rgba(255,214,160,0.06);border:1px solid rgba(255,214,160,0.2);border-radius:var(--r-lg);padding:20px">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                      <span style="font-size:22px">⏳</span>
+                      <div>
+                        <div style="font-size:14px;font-weight:600;color:var(--accent2)">Waiting for Dealer Payment</div>
+                        <div style="font-size:12px;color:var(--g5);margin-top:2px;line-height:1.5">Once the dealer pays you for the vehicle, confirm it below. Your PrivaBuy platform fee is only due after you have received the funds.</div>
+                      </div>
+                    </div>
+                    <button class="btn btn-full" onclick="sellerConfirmReceivedPayment()" style="background:rgba(255,214,160,0.12);color:var(--accent2);border:1px solid rgba(255,214,160,0.3);border-radius:50px;font-weight:600;font-size:14px;padding:12px">
+                      ✓ I Have Received Payment from the Dealer
+                    </button>
+                    <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.25);margin-top:10px">Only confirm once funds are in your account or in hand</p>
+                  </div>
+
+                  <!-- STEP 2: Platform fee — hidden until dealer payment confirmed -->
+                  <div id="seller-fee-prompt" class="hidden" style="margin-top:16px;background:rgba(201,184,255,0.07);border:1px solid rgba(201,184,255,0.25);border-radius:var(--r-lg);padding:20px">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                      <span style="font-size:22px">💳</span>
+                      <div>
+                        <div style="font-size:14px;font-weight:600">PrivaBuy Platform Fee — Required</div>
+                        <div style="font-size:12px;color:var(--g5);margin-top:2px">Now that you've been paid, the $250 PrivaBuy fee is due to complete your transaction.</div>
+                      </div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(0,0,0,0.3);border-radius:var(--r);margin-bottom:14px">
+                      <span style="font-size:13px;color:var(--g5)">Platform fee</span>
+                      <span style="font-size:18px;font-weight:700;color:var(--accent)">$250.00</span>
+                    </div>
+                    <button class="btn btn-full" onclick="sellerTab('payment', null); highlightSellerPayment();" style="background:rgba(201,184,255,0.15);color:var(--accent);border:1px solid rgba(201,184,255,0.35);border-radius:50px;font-weight:600;font-size:14px;padding:12px">
+                      Pay $250 Platform Fee →
+                    </button>
+                    <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.3);margin-top:10px">Agreed to in Terms & Conditions at time of listing</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HISTORY TAB ── -->
+    <div id="seller-tab-history" class="hidden">
+      <div class="section-title mb-16">Past Listings</div>
+      <div class="card">
+        <table class="data-table">
+          <thead><tr><th>Vehicle</th><th>Date</th><th>Bids</th><th>Top Offer</th><th>Your Floor</th><th>Outcome</th></tr></thead>
+          <tbody>
+            <tr><td><strong>2016 Toyota Camry SE</strong><br><span class="text-muted">88,400 mi</span></td><td>Mar 14, 2025</td><td>5</td><td class="text-purple" style="font-family:var(--serif);font-size:18px">$11,200</td><td>$10,000</td><td><span class="badge badge-won">Sold</span></td></tr>
+            <tr><td><strong>2018 Ford F-150 XLT</strong><br><span class="text-muted">102,000 mi</span></td><td>Feb 28, 2025</td><td>4</td><td class="text-purple" style="font-family:var(--serif);font-size:18px">$18,500</td><td>$16,000</td><td><span class="badge badge-won">Sold</span></td></tr>
+            <tr><td><strong>2015 Honda Pilot EX</strong><br><span class="text-muted">115,200 mi</span></td><td>Feb 2, 2025</td><td>2</td><td style="font-family:var(--serif);font-size:18px;color:var(--g5)">$9,800</td><td>$11,000</td><td><span class="badge badge-closed">Declined</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── SELLER PAYMENT TAB ── -->
+    <div id="seller-tab-payment" class="hidden">
+      <div class="flex-between mb-24">
+        <div>
+          <div class="section-title">Platform Fee</div>
+          <div class="section-sub" style="margin-bottom:0">One-time fee per successful auction</div>
+        </div>
+        <div class="badge badge-live" style="font-size:13px;padding:8px 16px">Secure Checkout</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start">
+
+        <!-- Payment form -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Payment Details</div></div>
+          <div class="card-body">
+            <div class="alert alert-info" style="margin-bottom:24px">🔒 Your payment is processed securely. PrivaBuy never stores your card details.</div>
+
+            <div class="form-group">
+              <label class="form-label">Cardholder Name</label>
+              <input class="form-input" id="seller-card-name" placeholder="Sarah Mitchell">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Card Number</label>
+              <input class="form-input" id="seller-card-num" placeholder="1234  5678  9012  3456" maxlength="19" oninput="formatCard(this)">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Expiry Date</label>
+                <input class="form-input" id="seller-card-exp" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)">
+              </div>
+              <div class="form-group">
+                <label class="form-label">CVV</label>
+                <input class="form-input" id="seller-card-cvv" placeholder="•••" maxlength="4" type="password">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Billing ZIP Code</label>
+              <input class="form-input" id="seller-card-zip" placeholder="60601" maxlength="5" type="number">
+            </div>
+
+            <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 0"></div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:14px;color:var(--g5)">Platform fee</span>
+              <span style="font-size:14px">$250.00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+              <span style="font-size:14px;color:var(--g5)">Processing</span>
+              <span style="font-size:14px;color:var(--accent3)">Free</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(201,184,255,0.08);border:1px solid rgba(201,184,255,0.2);border-radius:var(--r);margin-bottom:24px">
+              <span style="font-size:15px;font-weight:600">Total Due</span>
+              <span style="font-size:22px;font-weight:700;color:var(--accent)">$250.00</span>
+            </div>
+
+            <button class="btn btn-primary btn-full btn-lg" onclick="processSellerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">
+              Pay $250.00 →
+            </button>
+            <p style="text-align:center;font-size:12px;color:var(--g5);margin-top:12px">By paying you agree to PrivaBuy's Terms of Service</p>
+          </div>
+        </div>
+
+        <!-- Order summary -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Order Summary</div></div>
+            <div class="card-body">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.07)">
+                <div style="width:48px;height:48px;border-radius:12px;background:rgba(201,184,255,0.12);border:1px solid rgba(201,184,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px">🚗</div>
+                <div>
+                  <div style="font-size:14px;font-weight:500">2017 Honda CR-V EX</div>
+                  <div style="font-size:12px;color:var(--g5)">94,200 mi · Accepted offer: $12,400</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div class="flex-between"><span style="font-size:13px;color:var(--g5)">Service</span><span style="font-size:13px">Auction Platform Fee</span></div>
+                <div class="flex-between"><span style="font-size:13px;color:var(--g5)">Auction date</span><span style="font-size:13px">Apr 7, 2026</span></div>
+                <div class="flex-between"><span style="font-size:13px;color:var(--g5)">Winning dealer</span><span style="font-size:13px">Northside Auto Group</span></div>
+                <div class="flex-between"><span style="font-size:13px;color:var(--g5)">Fee type</span><span style="font-size:13px">One-time · Non-refundable</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:20px">🔒</span>
+                <div>
+                  <div style="font-size:13px;font-weight:500;margin-bottom:4px">256-bit SSL Encryption</div>
+                  <div style="font-size:12px;color:var(--g5);line-height:1.5">Your card information is encrypted and never stored on PrivaBuy servers.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:20px">❓</span>
+                <div>
+                  <div style="font-size:13px;font-weight:500;margin-bottom:4px">Questions?</div>
+                  <div style="font-size:12px;color:var(--g5);line-height:1.5">Email <span style="color:var(--accent)">support@privabuy.com</span> or call us at (312) 555-0199</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ DEALER ══════════════════ -->
+<div id="screen-dealer" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo">Priva<span>Buy</span> <span style="font-size:12px;color:var(--g5);font-family:var(--sans);font-weight:400">Dealer Portal</span></div>
+    <div class="topbar-right">
+      <span class="topbar-user">🏢 Northside Auto Group</span>
+      <button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="tabs" id="dealer-tabs">
+      <button class="tab-btn active" onclick="dealerTab('feed',this)">Live Feed</button>
+      <button class="tab-btn" onclick="dealerTab('watchlist',this)">Watchlist</button>
+      <button class="tab-btn" onclick="dealerTab('won',this)">Won Vehicles</button>
+      <button class="tab-btn hidden" id="dealer-pay-fee-tab" onclick="dealerTab('payment',this)" style="position:relative">
+        💳 Pay Fee <span id="dealer-fee-badge" style="display:none;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:50px;margin-left:4px;vertical-align:middle">0</span>
+      </button>
+      <button class="tab-btn" onclick="dealerTab('analytics',this)">Analytics</button>
+    </div>
+    <div id="dealer-tab-feed">
+      <div class="flex-between mb-24">
+        <div><div class="section-title">Active Auctions</div><div class="section-sub">📍 Within 25mi of Chicago, IL — Your territory</div></div>
+      </div>
+      <!-- REAL SELLER AUCTION CARD (appears when seller starts auction) -->
+      <div id="real-seller-auction-card" class="hidden mb-24">
+        <div class="alert alert-warning">⚡ <strong>New listing just posted in your territory!</strong> Real seller auction — place your bid now.</div>
+        <div class="vehicle-card" onclick="openRealAuction()">
+          <div class="vehicle-card-img" style="background:linear-gradient(135deg,rgba(201,184,255,0.12),var(--g1))">
+            🚗
+            <div class="badge badge-live" style="position:absolute;top:12px;left:12px">● Live — Real Seller</div>
+            <div style="position:absolute;top:12px;right:12px;background:rgba(201,184,255,0.2);border:1px solid var(--accent);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--accent);font-weight:600">NEW</div>
+          </div>
+          <div class="vehicle-card-body">
+            <div class="vehicle-card-title" id="rc-title">—</div>
+            <div class="vehicle-card-meta" id="rc-meta"></div>
+            <div class="vehicle-card-bid">
+              <div><div class="current-bid-label">Top Bid</div><div class="current-bid-amount" id="rc-top-bid">$0</div></div>
+              <div style="text-align:right"><div class="text-muted text-sm" id="rc-bid-count">0 bids</div><div style="font-family:monospace;font-size:14px;color:var(--accent3)" id="rc-timer">0:00</div><div style="font-size:10px;color:var(--g5)">elapsed</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-3" id="dealer-auction-grid"></div>
+    </div>
+    <div id="dealer-tab-watchlist" class="hidden">
+      <div class="section-title mb-16">My Watchlist</div>
+      <div class="alert alert-info">Set up alerts for vehicles matching your criteria.</div>
+      <div class="card mb-16">
+        <div class="card-header"><div class="card-title">Alert Criteria</div><button class="btn btn-primary btn-sm" onclick="showToast('✅','Alert saved!','You will be notified when matching vehicles list.')">+ Add Alert</button></div>
+        <div class="card-body">
+          <div class="form-row-3">
+            <div class="form-group"><label class="form-label">Make</label><select class="form-select"><option>Honda</option><option>Toyota</option><option>Ford</option></select></div>
+            <div class="form-group"><label class="form-label">Year Range</label><input class="form-input" value="2016 – 2019"></div>
+            <div class="form-group"><label class="form-label">Max Mileage</label><input class="form-input" placeholder="120,000 mi"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card"><table class="data-table"><thead><tr><th>Alert</th><th>Created</th><th>Matches (30d)</th><th>Status</th></tr></thead><tbody><tr><td><strong>Honda CRV/Pilot, 2016–2019</strong><br><span class="text-muted">Under 120k mi</span></td><td>Jan 15</td><td>8 vehicles</td><td><span class="badge badge-live">Active</span></td></tr></tbody></table></div>
+    </div>
+    <div id="dealer-tab-won" class="hidden">
+      <div class="section-title mb-16">Won Vehicles</div>
+      <div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Won</th><th>Paid</th><th>Seller</th><th>Status</th></tr></thead><tbody><tr><td><strong>2016 Toyota Camry SE</strong><br><span class="text-muted">88,400 mi • Clean</span></td><td>Mar 14</td><td class="text-purple" style="font-family:var(--serif)">$11,200</td><td>Sarah M. — 312-555-0100</td><td><span class="badge badge-won">Pickup Scheduled</span></td></tr></tbody></table></div>
+    </div>
+
+    <!-- ── DEALER PAYMENT TAB ── -->
+    <div id="dealer-tab-payment" class="hidden">
+      <div class="flex-between mb-24">
+        <div>
+          <div class="section-title">Outstanding Platform Fees</div>
+          <div class="section-sub" style="margin-bottom:0">$500 per vehicle won — only charged when a seller accepts your bid</div>
+        </div>
+        <div class="badge badge-live" style="font-size:13px;padding:8px 16px">🔒 Secure Checkout</div>
+      </div>
+
+      <!-- Pending fees list — dynamically populated -->
+      <div id="dealer-pending-fees-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px"></div>
+
+      <!-- Payment form — shown when a vehicle is selected -->
+      <div id="dealer-payment-form-wrap" class="hidden">
+        <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Pay for: <span id="dealer-paying-for" style="color:var(--accent)">—</span></div>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-info" style="margin-bottom:20px">🔒 Your payment is processed securely. PrivaBuy never stores your card details.</div>
+              <div class="form-group">
+                <label class="form-label">Cardholder Name</label>
+                <input class="form-input" id="dealer-card-name" placeholder="James Kowalski">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Card Number</label>
+                <input class="form-input" id="dealer-card-num" placeholder="1234  5678  9012  3456" maxlength="19" oninput="formatCard(this)">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Expiry Date</label>
+                  <input class="form-input" id="dealer-card-exp" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CVV</label>
+                  <input class="form-input" id="dealer-card-cvv" placeholder="•••" maxlength="4" type="password">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Billing ZIP Code</label>
+                <input class="form-input" id="dealer-card-zip" placeholder="60601" maxlength="5" type="number">
+              </div>
+              <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 0"></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(201,184,255,0.08);border:1px solid rgba(201,184,255,0.2);border-radius:var(--r);margin-bottom:20px">
+                <span style="font-size:15px;font-weight:600">Total Due</span>
+                <span style="font-size:22px;font-weight:700;color:var(--accent)">$500.00</span>
+              </div>
+              <button class="btn btn-primary btn-full btn-lg" id="dealer-pay-btn" onclick="processDealerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">
+                Pay $500.00 →
+              </button>
+              <p style="text-align:center;font-size:12px;color:var(--g5);margin-top:12px">One-time fee per vehicle — no subscription</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Fee Summary</div></div>
+              <div class="card-body" id="dealer-fee-summary-body">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div class="flex-between"><span style="font-size:13px;color:var(--g5)">Service</span><span style="font-size:13px">Per-win Platform Fee</span></div>
+                  <div class="flex-between"><span style="font-size:13px;color:var(--g5)">Vehicle</span><span style="font-size:13px" id="fee-summary-vehicle">—</span></div>
+                  <div class="flex-between"><span style="font-size:13px;color:var(--g5)">Win price</span><span style="font-size:13px" id="fee-summary-price">—</span></div>
+                  <div class="flex-between"><span style="font-size:13px;color:var(--g5)">Fee type</span><span style="font-size:13px">One-time · Per vehicle</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="card"><div class="card-body"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:20px">🔒</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">256-bit SSL Encryption</div><div style="font-size:12px;color:var(--g5);line-height:1.5">Your card information is never stored on PrivaBuy servers.</div></div></div></div></div>
+            <div class="card"><div class="card-body"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:20px">❓</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Questions?</div><div style="font-size:12px;color:var(--g5);line-height:1.5">Email <span style="color:var(--accent)">support@privabuy.com</span> or call (312) 555-0199</div></div></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="dealer-tab-analytics" class="hidden">
+
+      <!-- Header -->
+      <div class="flex-between mb-24">
+        <div>
+          <div class="section-title">Performance Analytics</div>
+          <div class="section-sub" style="margin-bottom:0;font-size:13px">Northside Auto Group &nbsp;·&nbsp; Chicago North Territory &nbsp;·&nbsp; Last 30 days</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div style="display:flex;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:50px;padding:3px;gap:2px">
+            <button onclick="setAnalyticsPeriod('7d',this)" style="padding:5px 14px;border-radius:50px;border:none;font-family:var(--sans);font-size:12px;cursor:pointer;background:rgba(255,255,255,0.10);color:#fff">7d</button>
+            <button onclick="setAnalyticsPeriod('30d',this)" style="padding:5px 14px;border-radius:50px;border:none;font-family:var(--sans);font-size:12px;cursor:pointer;background:none;color:rgba(255,255,255,0.4)">30d</button>
+            <button onclick="setAnalyticsPeriod('90d',this)" style="padding:5px 14px;border-radius:50px;border:none;font-family:var(--sans);font-size:12px;cursor:pointer;background:none;color:rgba(255,255,255,0.4)">90d</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Strip — 4 cards with sparklines -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+
+        <div class="stat-card" style="position:relative;overflow:hidden">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+            <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;font-weight:400">Win Rate</div>
+            <span style="font-size:11px;color:var(--accent3);background:rgba(168,240,224,0.1);border:1px solid rgba(168,240,224,0.2);padding:2px 8px;border-radius:50px">↑ 6%</span>
+          </div>
+          <div class="stat-value" style="color:var(--accent3)">34.8%</div>
+          <div class="stat-label">23 auctions entered this period</div>
+          <svg viewBox="0 0 80 28" style="width:100%;height:28px;margin-top:10px;opacity:0.7"><polyline points="0,22 13,18 26,20 39,12 52,15 65,8 80,5" fill="none" stroke="var(--accent3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="0,22 13,18 26,20 39,12 52,15 65,8 80,5 80,28 0,28" fill="rgba(168,240,224,0.08)" stroke="none"/></svg>
+        </div>
+
+        <div class="stat-card" style="position:relative;overflow:hidden">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+            <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;font-weight:400">Vehicles Won</div>
+            <span style="font-size:11px;color:var(--accent3);background:rgba(168,240,224,0.1);border:1px solid rgba(168,240,224,0.2);padding:2px 8px;border-radius:50px">↑ 3</span>
+          </div>
+          <div class="stat-value">8</div>
+          <div class="stat-label">of 23 auctions entered this period</div>
+          <svg viewBox="0 0 80 28" style="width:100%;height:28px;margin-top:10px;opacity:0.7"><polyline points="0,24 13,20 26,22 39,16 52,18 65,10 80,7" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="0,24 13,20 26,22 39,16 52,18 65,10 80,7 80,28 0,28" fill="rgba(201,184,255,0.07)" stroke="none"/></svg>
+        </div>
+
+        <div class="stat-card" style="position:relative;overflow:hidden">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+            <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;font-weight:400">Total Spend</div>
+            <span style="font-size:11px;color:var(--accent2);background:rgba(255,214,160,0.1);border:1px solid rgba(255,214,160,0.2);padding:2px 8px;border-radius:50px">avg $11.8k/unit</span>
+          </div>
+          <div class="stat-value" style="color:var(--accent)">$94k</div>
+          <div class="stat-label">Cumulative acquisition spend</div>
+          <svg viewBox="0 0 80 28" style="width:100%;height:28px;margin-top:10px;opacity:0.7"><polyline points="0,26 13,22 26,18 39,20 52,14 65,16 80,10" fill="none" stroke="var(--accent2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="0,26 13,22 26,18 39,20 52,14 65,16 80,10 80,28 0,28" fill="rgba(255,214,160,0.07)" stroke="none"/></svg>
+        </div>
+
+        <div class="stat-card" style="position:relative;overflow:hidden">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+            <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;font-weight:400">Est. Gross Profit</div>
+            <span style="font-size:11px;color:var(--accent3);background:rgba(168,240,224,0.1);border:1px solid rgba(168,240,224,0.2);padding:2px 8px;border-radius:50px">↑ 18%</span>
+          </div>
+          <div class="stat-value" style="color:var(--accent3)">$31k</div>
+          <div class="stat-label">Avg $3,875 gross margin per unit</div>
+          <svg viewBox="0 0 80 28" style="width:100%;height:28px;margin-top:10px;opacity:0.7"><polyline points="0,25 13,21 26,19 39,14 52,16 65,9 80,6" fill="none" stroke="var(--accent3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="0,25 13,21 26,19 39,14 52,16 65,9 80,6 80,28 0,28" fill="rgba(168,240,224,0.08)" stroke="none"/></svg>
+        </div>
+
+      </div>
+
+      <!-- Second row: secondary KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r-lg);padding:16px 18px">
+          <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">Avg Acquisition Cost</div>
+          <div style="font-family:var(--serif);font-size:22px;margin-bottom:2px">$11,750</div>
+          <div style="font-size:11px;color:var(--g5)">vs. $12,200 territory avg</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r-lg);padding:16px 18px">
+          <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">Days Since Last Win</div>
+          <div style="font-family:var(--serif);font-size:22px;margin-bottom:2px;color:var(--accent2)">3 days</div>
+          <div style="font-size:11px;color:var(--g5)">2017 Honda CR-V · $12,400</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r-lg);padding:16px 18px">
+          <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">Auctions Missed</div>
+          <div style="font-family:var(--serif);font-size:22px;margin-bottom:2px;color:var(--red)">5</div>
+          <div style="font-size:11px;color:var(--g5)">Territory auctions you skipped</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r-lg);padding:16px 18px">
+          <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">Territory Avg Top Bid</div>
+          <div style="font-family:var(--serif);font-size:22px;margin-bottom:2px">$11,940</div>
+          <div style="font-size:11px;color:var(--g5)">Honda CR-V most competitive make</div>
+        </div>
+      </div>
+
+      <!-- Main charts row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 340px;gap:16px;margin-bottom:20px">
+
+        <!-- Weekly bid activity bar chart -->
+        <div class="card" style="grid-column:span 2">
+          <div class="card-header">
+            <div class="card-title">Bid Activity vs. Wins</div>
+            <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:var(--g5)">
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(201,184,255,0.5);display:inline-block"></span>Bids Placed</span>
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--accent3);display:inline-block"></span>Won</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;align-items:flex-end;gap:10px;height:140px;padding-bottom:24px;position:relative">
+              <!-- Y axis labels -->
+              <div style="position:absolute;left:0;top:0;bottom:24px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none">
+                <span style="font-size:10px;color:rgba(255,255,255,0.25)">6</span>
+                <span style="font-size:10px;color:rgba(255,255,255,0.25)">4</span>
+                <span style="font-size:10px;color:rgba(255,255,255,0.25)">2</span>
+                <span style="font-size:10px;color:rgba(255,255,255,0.25)">0</span>
+              </div>
+              <!-- Grid lines -->
+              <div style="position:absolute;left:16px;right:0;top:0;bottom:24px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none">
+                <div style="height:1px;background:rgba(255,255,255,0.05)"></div>
+                <div style="height:1px;background:rgba(255,255,255,0.05)"></div>
+                <div style="height:1px;background:rgba(255,255,255,0.05)"></div>
+                <div style="height:1px;background:rgba(255,255,255,0.05)"></div>
+              </div>
+              <!-- Bars — static HTML -->
+              <div style="flex:1;display:flex;align-items:flex-end;gap:6px;padding-left:20px;height:100%">
+                <!-- Mon: bids=3, won=1 -->
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end">
+                  <div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:116px">
+                    <div style="flex:1;background:rgba(201,184,255,0.3);border-radius:4px 4px 0 0;height:50%;transition:all 0.3s" onmouseenter="this.style.background='rgba(201,184,255,0.55)'" onmouseleave="this.style.background='rgba(201,184,255,0.3)'"></div>
+                    <div style="flex:1;background:var(--accent3);border-radius:4px 4px 0 0;height:16.6%;opacity:0.85;transition:all 0.3s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.85'"></div>
+                  </div>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;letter-spacing:0.04em">Mon</div>
+                </div>
+                <!-- Tue: bids=5, won=2 -->
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end">
+                  <div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:116px">
+                    <div style="flex:1;background:rgba(201,184,255,0.3);border-radius:4px 4px 0 0;height:83.3%;transition:all 0.3s" onmouseenter="this.style.background='rgba(201,184,255,0.55)'" onmouseleave="this.style.background='rgba(201,184,255,0.3)'"></div>
+                    <div style="flex:1;background:var(--accent3);border-radius:4px 4px 0 0;height:33.3%;opacity:0.85;transition:all 0.3s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.85'"></div>
+                  </div>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;letter-spacing:0.04em">Tue</div>
+                </div>
+                <!-- Wed: bids=2, won=0 -->
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end">
+                  <div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:116px">
+                    <div style="flex:1;background:rgba(201,184,255,0.3);border-radius:4px 4px 0 0;height:33.3%;transition:all 0.3s" onmouseenter="this.style.background='rgba(201,184,255,0.55)'" onmouseleave="this.style.background='rgba(201,184,255,0.3)'"></div>
+                    <div style="flex:1;background:var(--accent3);border-radius:4px 4px 0 0;height:2%;opacity:0.85;transition:all 0.3s"></div>
+                  </div>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;letter-spacing:0.04em">Wed</div>
+                </div>
+                <!-- Thu: bids=4, won=2 -->
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end">
+                  <div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:116px">
+                    <div style="flex:1;background:rgba(201,184,255,0.3);border-radius:4px 4px 0 0;height:66.6%;transition:all 0.3s" onmouseenter="this.style.background='rgba(201,184,255,0.55)'" onmouseleave="this.style.background='rgba(201,184,255,0.3)'"></div>
+                    <div style="flex:1;background:var(--accent3);border-radius:4px 4px 0 0;height:33.3%;opacity:0.85;transition:all 0.3s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.85'"></div>
+                  </div>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;letter-spacing:0.04em">Thu</div>
+                </div>
+                <!-- Fri: bids=6, won=3 -->
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end">
+                  <div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:116px">
+                    <div style="flex:1;background:rgba(201,184,255,0.3);border-radius:4px 4px 0 0;height:100%;transition:all 0.3s" onmouseenter="this.style.background='rgba(201,184,255,0.55)'" onmouseleave="this.style.background='rgba(201,184,255,0.3)'"></div>
+                    <div style="flex:1;background:var(--accent3);border-radius:4px 4px 0 0;height:50%;opacity:0.85;transition:all 0.3s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.85'"></div>
+                  </div>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;letter-spacing:0.04em">Fri</div>
+                </div>
+                <!-- Sat: bids=1, won=1 -->
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end">
+                  <div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:116px">
+                    <div style="flex:1;background:rgba(201,184,255,0.3);border-radius:4px 4px 0 0;height:16.6%;transition:all 0.3s" onmouseenter="this.style.background='rgba(201,184,255,0.55)'" onmouseleave="this.style.background='rgba(201,184,255,0.3)'"></div>
+                    <div style="flex:1;background:var(--accent3);border-radius:4px 4px 0 0;height:16.6%;opacity:0.85;transition:all 0.3s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.85'"></div>
+                  </div>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;letter-spacing:0.04em">Sat</div>
+                </div>
+                <!-- Sun: bids=3, won=1 -->
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end">
+                  <div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:116px">
+                    <div style="flex:1;background:rgba(201,184,255,0.3);border-radius:4px 4px 0 0;height:50%;transition:all 0.3s" onmouseenter="this.style.background='rgba(201,184,255,0.55)'" onmouseleave="this.style.background='rgba(201,184,255,0.3)'"></div>
+                    <div style="flex:1;background:var(--accent3);border-radius:4px 4px 0 0;height:16.6%;opacity:0.85;transition:all 0.3s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.85'"></div>
+                  </div>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;letter-spacing:0.04em">Sun</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spend by Make donut -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Spend by Make</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;align-items:center">
+            <div style="position:relative;width:140px;height:140px;margin-bottom:16px">
+              <svg viewBox="0 0 36 36" style="width:140px;height:140px;transform:rotate(-90deg)">
+                <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+                <!-- Honda 45% -->
+                <circle cx="18" cy="18" r="14" fill="none" stroke="var(--accent)" stroke-width="5" stroke-dasharray="39.6 87.96" stroke-dashoffset="0" stroke-linecap="round" opacity="0.9"/>
+                <!-- Toyota 30% -->
+                <circle cx="18" cy="18" r="14" fill="none" stroke="var(--accent2)" stroke-width="5" stroke-dasharray="26.4 87.96" stroke-dashoffset="-39.6" stroke-linecap="round" opacity="0.85"/>
+                <!-- Ford 25% -->
+                <circle cx="18" cy="18" r="14" fill="none" stroke="var(--accent3)" stroke-width="5" stroke-dasharray="22 87.96" stroke-dashoffset="-66" stroke-linecap="round" opacity="0.8"/>
+              </svg>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <div style="font-family:var(--serif);font-size:20px">$94k</div>
+                <div style="font-size:10px;color:var(--g5)">total</div>
+              </div>
+            </div>
+            <div style="width:100%;display:flex;flex-direction:column;gap:10px">
+              <div class="flex-between"><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent)"></div><span style="font-size:13px">Honda</span></div><div style="text-align:right"><div style="font-size:13px;font-family:var(--serif);color:var(--accent)">$42,300</div><div style="font-size:10px;color:var(--g5)">45%</div></div></div>
+              <div class="flex-between"><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent2)"></div><span style="font-size:13px">Toyota</span></div><div style="text-align:right"><div style="font-size:13px;font-family:var(--serif);color:var(--accent2)">$28,200</div><div style="font-size:10px;color:var(--g5)">30%</div></div></div>
+              <div class="flex-between"><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent3)"></div><span style="font-size:13px">Ford</span></div><div style="text-align:right"><div style="font-size:13px;font-family:var(--serif);color:var(--accent3)">$23,500</div><div style="font-size:10px;color:var(--g5)">25%</div></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom row: Bid history + Missed opportunities -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+        <!-- Bid history table -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Bid History</div>
+            <span style="font-size:12px;color:var(--g5)">Last 10 auctions</span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <table class="data-table">
+              <thead><tr><th>Vehicle</th><th>Your Bid</th><th>Top Bid</th><th>Result</th></tr></thead>
+              <tbody>
+                <tr><td><strong>2017 Honda CR-V EX</strong><br><span class="text-muted" style="font-size:11px">94,200 mi</span></td><td style="font-family:var(--serif);">$12,400</td><td style="font-family:var(--serif);color:var(--accent)">$12,400</td><td><span style="color:var(--accent3);font-size:12px">✓ Won</span></td></tr>
+                <tr><td><strong>2016 Toyota Camry SE</strong><br><span class="text-muted" style="font-size:11px">88,400 mi</span></td><td style="font-family:var(--serif);">$11,200</td><td style="font-family:var(--serif);color:var(--accent)">$11,200</td><td><span style="color:var(--accent3);font-size:12px">✓ Won</span></td></tr>
+                <tr><td><strong>2018 Nissan Rogue SV</strong><br><span class="text-muted" style="font-size:11px">79,100 mi</span></td><td style="font-family:var(--serif);">$13,100</td><td style="font-family:var(--serif);color:var(--g5)">$13,800</td><td><span style="color:var(--red);font-size:12px">✗ Outbid</span></td></tr>
+                <tr><td><strong>2019 Ford Escape SE</strong><br><span class="text-muted" style="font-size:11px">67,500 mi</span></td><td style="font-family:var(--serif);">$14,200</td><td style="font-family:var(--serif);color:var(--g5)">$15,100</td><td><span style="color:var(--red);font-size:12px">✗ Outbid</span></td></tr>
+                <tr><td><strong>2017 Chevy Equinox LT</strong><br><span class="text-muted" style="font-size:11px">103,000 mi</span></td><td style="font-family:var(--serif);">$9,800</td><td style="font-family:var(--serif);color:var(--accent)">$9,800</td><td><span style="color:var(--accent3);font-size:12px">✓ Won</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Missed opportunities -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Missed Opportunities</div>
+            <span style="font-size:12px;color:var(--accent2)">⚠ 5 this week</span>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+            <div style="background:rgba(255,214,160,0.05);border:1px solid rgba(255,214,160,0.15);border-radius:var(--r);padding:14px 16px">
+              <div class="flex-between" style="margin-bottom:6px">
+                <div>
+                  <div style="font-size:13px;font-weight:400">2018 Honda CR-V EX</div>
+                  <div style="font-size:11px;color:var(--g5)">91,200 mi · 4.2 mi away</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-family:var(--serif);font-size:18px;color:var(--accent2)">$13,200</div>
+                  <div style="font-size:10px;color:var(--g5)">settled price</div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:rgba(255,214,160,0.6)">You didn't enter · Est. $2,800 gross missed</div>
+            </div>
+            <div style="background:rgba(255,214,160,0.05);border:1px solid rgba(255,214,160,0.15);border-radius:var(--r);padding:14px 16px">
+              <div class="flex-between" style="margin-bottom:6px">
+                <div>
+                  <div style="font-size:13px;font-weight:400">2017 Toyota RAV4 XLE</div>
+                  <div style="font-size:11px;color:var(--g5)">84,500 mi · 7.1 mi away</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-family:var(--serif);font-size:18px;color:var(--accent2)">$14,100</div>
+                  <div style="font-size:10px;color:var(--g5)">settled price</div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:rgba(255,214,160,0.6)">You didn't enter · Est. $3,400 gross missed</div>
+            </div>
+            <div style="background:rgba(255,214,160,0.05);border:1px solid rgba(255,214,160,0.15);border-radius:var(--r);padding:14px 16px">
+              <div class="flex-between" style="margin-bottom:6px">
+                <div>
+                  <div style="font-size:13px;font-weight:400">2016 Ford Explorer XLT</div>
+                  <div style="font-size:11px;color:var(--g5)">109,800 mi · 11.3 mi away</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-family:var(--serif);font-size:18px;color:var(--accent2)">$10,900</div>
+                  <div style="font-size:10px;color:var(--g5)">settled price</div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:rgba(255,214,160,0.6)">You didn't enter · Est. $2,100 gross missed</div>
+            </div>
+            <div style="text-align:center;padding-top:4px">
+              <button class="btn btn-secondary btn-sm" onclick="showToast('📋','Missed Auctions','Showing all 5 missed auctions this week.')">View all 5 missed →</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ ADMIN ══════════════════ -->
+<div id="screen-admin" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo">Priva<span>Buy</span> <span style="font-size:12px;color:var(--g5);font-family:var(--sans);font-weight:400">Admin</span></div>
+    <div class="topbar-right"><span class="topbar-user">⚙️ Platform Admin</span><button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button></div>
+  </div>
+  <div style="display:flex;flex:1;min-height:0;overflow:hidden;">
+    <div class="admin-sidebar">
+      <div class="admin-nav-item active" onclick="adminSection('overview',this)">📊 Overview</div>
+      <div class="admin-nav-item" onclick="adminSection('auctions',this)">⚡ Live Auctions</div>
+      <div class="admin-nav-item" onclick="adminSection('dealers',this)">🏢 Dealers</div>
+      <div class="admin-nav-item" onclick="adminSection('listings',this)">🚗 Listings</div>
+      <div class="admin-nav-item" onclick="adminSection('flags',this)">🚩 Flagged</div>
+      <div class="admin-nav-item" onclick="adminSection('revenue',this)">💰 Revenue</div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:24px;">
+      <div id="admin-overview">
+        <div class="section-title mb-24">Platform Overview</div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Live Auctions</div><div class="stat-change text-green">● Active now</div></div>
+          <div class="stat-card"><div class="stat-value">47</div><div class="stat-label">Dealers (Active)</div><div class="stat-change">+3 this week</div></div>
+          <div class="stat-card"><div class="stat-value">182</div><div class="stat-label">Auctions (30d)</div><div class="stat-change">↑ 22% vs prior</div></div>
+          <div class="stat-card"><div class="stat-value" style="color:var(--accent)">$28k</div><div class="stat-label">Revenue (30d)</div><div class="stat-change">↑ 31% vs prior</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><div class="card-header"><div class="card-title">Recent Activity</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:12px;"><div class="flex-between"><span class="text-sm">🟢 2018 Honda CR-V listed — Chicago, IL</span><span class="text-muted text-sm">2 min ago</span></div><div class="flex-between"><span class="text-sm">💰 Bid $14,200 placed on 2017 F-150</span><span class="text-muted text-sm">5 min ago</span></div><div class="flex-between"><span class="text-sm">✅ 2016 Camry auction settled — $11,200</span><span class="text-muted text-sm">18 min ago</span></div><div class="flex-between"><span class="text-sm">🏢 New dealer application: DuPage Motors</span><span class="text-muted text-sm">1 hr ago</span></div></div></div></div>
+          <div class="card"><div class="card-header"><div class="card-title">Platform Health</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:16px;margin-top:4px"><div><div class="flex-between mb-4"><span class="text-sm">Auction fill rate (5 dealers)</span><span class="text-sm text-green">94%</span></div><div class="progress-bar"><div class="progress-fill" style="width:94%"></div></div></div><div><div class="flex-between mb-4"><span class="text-sm">Seller acceptance rate</span><span class="text-sm text-green">71%</span></div><div class="progress-bar"><div class="progress-fill" style="width:71%"></div></div></div><div><div class="flex-between mb-4"><span class="text-sm">Avg bids per auction</span><span class="text-sm">4.2</span></div><div class="progress-bar"><div class="progress-fill" style="width:84%"></div></div></div></div></div></div>
+        </div>
+      </div>
+      <div id="admin-auctions" class="hidden"><div class="section-title mb-24">Live Auctions</div><div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Seller</th><th>Dealers</th><th>Top Bid</th><th>Time Left</th><th>Action</th></tr></thead><tbody><tr><td><strong>2017 Honda CR-V EX</strong><br><span class="text-muted">94,200 mi</span></td><td>Sarah M.</td><td>5/5</td><td class="text-purple" style="font-family:var(--serif)">$12,400</td><td><span class="text-green">8:32</span></td><td><button class="btn btn-secondary btn-sm" onclick="showToast('⚠️','Extended','Added 2 minutes.')">Extend</button> <button class="btn btn-danger btn-sm" onclick="showToast('🛑','Cancelled','Notifying all parties.')">Cancel</button></td></tr></tbody></table></div></div>
+      <div id="admin-dealers" class="hidden"><div class="section-title mb-24">Dealer Roster</div><div class="card"><table class="data-table"><thead><tr><th>Dealer</th><th>Territory</th><th>Plan</th><th>Status</th><th>Action</th></tr></thead><tbody><tr><td><strong>Northside Auto Group</strong></td><td>Chicago N. (25mi)</td><td>Pro — $399/mo</td><td><span class="badge badge-live">Verified</span></td><td><button class="btn btn-secondary btn-sm">Edit</button></td></tr><tr><td><strong>DuPage Motors</strong></td><td>Pending</td><td>—</td><td><span class="badge badge-pending">Pending</span></td><td><button class="btn btn-success btn-sm" onclick="showToast('✅','Approved','DuPage Motors is now active.')">Approve</button></td></tr></tbody></table></div></div>
+      <div id="admin-listings" class="hidden"><div class="section-title mb-24">All Listings</div><div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Seller</th><th>Bids</th><th>Outcome</th><th>Status</th></tr></thead><tbody><tr><td><strong>2017 Honda CR-V EX</strong></td><td>Sarah M.</td><td>7</td><td class="text-purple" style="font-family:var(--serif)">$12,400</td><td><span class="badge badge-live">Live</span></td></tr><tr><td><strong>2016 Toyota Camry SE</strong></td><td>James T.</td><td>5</td><td class="text-green" style="font-family:var(--serif)">$11,200</td><td><span class="badge badge-won">Sold</span></td></tr></tbody></table></div></div>
+      <div id="admin-flags" class="hidden"><div class="section-title mb-24">Flagged Listings</div><div class="alert alert-warning">1 item requires review.</div><div class="card"><div class="card-body"><div class="flex-between"><div><div style="font-weight:600;margin-bottom:4px">2016 Chrysler 200 — VIN Mismatch</div><div class="text-muted text-sm">Listed by: Robert Q. — VIN trim/mileage mismatch</div></div><div class="flex-gap"><button class="btn btn-success btn-sm" onclick="showToast('✅','Approved','Sent to live queue.')">Approve</button><button class="btn btn-danger btn-sm" onclick="showToast('🚩','Rejected','Seller notified.')">Reject</button></div></div></div></div></div>
+      <div id="admin-revenue" class="hidden"><div class="section-title mb-24">Revenue Dashboard</div><div class="stats-row"><div class="stat-card"><div class="stat-value" style="color:var(--accent)">$28,400</div><div class="stat-label">Revenue (30d)</div></div><div class="stat-card"><div class="stat-value">$156</div><div class="stat-label">Avg Rev / Auction</div></div><div class="stat-card"><div class="stat-value">$14,200</div><div class="stat-label">Subscriptions MRR</div></div><div class="stat-card"><div class="stat-value text-green">$14,200</div><div class="stat-label">Per-bid Fees</div></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SHARED MODAL STYLES ══ -->
+<style>
+.auction-modal-layout{display:grid;grid-template-columns:1fr 340px;gap:0;min-height:0;}
+.auction-modal-left{overflow-y:auto;padding:0 20px 24px 0;border-right:1px solid rgba(255,255,255,0.06);}
+.auction-modal-right{padding:0 0 24px 20px;display:flex;flex-direction:column;gap:12px;}
+
+/* Photo gallery */
+.photo-gallery{margin-bottom:18px;}
+.photo-main{width:100%;height:200px;background:linear-gradient(135deg,rgba(201,184,255,0.12),rgba(0,0,0,0.5));border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:72px;margin-bottom:8px;position:relative;overflow:hidden;cursor:pointer;}
+.photo-main-label{position:absolute;bottom:10px;left:12px;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);font-size:11px;padding:3px 10px;border-radius:50px;color:var(--g6);}
+.photo-main-count{position:absolute;bottom:10px;right:12px;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);font-size:11px;padding:3px 10px;border-radius:50px;color:var(--g6);}
+.photo-thumbs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+.photo-thumb{aspect-ratio:4/3;background:rgba(255,255,255,0.06);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;border:1px solid transparent;transition:border-color 0.15s;}
+.photo-thumb.active{border-color:rgba(201,184,255,0.5);}
+.photo-thumb:hover{border-color:rgba(201,184,255,0.3);}
+
+/* Info sections */
+.modal-section{margin-bottom:18px;}
+.modal-section-title{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.modal-section-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.06);}
+
+/* Docs row */
+.docs-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.doc-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.doc-icon{font-size:20px;flex-shrink:0;}
+.doc-label{font-size:11px;color:var(--g5);margin-bottom:2px;font-weight:300;}
+.doc-value{font-size:13px;font-weight:500;}
+.doc-badge{font-size:10px;font-weight:600;letter-spacing:0.05em;padding:2px 7px;border-radius:4px;margin-top:3px;display:inline-block;}
+.doc-badge-clean{background:rgba(168,240,224,0.12);color:var(--accent3);}
+.doc-badge-issue{background:rgba(248,113,113,0.10);color:var(--red);}
+
+/* Spec grid */
+.spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.spec-item{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:var(--r);padding:10px 12px;}
+.spec-label{font-size:10px;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;}
+.spec-value{font-size:13px;font-weight:400;}
+
+/* Carfax summary */
+.carfax-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.carfax-item{background:rgba(255,255,255,0.04);border-radius:var(--r);padding:10px 12px;text-align:center;}
+.carfax-num{font-family:var(--serif);font-size:22px;margin-bottom:2px;}
+.carfax-label{font-size:10px;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:0.06em;}
+
+/* Condition pills */
+.condition-row{display:flex;flex-wrap:wrap;gap:6px;}
+.cond-pill{font-size:11px;padding:4px 10px;border-radius:50px;}
+.cond-good{background:rgba(168,240,224,0.10);color:var(--accent3);border:1px solid rgba(168,240,224,0.2);}
+.cond-warn{background:rgba(255,214,160,0.10);color:var(--accent2);border:1px solid rgba(255,214,160,0.2);}
+.cond-bad{background:rgba(248,113,113,0.08);color:var(--red);border:1px solid rgba(248,113,113,0.2);}
+
+@media(max-width:700px){
+  .auction-modal-layout{grid-template-columns:1fr;}
+  .auction-modal-left{border-right:none;padding-right:0;border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:20px;margin-bottom:16px;}
+  .auction-modal-right{padding-left:0;}
+  .photo-thumbs{grid-template-columns:repeat(4,1fr);}
+  .spec-grid,.carfax-row,.docs-row{grid-template-columns:1fr 1fr;}
+}
+</style>
+
+<!-- ══ DEALER AUCTION MODAL (Real Seller) ══ -->
+<div class="modal-overlay" id="real-auction-modal">
+  <div class="modal" style="max-width:900px;width:95vw;">
+    <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px;">
+      <div>
+        <div class="modal-title" id="ram-title">Live Auction</div>
+        <div style="font-size:12px;color:var(--g5);margin-top:3px">Real Seller Listing — Chicago, IL</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="badge badge-live">● Live — Real Seller</div>
+        <button class="modal-close" onclick="closeModal('real-auction-modal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding-top:20px;">
+      <!-- Timer bar -->
+      <div class="auction-timer-block" style="margin-bottom:20px;padding:16px 20px;">
+        <div>
+          <div style="font-size:11px;color:var(--accent3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">● Live — Open Auction</div>
+          <div class="timer-digits" id="ram-timer" style="font-size:40px;">0:00</div>
+          <div class="timer-label">Elapsed · No time limit</div>
+        </div>
+        <div style="text-align:right;font-size:13px;color:var(--g5)" id="ram-bid-summary">0 bids so far</div>
+      </div>
+
+      <div class="auction-modal-layout">
+        <!-- LEFT: full vehicle info -->
+        <div class="auction-modal-left">
+
+          <!-- Photo Gallery -->
+          <div class="modal-section">
+            <div class="modal-section-title">📷 Photos</div>
+            <div class="photo-gallery">
+              <div class="photo-main" id="ram-photo-main" onclick="cyclePhoto('ram')">
+                <span id="ram-photo-emoji">🚗</span>
+                <div class="photo-main-label" id="ram-photo-label">Front Exterior</div>
+                <div class="photo-main-count" id="ram-photo-count">1 / 6</div>
+              </div>
+              <div class="photo-thumbs" id="ram-thumbs"></div>
+            </div>
+          </div>
+
+          <!-- Title & License -->
+          <div class="modal-section">
+            <div class="modal-section-title">📋 Title & Registration</div>
+            <div class="docs-row" id="ram-docs"></div>
+          </div>
+
+          <!-- Specs -->
+          <div class="modal-section">
+            <div class="modal-section-title">🔧 Vehicle Specs</div>
+            <div class="spec-grid" id="ram-specs"></div>
+          </div>
+
+          <!-- Carfax -->
+          <div class="modal-section">
+            <div class="modal-section-title">🔍 Carfax Summary</div>
+            <div class="carfax-row" id="ram-carfax"></div>
+          </div>
+
+          <!-- Condition -->
+          <div class="modal-section">
+            <div class="modal-section-title">⭐ Seller Condition Disclosure</div>
+            <div id="ram-condition"></div>
+          </div>
+
+          <div id="ram-details" style="font-size:13px;color:var(--g5);line-height:1.7;margin-top:8px;"></div>
+        </div>
+
+        <!-- RIGHT: bids + bid panel -->
+        <div class="auction-modal-right">
+          <!-- Your bid status -->
+          <div id="ram-dealer-status">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;">
+              🔒 All dealer identities are anonymous — place a bid to enter
+            </div>
+          </div>
+          <div class="card" style="flex:1;">
+            <div class="card-body" style="padding:16px;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--g4);margin-bottom:6px;">Current Bids</div>
+              <div style="font-size:11px;color:var(--g4);margin-bottom:10px;">Your bids show as <strong style="color:var(--white)">⭐ You</strong> — competitors are anonymous</div>
+              <div class="bid-feed" id="ram-bid-feed">
+                <div class="text-muted text-sm" style="text-align:center;padding:16px;">No bids yet — be first!</div>
+              </div>
+            </div>
+          </div>
+          <div class="bid-panel" style="position:static;">
+            <div style="font-size:13px;color:var(--g5);margin-bottom:8px;">Place Your Bid</div>
+            <div class="bid-input-row">
+              <div class="bid-input-wrapper">
+                <span class="bid-currency">$</span>
+                <input class="bid-amount-input" id="real-bid-input" type="number" placeholder="0" min="0" step="100">
+              </div>
+              <button class="btn btn-primary" onclick="placeRealBid()">Bid Now</button>
+            </div>
+            <div class="auto-bid-row">
+              <div class="toggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+              <div><div style="font-size:12px;font-weight:500;">Auto-Bid</div><div class="text-muted" style="font-size:11px;">System bids up to your max</div></div>
+              <input class="form-input" placeholder="Max $" style="width:84px;margin-left:auto;padding:8px 10px;" type="number">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DEALER DEMO AUCTION MODAL ══ -->
+<div class="modal-overlay" id="dealer-auction-modal">
+  <div class="modal" style="max-width:900px;width:95vw;">
+    <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px;">
+      <div>
+        <div class="modal-title" id="dam-title">—</div>
+        <div style="font-size:12px;color:var(--g5);margin-top:3px" id="dam-subtitle">Chicago, IL</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="badge badge-live">● Live</div>
+        <button class="modal-close" onclick="closeModal('dealer-auction-modal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding-top:20px;">
+      <!-- Timer bar -->
+      <div class="auction-timer-block" style="margin-bottom:20px;padding:16px 20px;">
+        <div>
+          <div style="font-size:11px;color:var(--accent3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">● Open Auction</div>
+          <div class="timer-digits" id="dealer-modal-timer" style="font-size:40px;">—</div>
+          <div class="timer-label">No time limit · Bid at any time</div>
+        </div>
+        <div style="text-align:right;font-size:13px;color:var(--g5)" id="dam-bid-summary">Loading bids...</div>
+      </div>
+
+      <div class="auction-modal-layout">
+        <!-- LEFT -->
+        <div class="auction-modal-left">
+
+          <!-- Photo Gallery -->
+          <div class="modal-section">
+            <div class="modal-section-title">📷 Photos</div>
+            <div class="photo-gallery">
+              <div class="photo-main" id="dam-photo-main" onclick="cyclePhoto('dam')">
+                <span id="dam-photo-emoji">🚗</span>
+                <div class="photo-main-label" id="dam-photo-label">Front Exterior</div>
+                <div class="photo-main-count" id="dam-photo-count">1 / 6</div>
+              </div>
+              <div class="photo-thumbs" id="dam-thumbs"></div>
+            </div>
+          </div>
+
+          <!-- Title & License -->
+          <div class="modal-section">
+            <div class="modal-section-title">📋 Title & Registration</div>
+            <div class="docs-row" id="dam-docs"></div>
+          </div>
+
+          <!-- Specs -->
+          <div class="modal-section">
+            <div class="modal-section-title">🔧 Vehicle Specs</div>
+            <div class="spec-grid" id="dam-specs"></div>
+          </div>
+
+          <!-- Carfax -->
+          <div class="modal-section">
+            <div class="modal-section-title">🔍 Carfax Summary</div>
+            <div class="carfax-row" id="dam-carfax"></div>
+          </div>
+
+          <!-- Condition -->
+          <div class="modal-section">
+            <div class="modal-section-title">⭐ Condition Disclosure</div>
+            <div id="dam-condition"></div>
+          </div>
+
+          <div id="dam-details" style="font-size:13px;color:var(--g5);line-height:1.7;margin-top:8px;"></div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="auction-modal-right">
+          <!-- Status banner — injected by JS after bid placed -->
+          <div id="dam-dealer-status">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;">
+              🔒 All dealer identities are anonymous — place a bid to enter
+            </div>
+          </div>
+          <div class="card" style="flex:1;">
+            <div class="card-body" style="padding:16px;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--g4);margin-bottom:6px;">Current Bids</div>
+              <div style="font-size:11px;color:var(--g4);margin-bottom:10px;">Your bids show as <strong style="color:var(--white)">⭐ You</strong> — competitors are anonymous</div>
+              <div class="bid-feed" id="dam-bid-feed"></div>
+            </div>
+          </div>
+          <div class="bid-panel" style="position:static;">
+            <div style="font-size:13px;color:var(--g5);margin-bottom:8px;">Place Your Bid</div>
+            <div class="bid-input-row">
+              <div class="bid-input-wrapper">
+                <span class="bid-currency">$</span>
+                <input class="bid-amount-input" id="dealer-bid-input" type="number" placeholder="0" min="0" step="100">
+              </div>
+              <button class="btn btn-primary" onclick="placeDealerBid()">Bid Now</button>
+            </div>
+            <div class="auto-bid-row">
+              <div class="toggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+              <div><div style="font-size:12px;font-weight:500;">Auto-Bid</div><div class="text-muted" style="font-size:11px;">Bids up to your max automatically</div></div>
+              <input class="form-input" placeholder="Max $" style="width:84px;margin-left:auto;padding:8px 10px;" type="number">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COUNTER MODAL ══ -->
+<div class="modal-overlay" id="counter-modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Counter Offer</div><button class="modal-close" onclick="closeModal('counter-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="alert alert-warning">⚠️ Your counter pauses the auction. The top bidder has 5 minutes to respond.</div>
+      <div class="form-group mt-16"><label class="form-label">Your Counter Amount</label><div class="bid-input-wrapper"><span class="bid-currency">$</span><input class="bid-amount-input" id="counter-amount" placeholder="0" style="width:100%"></div></div>
+      <div class="form-group"><label class="form-label">Optional Note</label><textarea class="form-textarea" placeholder="e.g. I recently replaced all four tires — asking a bit more to reflect that."></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('counter-modal')">Cancel</button><button class="btn btn-primary" onclick="submitCounter()">Send Counter</button></div>
+  </div>
+</div>
+
+<!-- ══ MESSAGE MODAL ══ -->
+<div class="modal-overlay" id="message-modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Message Dealer</div><button class="modal-close" onclick="closeModal('message-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="message-list" id="message-list"><div class="message-item received"><div class="message-text">Congratulations! Looking forward to picking up the vehicle. What days work for you?</div><div class="message-time">Winning Dealer • 2:34 PM</div></div></div>
+      <div class="divider"></div>
+      <div class="form-group"><textarea class="form-textarea" id="msg-input" placeholder="Type your message..."></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('message-modal')">Close</button><button class="btn btn-primary" onclick="sendMessage()">Send</button></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════
+//  STATE
+// ═══════════════════════════════════
+const API = 'https://privabuy-backend-production.up.railway.app';
+const S = {
+  role:'seller', auctionActive:false, auctionData:null,
+  timerInterval:null, bidInterval:null, timeLeft:900,
+  bids:[], photosUploaded:0, requiredPhotos:0,
+  wizardStep:1, formData:{}, floorPrice:0,
+  dealerModalTimer:null,
+  radioValues:{}
+};
+
+const DEMO_DEALERS = ['Northside Auto Group','Lakeview Motors','Chicago Auto Exchange','Westside Pre-Owned','Lincoln Park Cars'];
+const DEMO_AUCTIONS = [
+  {id:1,year:2018,make:'Honda',model:'CR-V',trim:'EX-L',mileage:'91,200',city:'Chicago',topBid:13400,bids:5,timeLeft:742,emoji:'🚙',color:'Lunar Silver',condition:'Good',issues:'Minor scratch on rear bumper'},
+  {id:2,year:2017,make:'Ford',model:'F-150',trim:'XLT',mileage:'108,000',city:'Evanston',topBid:19100,bids:4,timeLeft:333,emoji:'🛻',color:'Blue Jeans',condition:'Good',issues:'None disclosed'},
+  {id:3,year:2016,make:'Toyota',model:'Camry',trim:'SE',mileage:'96,500',city:'Oak Park',topBid:10200,bids:3,timeLeft:890,emoji:'🚗',color:'Midnight Black',condition:'Good',issues:'AC compressor replaced 2023'},
+];
+const VIN_DB = {
+  '1HGBH41JXMN109186':{year:2017,make:'Honda',model:'Civic',trim:'EX',color:'Lunar Silver Metallic',engine:'1.5L Turbo I4',transmission:'CVT',drivetrain:'FWD'},
+  '2T1BURHE0JC041821':{year:2018,make:'Toyota',model:'Corolla',trim:'LE',color:'Classic Silver',engine:'1.8L I4',transmission:'CVT',drivetrain:'FWD'},
+  '1FTFW1EF3EKE26064':{year:2016,make:'Ford',model:'F-150',trim:'XLT',color:'Race Red',engine:'5.0L V8',transmission:'6-Speed Auto',drivetrain:'4WD'},
+  'DEFAULT':           {year:2017,make:'Honda',model:'CR-V',trim:'EX',color:'Obsidian Blue',engine:'1.5L Turbo I4',transmission:'CVT',drivetrain:'AWD'},
+};
+
+// ═══════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════
+let selectedRole = 'seller';
+function selectRole(role, el) {
+  selectedRole = role;
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  ['seller','dealer','admin'].forEach(r=>document.getElementById(`login-${r}-fields`).classList.toggle('hidden',r!==role));
+}
+async function login() {
+  S.role = selectedRole;
+
+  try {
+    if(selectedRole === 'seller') {
+      const phone = document.querySelector('#login-seller-fields input[type="tel"]').value;
+      const email = document.querySelector('#login-seller-fields input[type="email"]').value;
+      if(!phone || !email) { showToast('⚠️','Missing Info','Enter your phone and email.'); return; }
+      const res = await fetch(`${API}/sellers/register`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({phone, email})
+      });
+      const data = await res.json();
+      S.seller_id = data.seller_id;
+      showToast('👋','Welcome!','Your seller account is ready.');
+    }
+
+    if(selectedRole === 'dealer') {
+      const email = document.querySelector('#login-dealer-fields input[type="email"]').value;
+      if(!email) { showToast('⚠️','Missing Info','Enter your dealer email.'); return; }
+      // For now store email, dealer_id will come from registration
+      S.dealer_email = email;
+      S.dealer_id = null; // Set this after dealer registers via API
+      showToast('👋','Dealer Portal','Logged in as demo dealer.');
+    }
+
+    showScreen(`screen-${selectedRole}`);
+    if(selectedRole==='seller') initSellerView();
+    else if(selectedRole==='dealer') initDealerView();
+    else showToast('👋','Admin','Dashboard loaded.');
+
+  } catch(err) {
+    showToast('❌','Connection Error','Could not reach the server. Check your connection.');
+    console.error(err);
+  }
+}
+function logout() { clearAuction(); showScreen('screen-login'); }
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+// ═══════════════════════════════════
+//  FORM HELPERS
+// ═══════════════════════════════════
+function selectRadio(groupId, el, value) {
+  document.querySelectorAll(`#${groupId} .radio-pill`).forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+  S.radioValues[groupId] = value;
+}
+function togglePill(el) {
+  el.classList.toggle('selected');
+}
+function getRadio(groupId) { return S.radioValues[groupId] || null; }
+
+// ═══════════════════════════════════
+//  SELLER FLOW
+// ═══════════════════════════════════
+function initSellerView() {
+  sellerTab('list',document.querySelector('#screen-seller .tab-btn'));
+  wizardGo(1);
+  S.radioValues = { 'transmission-group':'Automatic','drivetrain-group':'FWD','title-group':'Clean','loan-group':'None','keys-group':'Yes','tires-group':'0','windshield-group':'No Damage','overall-condition-group':'Pretty Great','driveable-group':'Yes','accident-group':'None','moonroof-group':'N/A','smoked-group':'No','truthful-group':'Yes' };
+  document.getElementById('no-auction-msg').classList.toggle('hidden', S.auctionActive);
+  document.getElementById('live-auction-view').classList.toggle('hidden', !S.auctionActive);
+}
+function sellerTab(tab, el) {
+  ['list','auction','history','payment'].forEach(t=>document.getElementById(`seller-tab-${t}`).classList.add('hidden'));
+  document.getElementById(`seller-tab-${tab}`).classList.remove('hidden');
+  document.querySelectorAll('#seller-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(tab==='auction'){
+    document.getElementById('no-auction-msg').classList.toggle('hidden',S.auctionActive);
+    document.getElementById('live-auction-view').classList.toggle('hidden',!S.auctionActive);
+  }
+}
+function wizardGo(step) {
+  S.wizardStep = step;
+  for(let i=1;i<=5;i++){
+    document.getElementById(`wizard-step-${i}`).classList.toggle('hidden',i!==step);
+    const ws = document.getElementById(`ws-${i}`);
+    ws.classList.remove('active','done');
+    if(i<step) ws.classList.add('done');
+    if(i===step) ws.classList.add('active');
+  }
+  if(step===4) buildValueEstimate();
+  if(step===5) populateReview();
+}
+function decodeVIN() {
+  const vin = document.getElementById('vin-input').value.trim();
+  if(vin.length<10){showToast('⚠️','Invalid VIN','Enter at least 10 characters.');return;}
+  const d = VIN_DB[vin]||VIN_DB['DEFAULT'];
+  document.getElementById('f-year').value = d.year;
+  document.getElementById('f-make').value = d.make;
+  document.getElementById('f-model').value = d.model;
+  document.getElementById('f-trim').value = d.trim;
+  document.getElementById('f-color').value = d.color;
+  // set radio defaults from VIN
+  const transGroup = document.getElementById('transmission-group');
+  transGroup.querySelectorAll('.radio-pill').forEach(p=>{p.classList.remove('selected');if(p.textContent.trim()===d.transmission||p.textContent.trim().startsWith(d.transmission.split(' ')[0]))p.classList.add('selected');});
+  S.radioValues['transmission-group'] = d.transmission;
+  S.radioValues['drivetrain-group'] = d.drivetrain;
+  document.getElementById('vin-result').classList.remove('hidden');
+  document.getElementById('vin-result').innerHTML = `<div class="alert alert-success">✅ VIN Decoded: ${d.year} ${d.make} ${d.model} ${d.trim} • ${d.engine} • ${d.transmission} • ${d.drivetrain}</div>`;
+  showToast('✅','VIN Decoded!',`${d.year} ${d.make} ${d.model} auto-populated.`);
+}
+function checkEligibility() {
+  const year = parseInt(document.getElementById('f-year').value)||0;
+  const mileage = parseInt(document.getElementById('f-mileage').value)||0;
+  const make = document.getElementById('f-make').value.trim();
+  const model = document.getElementById('f-model').value.trim();
+  if(!year||!make||!model){showToast('⚠️','Missing Info','Fill in year, make, and model first.');return;}
+  const age = 2025-year;
+  const isEligible = age>=5&&age<=10&&mileage>=50000;
+  const el = document.getElementById('eligibility-result');
+  S.formData = {year,make,model,trim:document.getElementById('f-trim').value||'',color:document.getElementById('f-color').value||'',mileage,addons:document.getElementById('f-addons').value||'N/A',zip:document.getElementById('f-zip').value||'',transmission:getRadio('transmission-group')||'Automatic',drivetrain:getRadio('drivetrain-group')||'FWD',title:getRadio('title-group')||'Clean',loan:getRadio('loan-group')||'None',keys:getRadio('keys-group')||'Yes'};
+  if(isEligible){
+    el.innerHTML=`<div class="eligibility-card pass"><div class="eligibility-icon">✅</div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px">Your vehicle qualifies!</div><div class="text-muted text-sm">A ${year} ${make} ${model} with ${mileage.toLocaleString()} miles is prime dealer inventory.</div></div></div>`;
+    setTimeout(()=>wizardGo(2),500);
+  } else {
+    el.innerHTML=`<div class="eligibility-card fail"><div class="eligibility-icon">⚠️</div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px">Outside ideal range</div><div class="text-muted text-sm">${age<5?'Too new (under 5 years).':age>10?'May be too old (over 10 years).':'Under 50k miles — dealers prefer higher mileage inventory.'} We\'ll still list it — dealers can opt in.</div></div></div>`;
+    setTimeout(()=>wizardGo(2),700);
+  }
+}
+let photoCount=0, requiredFilled=0;
+function simulatePhoto(el,label,required) {
+  if(el.classList.contains('filled'))return;
+  const emojis=['🚗','🛞','🪟','🛣️','🚙','📊','⚙️','🔧'];
+  el.classList.add('filled');
+  const wasReq = required && el.querySelector('.photo-required-badge');
+  if(wasReq){ wasReq.style.background='var(--green)'; wasReq.textContent='✓'; requiredFilled++; }
+  el.innerHTML = `${wasReq?`<div class="photo-required-badge" style="background:var(--green)">✓</div>`:''}
+    <div style="font-size:40px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.07)">${emojis[photoCount%emojis.length]}</div>
+    <div class="photo-slot-label" style="position:absolute;bottom:6px;z-index:1;background:rgba(0,0,0,0.6);padding:2px 8px;border-radius:4px;font-size:10px">✓ ${label}</div>`;
+  photoCount++;
+  document.getElementById('photos-uploaded-count').textContent = `${photoCount} of 8 uploaded • ${requiredFilled}/6 required complete`;
+  showToast('📸','Photo Added',`${label} uploaded.`);
+}
+function switchDamageTab(tab, el) {
+  ['exterior','interior','mechanical'].forEach(t=>document.getElementById(`damage-${t}`).classList.toggle('hidden',t!==tab));
+  document.querySelectorAll('.damage-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+const damagePins = {};
+function togglePin(id, label) {
+  const pin = document.getElementById(`pin-${id}`);
+  const dot = pin.querySelector('.damage-pin-dot');
+  if(damagePins[id]){
+    delete damagePins[id];
+    pin.classList.remove('has-damage');
+    dot.textContent='+';
+    showToast('✓','Damage Cleared',`${label} marked as undamaged.`);
+  } else {
+    damagePins[id]=label;
+    pin.classList.add('has-damage');
+    dot.textContent='!';
+    showToast('🔴','Damage Noted',`${label} marked — dealers will be informed.`);
+  }
+}
+const areaDamage = {};
+function toggleAreaDamage(el, id) {
+  if(areaDamage[id]){delete areaDamage[id];el.classList.remove('has-damage');}
+  else{areaDamage[id]=true;el.classList.add('has-damage');}
+}
+
+// ── VALUE ESTIMATE ENGINE ──
+function buildValueEstimate() {
+  const d = S.formData;
+  if(!d.year||!d.make){
+    document.getElementById('value-estimate-content').innerHTML='<div class="alert alert-warning">⚠️ Please complete Step 1 first.</div>';
+    return;
+  }
+  // Base values by make (wholesale/dealer acquisition prices)
+  const baseValues = {Honda:13500,Toyota:14200,Ford:13000,Chevrolet:11800,Nissan:10800,Hyundai:10000,Subaru:13000,Mazda:12200,BMW:17500,'Mercedes-Benz':19000,Volkswagen:11500,Kia:9800};
+  const base = baseValues[d.make]||11000;
+  const ageDepr = (2025-d.year)*1300;
+  const mileDepr = Math.max(0,(d.mileage-60000)/1000)*90;
+  const driveBonus = d.drivetrain==='AWD'?800:d.drivetrain==='4WD'?1200:0;
+  const titlePenalty = d.title==='Salvage'?-3500:d.title==='Rebuilt'?-2000:0;
+  const accidentPenalty = (getRadio('accident-group')==='One')?-1200:(getRadio('accident-group')==='Two or More')?-2500:0;
+  const conditionMult = {
+    'Like New':1.12,'Pretty Great':1.0,'Just Okay':0.88,'Kind of Rough':0.78,'Major Issues':0.62
+  }[getRadio('overall-condition-group')||'Pretty Great']||1.0;
+  const damagePenalty = Object.keys(damagePins).length*-400+Object.keys(areaDamage).length*-300;
+  const smokedPenalty = getRadio('smoked-group')==='Yes'?-900:0;
+  const tireBonus = parseInt(getRadio('tires-group')||'0')*120;
+  const rawValue = Math.max(3500,(base-ageDepr-mileDepr+driveBonus+titlePenalty+accidentPenalty+damagePenalty+smokedPenalty+tireBonus)*conditionMult);
+  // Three tiers: private party, trade-in (what dealer pays), dealer retail
+  const tradeIn = Math.round(rawValue*0.82/100)*100;    // what a dealer offers
+  const privateSale = Math.round(rawValue/100)*100;      // private market
+  const dealerRetail = Math.round(rawValue*1.28/100)*100;// what dealer sells for
+  const pbExpected = Math.round((tradeIn*1.12)/100)*100; // PrivaBuy competitive bid
+  S.formData.tradeIn = tradeIn; S.formData.privateSale = privateSale; S.formData.dealerRetail = dealerRetail; S.formData.pbExpected = pbExpected;
+  S.floorPrice = tradeIn; // default floor = trade-in value
+  // Build factors list
+  const factors = [];
+  if(d.drivetrain==='AWD'||d.drivetrain==='4WD') factors.push({label:`${d.drivetrain} adds value`,type:'pos'});
+  if(d.mileage<80000) factors.push({label:'Lower mileage for age',type:'pos'});
+  if(d.mileage>110000) factors.push({label:'High mileage',type:'neg'});
+  if(getRadio('accident-group')!=='None') factors.push({label:'Accident history',type:'neg'});
+  if(Object.keys(damagePins).length>0) factors.push({label:`${Object.keys(damagePins).length} damage area(s) noted`,type:'neg'});
+  if(getRadio('smoked-group')==='Yes') factors.push({label:'Smoked in',type:'neg'});
+  if(getRadio('tires-group')!=='0') factors.push({label:'Replaced tires',type:'pos'});
+  if(d.title==='Salvage'||d.title==='Rebuilt') factors.push({label:`${d.title} title`,type:'neg'});
+  if(conditionMult>1) factors.push({label:'Excellent condition',type:'pos'});
+  if(conditionMult<0.85) factors.push({label:'Below average condition',type:'neg'});
+  factors.push({label:'Market demand high for this age/mileage',type:'pos'});
+  document.getElementById('value-estimate-content').innerHTML = `
+    <div class="alert alert-info" style="margin-bottom:20px">📊 <strong>How we calculate this:</strong> Based on your vehicle's year, mileage, condition, drivetrain, damage disclosures, and current dealer demand for ${2025-d.year}-year-old inventory in your ZIP code area.</div>
+
+    <div style="background:linear-gradient(135deg,rgba(201,184,255,0.15) 0%,rgba(201,184,255,0.05) 100%);border:1px solid rgba(201,184,255,0.35);border-radius:var(--r-lg);padding:32px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(201,184,255,0.5),rgba(201,184,255,0.1));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none"></div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(201,184,255,0.7);margin-bottom:10px">Trade-In Value</div>
+      <div style="font-size:52px;font-weight:700;color:var(--accent);line-height:1;margin-bottom:8px">$${tradeIn.toLocaleString()}</div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.55)">What a dealership typically offers</div>
+    </div>
+
+    <div class="value-factors" style="margin-bottom:20px">
+      ${factors.map(f=>`<span class="factor-tag factor-${f.type}">${f.type==='pos'?'↑':f.type==='neg'?'↓':'–'} ${f.label}</span>`).join('')}
+    </div>
+    <div class="floor-price-row">
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px">Set Your Minimum Price</div>
+      <div style="font-size:13px;color:var(--g5);line-height:1.6">This is the <strong style="color:var(--white)">minimum you'll accept</strong>. You're never forced to sell below this — it protects you if bids come in lower than expected.</div>
+      <div class="floor-price-input-wrap">
+        <span class="floor-currency">$</span>
+        <input class="floor-input" id="floor-price-input" type="number" value="${tradeIn}" min="1000" step="100" oninput="updateFloor(this.value)">
+      </div>
+      <div id="floor-feedback" style="font-size:12px;margin-top:8px;color:var(--g5)">Floor set to trade-in value — a reasonable starting point.</div>
+    </div>
+  `;
+}
+function updateFloor(val) {
+  S.floorPrice = parseInt(val)||0;
+  const pb = S.formData.pbExpected||10000;
+  const ti = S.formData.tradeIn||8000;
+  const el = document.getElementById('floor-feedback');
+  if(S.floorPrice < ti*0.85) el.innerHTML='<span style="color:#f87171">⚠️ Below trade-in — dealers may sense urgency but you might undersell.</span>';
+  else if(S.floorPrice > pb*1.1) el.innerHTML='<span style="color:#fbbf24">⚠️ Above expected PrivaBuy range — dealers may not bid to your floor.</span>';
+  else if(S.floorPrice >= ti && S.floorPrice <= pb) el.innerHTML='<span style="color:#4ade80">✓ Good floor — realistic and protective.</span>';
+  else el.innerHTML='<span style="color:var(--g5)">Floor updated.</span>';
+  S.formData.floorPrice = S.floorPrice;
+  // Update accept button display
+  const floorDisplay = document.getElementById('floor-display');
+  if(floorDisplay) floorDisplay.textContent = '$'+S.floorPrice.toLocaleString();
+}
+function populateReview() {
+  const d = S.formData;
+  document.getElementById('listing-review-body').innerHTML = `
+    <div class="grid-2 mb-16">
+      <div><div class="text-muted text-sm mb-4">Vehicle</div><div style="font-family:var(--serif);font-size:22px">${d.year||'—'} ${d.make||'—'} ${d.model||'—'}</div><div class="text-muted mt-4">${d.trim||''} • ${d.color||''} • ${(d.mileage||0).toLocaleString()} mi • ${d.drivetrain||''}</div></div>
+      <div><div class="text-muted text-sm mb-4">Your Minimum Price</div><div style="font-size:28px;font-weight:700;color:var(--accent)">$${(S.floorPrice||d.tradeIn||8000).toLocaleString()}</div><div class="text-muted mt-4">Dealers will not be shown this figure</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="form-row">
+      <div><div class="text-muted text-sm">Title</div><div class="mt-4">${d.title||'Clean'}</div></div>
+      <div><div class="text-muted text-sm">Transmission</div><div class="mt-4">${d.transmission||'—'}</div></div>
+      <div><div class="text-muted text-sm">Loan/Lease</div><div class="mt-4">${d.loan||'None'}</div></div>
+    </div>
+    <div class="form-row mt-16">
+      <div><div class="text-muted text-sm">Photos</div><div class="mt-4">${photoCount} uploaded (${requiredFilled}/6 required)</div></div>
+      <div><div class="text-muted text-sm">Damage Areas</div><div class="mt-4">${Object.values(damagePins).length>0?Object.values(damagePins).join(', '):'None disclosed'}</div></div>
+      <div><div class="text-muted text-sm">ZIP Code</div><div class="mt-4">${d.zip||'—'}</div></div>
+    </div>
+  `;
+}
+
+// ── AUCTION ENGINE ──
+async function startAuction() {
+  if(!S.seller_id) { showToast('⚠️','Not Logged In','Please log in first.'); return; }
+  const d = S.formData;
+
+  try {
+    showToast('⏳','Submitting...','Sending your listing to dealers.');
+    const res = await fetch(`${API}/cars/list-car`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        seller_id: S.seller_id,
+        year: parseInt(d.year) || 2017,
+        make: d.make || '',
+        model: d.model || '',
+        mileage: parseInt(d.mileage) || 0,
+        zip: d.zip || '',
+        condition: (getRadio('overall-condition-group') || 'good').toLowerCase().replace(/ /g,'-'),
+        seller_phone: '',
+        seller_email: ''
+      })
+    });
+
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.detail || 'Failed to list car');
+
+    S.car_id = data.car_id;
+    S.auctionActive = true;
+    S.bids = [];
+    S.elapsedSeconds = 0;
+    S.auctionData = {...S.formData};
+    resetAnon();
+
+    sellerTab('auction', document.querySelectorAll('#seller-tabs .tab-btn')[1]);
+    document.getElementById('no-auction-msg').classList.add('hidden');
+    document.getElementById('live-auction-view').classList.remove('hidden');
+    document.getElementById('floor-display').textContent = '$'+(S.floorPrice||0).toLocaleString();
+
+    document.getElementById('auction-vehicle-summary').innerHTML = `
+      <div style="font-family:var(--serif);font-size:20px;margin-bottom:8px">${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'}</div>
+      <div class="vehicle-card-meta"><span class="meta-tag">🛣 ${(d.mileage||0).toLocaleString()} mi</span><span class="meta-tag">✓ ${d.title||'Clean'}</span><span class="meta-tag">📍 ZIP ${d.zip||''}</span></div>
+      <div class="text-muted mt-16 text-sm">Car ID: <strong style="color:var(--accent);font-family:monospace;font-size:11px">${S.car_id}</strong></div>
+      <div class="text-muted mt-8 text-sm">Floor price: <strong style="color:var(--accent)">$${(S.floorPrice||0).toLocaleString()}</strong></div>
+    `;
+
+    notifyDealerPortal();
+    showToast('🚀','Auction Live!',`${data.connected_dealers} dealers notified. Car ID: ${S.car_id.slice(0,8)}...`);
+    startAuctionTimer();
+    setTimeout(()=>startBidSimulation(), 4000);
+
+  } catch(err) {
+    showToast('❌','Failed to Start','Could not create listing: ' + err.message);
+    console.error(err);
+  }
+}
+
+function notifyDealerPortal() {
+  const d = S.auctionData;
+  document.getElementById('real-seller-auction-card').classList.remove('hidden');
+  document.getElementById('rc-title').textContent = `${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'} ${d.trim||''}`;
+  document.getElementById('rc-meta').innerHTML = `<span class="meta-tag">📍 ZIP ${d.zip||'60601'}</span><span class="meta-tag">🛣 ${(d.mileage||0).toLocaleString()} mi</span><span class="meta-tag">${d.drivetrain||'FWD'}</span>`;
+  // Link timer to dealer card
+  S.dealerCardTimerInterval = setInterval(()=>{
+    const el = document.getElementById('rc-timer');
+    const m = Math.floor((S.elapsedSeconds||0)/60), sec = (S.elapsedSeconds||0)%60;
+    if(el) el.textContent = `${m}:${String(sec).padStart(2,'0')}`;
+  },1000);
+}
+
+function sellerConfirmReceivedPayment() {
+  // Mark awaiting block as done
+  const awaiting = document.getElementById('seller-awaiting-payment');
+  if(awaiting) {
+    awaiting.style.borderColor = 'rgba(168,240,224,0.3)';
+    awaiting.style.background = 'rgba(168,240,224,0.05)';
+    awaiting.innerHTML = `<div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">✅</span>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--accent3)">Dealer Payment Confirmed</div>
+        <div style="font-size:12px;color:var(--g5);margin-top:2px">Great — your PrivaBuy platform fee is now due below.</div>
+      </div>
+    </div>`;
+  }
+  // Now show the fee prompt
+  const fee = document.getElementById('seller-fee-prompt');
+  if(fee) fee.classList.remove('hidden');
+  showToast('✅','Payment Confirmed','Now please complete your $250 PrivaBuy platform fee.');
+}
+
+function updateStartBtn() {
+  const cb = document.getElementById('terms-checkbox');
+  const btn = document.getElementById('start-auction-btn');
+  if(!btn) return;
+  if(cb && cb.checked) {
+    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+  } else {
+    btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed';
+  }
+}
+
+function startAuctionTimer() {
+  clearInterval(S.timerInterval);
+  S.elapsedSeconds = 0;
+  S.timerInterval = setInterval(()=>{
+    S.elapsedSeconds = (S.elapsedSeconds||0) + 1;
+    const m = Math.floor(S.elapsedSeconds/60), sec = S.elapsedSeconds%60;
+    const str = `${m}:${String(sec).padStart(2,'0')}`;
+    const el = document.getElementById('seller-elapsed');
+    if(el) el.textContent = str;
+    // Update dealer card elapsed too
+    const rc = document.getElementById('rc-timer');
+    if(rc) rc.textContent = str;
+  },1000);
+}
+
+function startBidSimulation() {
+  const base = S.auctionData?.tradeIn ? S.auctionData.tradeIn : 9000;
+  let cur = base - 600;
+  const delays = [0,5000,12000,22000,35000,52000];
+  delays.forEach((delay,i)=>{
+    setTimeout(()=>{
+      if(!S.auctionActive)return;
+      const dealer = DEMO_DEALERS[(i+1)%DEMO_DEALERS.length]; // not index 0, that's "real dealer"
+      cur += 200+Math.floor(Math.random()*400);
+      addBid(dealer,cur,false);
+    },delay);
+  });
+}
+
+// ── Anonymisation helpers ──
+// Assign each real dealer name a stable anonymous label for this auction session
+const ANON_LABELS = ['Dealer A','Dealer B','Dealer C','Dealer D','Dealer E'];
+const anonMap = {}; // dealer real name → anon label
+let anonCounter = 0;
+function getAnon(dealer) {
+  if(!anonMap[dealer]){ anonMap[dealer] = ANON_LABELS[anonCounter++ % ANON_LABELS.length]; }
+  return anonMap[dealer];
+}
+function resetAnon() { Object.keys(anonMap).forEach(k=>delete anonMap[k]); anonCounter=0; }
+
+function addBid(dealer, amount, isReal=false) {
+  S.bids.unshift({dealer, amount, time:'just now', isReal});
+  updateBidFeed();
+  const topBtn = document.getElementById('accept-bid-btn');
+  if(topBtn){
+    topBtn.disabled = false;
+    document.getElementById('top-bid-display').textContent = '$'+amount.toLocaleString();
+  }
+  const floorWarn = document.getElementById('floor-warning');
+  if(floorWarn) floorWarn.classList.toggle('hidden', amount >= S.floorPrice);
+  document.getElementById('seller-bid-count').textContent = `${S.bids.length} bid${S.bids.length!==1?'s':''}`;
+  document.getElementById('rc-top-bid').textContent = '$'+amount.toLocaleString();
+  document.getElementById('rc-bid-count').textContent = `${S.bids.length} bids`;
+  // Toast uses anon name for everyone
+  showToast('💰','New Bid',`${getAnon(dealer)} bid $${amount.toLocaleString()}`);
+  updateRealAuctionFeed();
+}
+
+// SELLER view — sees only anonymous labels + amounts
+function updateBidFeed() {
+  const feed = document.getElementById('seller-bid-feed');
+  if(!feed) return;
+  feed.innerHTML = S.bids.map((b,i) => `
+    <div class="bid-item ${i===0?'top':'mid'} ${i===0?'new-bid':''}">
+      <div>
+        <div class="bid-dealer-name">${getAnon(b.dealer)}</div>
+        <div class="bid-time">${b.time}</div>
+      </div>
+      <div><span class="bid-amount">$${b.amount.toLocaleString()}</span>${i===0?'<span class="bid-top-label">TOP</span>':''}</div>
+    </div>`).join('');
+}
+
+// DEALER view inside the real auction modal — sees "You" for own bids, anon for others
+function updateRealAuctionFeed() {
+  const feed = document.getElementById('ram-bid-feed');
+  if(!feed) return;
+  if(S.bids.length===0){
+    feed.innerHTML='<div class="text-muted text-sm" style="text-align:center;padding:16px">No bids yet — be first!</div>';
+    return;
+  }
+  // Track whether YOU (the logged-in dealer) are the top bidder
+  const topBid = S.bids[0];
+  const iAmTop = topBid.isReal;
+  // Update the top-bidder status banner inside the modal
+  const statusEl = document.getElementById('ram-dealer-status');
+  if(statusEl){
+    if(iAmTop){
+      statusEl.innerHTML = `<div style="background:rgba(22,163,74,0.15);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center">🏆 You are the top bidder at $${topBid.amount.toLocaleString()}</div>`;
+    } else {
+      const yourBid = S.bids.find(b=>b.isReal);
+      statusEl.innerHTML = yourBid
+        ? `<div style="background:rgba(217,119,6,0.12);border:1px solid rgba(251,191,36,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#fbbf24;font-weight:600;text-align:center">⚠️ You've been outbid — your last bid: $${yourBid.amount.toLocaleString()}</div>`
+        : `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--g5);text-align:center">Place a bid to enter this auction</div>`;
+    }
+  }
+  feed.innerHTML = S.bids.map((b,i) => `
+    <div class="bid-item ${i===0?'top':'mid'} ${i===0?'new-bid':''}">
+      <div>
+        <div class="bid-dealer-name" style="${b.isReal?'color:var(--white);font-weight:600':''}">
+          ${b.isReal ? '⭐ You' : getAnon(b.dealer)}
+        </div>
+      </div>
+      <div><span class="bid-amount">$${b.amount.toLocaleString()}</span>${i===0?'<span class="bid-top-label">TOP</span>':''}</div>
+    </div>`).join('');
+  // Also update bid summary line
+  const summaryEl = document.getElementById('ram-bid-summary');
+  if(summaryEl) summaryEl.textContent = `${S.bids.length} bid${S.bids.length!==1?'s':''} so far`;
+}
+
+// ── SHARED: build photo gallery HTML ──
+const PHOTO_LABELS = ['Front Exterior','Rear Exterior','Driver Side','Passenger Side','Interior / Dash','Odometer','Engine Bay','Damage Area'];
+const PHOTO_EMOJIS = ['🚗','🚙','🛞','🛣️','💺','📊','⚙️','🔧'];
+function buildPhotoGallery(prefix, emoji, photoCount) {
+  const count = Math.max(photoCount||0, 1);
+  const mainEl = document.getElementById(`${prefix}-photo-main`);
+  const emojiEl = document.getElementById(`${prefix}-photo-emoji`);
+  const labelEl = document.getElementById(`${prefix}-photo-label`);
+  const countEl = document.getElementById(`${prefix}-photo-count`);
+  const thumbsEl = document.getElementById(`${prefix}-thumbs`);
+  if(!mainEl) return;
+  emojiEl.textContent = emoji || '🚗';
+  labelEl.textContent = PHOTO_LABELS[0];
+  countEl.textContent = `1 / ${count}`;
+  S[`${prefix}PhotoIdx`] = 0;
+  S[`${prefix}PhotoCount`] = count;
+  S[`${prefix}Emoji`] = emoji || '🚗';
+  thumbsEl.innerHTML = Array.from({length:Math.min(count,6)},(_,i)=>`
+    <div class="photo-thumb${i===0?' active':''}" onclick="selectPhoto('${prefix}',${i})" title="${PHOTO_LABELS[i]||'Photo '+(i+1)}">
+      ${PHOTO_EMOJIS[i]||'📷'}
+    </div>`).join('');
+}
+function selectPhoto(prefix, idx) {
+  S[`${prefix}PhotoIdx`] = idx;
+  document.getElementById(`${prefix}-photo-emoji`).textContent = PHOTO_EMOJIS[idx] || S[`${prefix}Emoji`];
+  document.getElementById(`${prefix}-photo-label`).textContent = PHOTO_LABELS[idx] || `Photo ${idx+1}`;
+  document.getElementById(`${prefix}-photo-count`).textContent = `${idx+1} / ${S[`${prefix}PhotoCount`]||1}`;
+  document.querySelectorAll(`#${prefix}-thumbs .photo-thumb`).forEach((t,i)=>t.classList.toggle('active',i===idx));
+}
+function cyclePhoto(prefix) {
+  const cur = S[`${prefix}PhotoIdx`]||0;
+  const next = (cur+1)%(S[`${prefix}PhotoCount`]||1);
+  selectPhoto(prefix, next);
+}
+
+// ── SHARED: build title/license docs ──
+function buildDocs(prefix, titleStatus, licPlate, licState, vinNum) {
+  const el = document.getElementById(`${prefix}-docs`);
+  if(!el) return;
+  const isClean = !titleStatus||titleStatus==='Clean';
+  el.innerHTML = `
+    <div class="doc-card">
+      <div class="doc-icon">📄</div>
+      <div>
+        <div class="doc-label">Title Status</div>
+        <div class="doc-value">${titleStatus||'Clean Title'}</div>
+        <span class="doc-badge ${isClean?'doc-badge-clean':'doc-badge-issue'}">${isClean?'✓ Clear':'⚠ Check'}</span>
+      </div>
+    </div>
+    <div class="doc-card">
+      <div class="doc-icon">🪪</div>
+      <div>
+        <div class="doc-label">License Plate</div>
+        <div class="doc-value" style="font-family:monospace;letter-spacing:2px;font-size:15px">${licPlate||'AB-12345'}</div>
+        <span class="doc-badge doc-badge-clean">${licState||'IL'} — Registered</span>
+      </div>
+    </div>
+    <div class="doc-card">
+      <div class="doc-icon">🔑</div>
+      <div>
+        <div class="doc-label">VIN</div>
+        <div class="doc-value" style="font-family:monospace;font-size:11px;letter-spacing:1px">${vinNum||'—'}</div>
+        <span class="doc-badge doc-badge-clean">✓ Verified</span>
+      </div>
+    </div>
+    <div class="doc-card">
+      <div class="doc-icon">📋</div>
+      <div>
+        <div class="doc-label">Loan / Lease</div>
+        <div class="doc-value" id="${prefix}-loan-val">—</div>
+        <span class="doc-badge doc-badge-clean">✓ Disclosed</span>
+      </div>
+    </div>`;
+}
+
+// ── SHARED: build specs grid ──
+function buildSpecs(prefix, specs) {
+  const el = document.getElementById(`${prefix}-specs`);
+  if(!el) return;
+  el.innerHTML = specs.map(s=>`
+    <div class="spec-item">
+      <div class="spec-label">${s.label}</div>
+      <div class="spec-value">${s.value}</div>
+    </div>`).join('');
+}
+
+// ── SHARED: build Carfax ──
+function buildCarfax(prefix, owners, accidents, serviceRecs) {
+  const el = document.getElementById(`${prefix}-carfax`);
+  if(!el) return;
+  el.innerHTML = `
+    <div class="carfax-item">
+      <div class="carfax-num" style="color:${owners<=1?'#4ade80':'#fbbf24'}">${owners}</div>
+      <div class="carfax-label">Owner${owners!==1?'s':''}</div>
+    </div>
+    <div class="carfax-item">
+      <div class="carfax-num" style="color:${accidents===0?'#4ade80':'#f87171'}">${accidents}</div>
+      <div class="carfax-label">Accident${accidents!==1?'s':''}</div>
+    </div>
+    <div class="carfax-item">
+      <div class="carfax-num" style="color:${serviceRecs>0?'#4ade80':'#fbbf24'}">${serviceRecs}</div>
+      <div class="carfax-label">Service Records</div>
+    </div>`;
+}
+
+// ── SHARED: build condition disclosure ──
+function buildCondition(prefix, conditionPills) {
+  const el = document.getElementById(`${prefix}-condition`);
+  if(!el) return;
+  el.innerHTML = `<div class="condition-row">${conditionPills.map(p=>`<span class="cond-pill cond-${p.type}">${p.label}</span>`).join('')}</div>`;
+}
+
+function openRealAuction() {
+  const d = S.auctionData;
+  if(!d){showToast('ℹ️','No Active Auction','Start a seller auction first.');return;}
+  const vin = document.getElementById('vin-input')?.value||'1HGBH41JXMN109186';
+  document.getElementById('ram-title').textContent=`${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'} ${d.trim||''}`;
+
+  // Photos
+  buildPhotoGallery('ram', '🚗', photoCount||6);
+
+  // Title & License
+  buildDocs('ram', d.title||'Clean', 'AB-'+Math.floor(10000+Math.random()*90000), 'IL', vin);
+  const loanEl = document.getElementById('ram-loan-val');
+  if(loanEl) loanEl.textContent = d.loan||'None';
+
+  // Specs
+  buildSpecs('ram', [
+    {label:'Year',value:d.year||2017},
+    {label:'Make',value:d.make||'Honda'},
+    {label:'Model',value:d.model||'CR-V'},
+    {label:'Trim',value:d.trim||'EX'},
+    {label:'Color',value:d.color||'—'},
+    {label:'Mileage',value:(d.mileage||0).toLocaleString()+' mi'},
+    {label:'Transmission',value:d.transmission||'CVT'},
+    {label:'Drivetrain',value:d.drivetrain||'AWD'},
+    {label:'Add-ons',value:d.addons||'N/A'},
+  ]);
+
+  // Carfax (derived from seller inputs)
+  const accVal = S.radioValues?.['accident-group']||'None';
+  const accNum = accVal==='None'?0:accVal==='One'?1:2;
+  buildCarfax('ram', 1, accNum, 4);
+
+  // Condition pills
+  const condPills = [];
+  condPills.push({label:'Overall: '+(S.radioValues?.['overall-condition-group']||'Pretty Great'),type:'good'});
+  if(S.radioValues?.['windshield-group']&&S.radioValues['windshield-group']!=='No Damage') condPills.push({label:'Windshield: '+S.radioValues['windshield-group'],type:'warn'});
+  if(S.radioValues?.['smoked-group']==='Yes') condPills.push({label:'Smoked In',type:'bad'});
+  if(Object.keys(damagePins).length>0) Object.values(damagePins).forEach(p=>condPills.push({label:'Damage: '+p,type:'warn'}));
+  if(Object.keys(areaDamage).length===0&&Object.keys(damagePins).length===0) condPills.push({label:'No interior damage',type:'good'});
+  if(S.radioValues?.['tires-group']&&S.radioValues['tires-group']!=='0') condPills.push({label:S.radioValues['tires-group']+' tires replaced',type:'good'});
+  buildCondition('ram', condPills);
+
+  document.getElementById('ram-details').innerHTML = document.getElementById('f-comments')?.value
+    ? `<strong style="color:var(--white)">Seller Notes:</strong> ${document.getElementById('f-comments').value}` : '';
+
+  document.getElementById('real-bid-input').value = S.bids.length>0 ? S.bids[0].amount+200 : (d.tradeIn||9000);
+  document.getElementById('ram-bid-summary').textContent = `${S.bids.length} bid${S.bids.length!==1?'s':''} so far`;
+  updateRealAuctionFeed();
+  document.getElementById('real-auction-modal').classList.add('open');
+}
+
+async function placeRealBid() {
+  const amount = parseInt(document.getElementById('real-bid-input').value)||0;
+  if(S.bids.length>0 && amount<=S.bids[0].amount){
+    showToast('⚠️','Bid Too Low',`Must exceed $${S.bids[0].amount.toLocaleString()}`);
+    return;
+  }
+  if(!S.car_id){ showToast('⚠️','No Active Auction','No real auction running.'); return; }
+  if(!S.dealer_id){ showToast('⚠️','Not Authorized','No dealer ID. Use a registered dealer account.'); return; }
+
+  try {
+    const res = await fetch(`${API}/offers/submit`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        dealer_id: S.dealer_id,
+        car_id: S.car_id,
+        offer_amount: amount
+      })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.detail || 'Bid failed');
+
+    S.latest_offer_id = data.offer_id;
+    addBid('Northside Auto Group', amount, true);
+    document.getElementById('real-bid-input').value = amount + 200;
+    showRealDealerStatus(amount, false);
+    showToast('✅','Bid Placed!',`$${amount.toLocaleString()} submitted. Offer ID: ${data.offer_id.slice(0,8)}...`);
+
+  } catch(err) {
+    showToast('❌','Bid Failed', err.message);
+    console.error(err);
+  }
+}
+
+function showRealDealerStatus(amount, isWon) {
+  let banner = document.getElementById('ram-dealer-status');
+  if(!banner) return;
+  if(isWon){
+    // Add to pending fees queue — this triggers the tab to appear
+    const d = S.auctionData || {};
+    const vehicle = `${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'} ${d.trim||''}`.trim();
+    dealerAddPendingFee(vehicle, amount, 'Sarah Mitchell', '(312) 555-0100', 'sarah.m@email.com');
+
+    banner.innerHTML = `
+      <div style="background:linear-gradient(135deg,rgba(22,163,74,0.25),rgba(22,163,74,0.1));border:1px solid rgba(74,222,128,0.4);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:14px">
+        <div style="font-size:28px;margin-bottom:6px">🏆</div>
+        <div style="font-size:18px;font-weight:700;color:#4ade80;margin-bottom:4px">You Won This Auction!</div>
+        <div style="font-size:13px;color:var(--g5)">Winning bid: <strong style="color:var(--white)">$${amount.toLocaleString()}</strong></div>
+        <div style="font-size:12px;color:var(--g4);margin-top:6px">The seller has accepted your offer.</div>
+      </div>
+      <div style="background:rgba(201,184,255,0.07);border:1px solid rgba(201,184,255,0.25);border-radius:var(--r-lg);padding:14px;text-align:center">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">💳 $500 platform fee added to your Pay Fee tab</div>
+        <div style="font-size:12px;color:var(--g5)">Seller contact will be unlocked after payment.</div>
+      </div>`;
+  } else {
+    banner.innerHTML = `
+      <div style="background:rgba(22,163,74,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center;">
+        🏆 You are the top bidder at $${amount.toLocaleString()}
+      </div>`;
+  }
+}
+
+async function acceptTopBid() {
+  if(!S.bids.length) return;
+  const top = S.bids[0];
+
+  // If top bid is real (from backend), use real accept
+  if(top.isReal && S.latest_offer_id && S.seller_id) {
+    try {
+      const res = await fetch(`${API}/offers/accept/${S.latest_offer_id}`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({seller_id: S.seller_id})
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.detail || 'Accept failed');
+      showToast('🎉','Offer Accepted!',`$${top.amount.toLocaleString()} confirmed in database.`);
+    } catch(err) {
+      showToast('❌','Accept Failed', err.message);
+      console.error(err);
+      return;
+    }
+  }
+
+  // Update UI regardless
+  clearInterval(S.timerInterval);
+  clearInterval(S.dealerCardTimerInterval);
+  S.auctionActive = false;
+  document.getElementById('seller-auction-buttons').classList.add('hidden');
+  document.getElementById('seller-auction-closed').classList.remove('hidden');
+  document.getElementById('accepted-amount').textContent = '$'+top.amount.toLocaleString();
+  const elapsed = document.getElementById('seller-elapsed');
+  if(elapsed) elapsed.textContent = 'SOLD';
+  document.getElementById('dealer-contact-reveal').innerHTML=`
+    <strong>Winning Dealer:</strong> ${top.dealer}<br>
+    📞 (312) 555-0192 • dealer@${top.dealer.toLowerCase().replace(/ /g,'')}.com<br>
+    <em style="font-size:11px;color:var(--g4)">Contact info revealed only after you accept</em>`;
+  if(top.isReal) showRealDealerStatus(top.amount, true);
+}
+function auctionEnd() {
+  S.auctionActive=false;
+  if(S.bids.length>0) showToast('⏰','Auction Ended',`Top bid: $${S.bids[0].amount.toLocaleString()}`);
+  else showToast('⏰','Auction Ended','No bids received.');
+}
+function clearAuction() {
+  clearInterval(S.timerInterval); S.auctionActive=false; S.bids=[];
+  clearInterval(S.dealerCardTimerInterval);
+}
+
+// ═══ DEALER ═══
+function initDealerView() {
+  dealerTab('feed',document.querySelector('#screen-dealer .tab-btn'));
+  renderDealerAuctions();
+}
+function setAnalyticsPeriod(period, el) {
+  document.querySelectorAll('#dealer-tab-analytics .tab-btn, [onclick*="setAnalyticsPeriod"]').forEach(b=>{
+    b.style.background='none'; b.style.color='rgba(255,255,255,0.4)';
+  });
+  el.style.background='rgba(255,255,255,0.10)'; el.style.color='#fff';
+  showToast('📊','Period Updated',`Now showing ${period} performance data.`);
+}
+function dealerTab(tab, el) {
+  ['feed','watchlist','won','payment','analytics'].forEach(t=>document.getElementById(`dealer-tab-${t}`).classList.add('hidden'));
+  document.getElementById(`dealer-tab-${tab}`).classList.remove('hidden');
+  document.querySelectorAll('#dealer-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+function renderDealerAuctions() {
+  const grid = document.getElementById('dealer-auction-grid');
+  grid.innerHTML = DEMO_AUCTIONS.map(a=>{
+    const m=Math.floor(a.timeLeft/60),sec=a.timeLeft%60,urgent=a.timeLeft<120;
+    return `<div class="vehicle-card" onclick="openDealerAuction(${a.id})">
+      <div class="vehicle-card-img">${a.emoji}<div class="badge ${urgent?'badge-pending':'badge-live'}" style="position:absolute;top:12px;left:12px">${urgent?'⚡ Ending':'● Live'}</div></div>
+      <div class="vehicle-card-body">
+        <div class="vehicle-card-title">${a.year} ${a.make} ${a.model}</div>
+        <div class="vehicle-card-meta"><span class="meta-tag">📍 ${a.city}</span><span class="meta-tag">🛣 ${a.mileage} mi</span><span class="meta-tag">${a.trim}</span></div>
+        <div class="vehicle-card-bid">
+          <div><div class="current-bid-label">Top Bid</div><div class="current-bid-amount">$${a.topBid.toLocaleString()}</div></div>
+          <div style="text-align:right"><div class="text-muted text-sm">${a.bids} bids</div><div style="font-family:monospace;font-size:13px;color:${urgent?'#f87171':'#4ade80'}">${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}</div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+// Demo auction static data (license plates, VINs, carfax)
+const DEMO_EXTRA = {
+  1:{vin:'2HKRM4H79GH638591',plate:'HND-8821',owners:1,accidents:0,serviceRecs:6,loan:'None',comments:'Recently detailed. Tires replaced at 88k. All service records available.'},
+  2:{vin:'1FTFW1EF7EKE08122',plate:'FRD-4410',owners:2,accidents:0,serviceRecs:4,loan:'None',comments:'Previous owner was a contractor — light commercial use. Bed liner installed.'},
+  3:{vin:'4T1BF1FK7GU236540',plate:'TOY-3391',owners:1,accidents:1,serviceRecs:8,loan:'Loan — payoff est. $2,100',comments:'Minor fender bender in 2022, repaired professionally. No airbag deployment.'},
+};
+
+let openAuctionId=null;
+function openDealerAuction(id) {
+  const a=DEMO_AUCTIONS.find(x=>x.id===id); if(!a)return;
+  const ex=DEMO_EXTRA[id]||{};
+  openAuctionId=id;
+
+  document.getElementById('dam-title').textContent=`${a.year} ${a.make} ${a.model} ${a.trim}`;
+  document.getElementById('dam-subtitle').textContent=`${a.city}, IL • ${a.mileage} mi`;
+  // Reset status banner for this auction
+  const statusBanner = document.getElementById('dam-dealer-status');
+  if(statusBanner && !a.iAmTop) {
+    statusBanner.innerHTML = `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;">🔒 All dealer identities are anonymous — place a bid to enter</div>`;
+  }
+
+  // Photos
+  buildPhotoGallery('dam', a.emoji||'🚗', 6);
+
+  // Docs
+  buildDocs('dam', 'Clean', ex.plate||'AB-12345', 'IL', ex.vin||'—');
+  const lv=document.getElementById('dam-loan-val'); if(lv) lv.textContent=ex.loan||'None';
+
+  // Specs
+  buildSpecs('dam',[
+    {label:'Year',value:a.year},
+    {label:'Make',value:a.make},
+    {label:'Model',value:a.model},
+    {label:'Trim',value:a.trim},
+    {label:'Color',value:a.color},
+    {label:'Mileage',value:a.mileage+' mi'},
+    {label:'Condition',value:a.condition},
+    {label:'Drivetrain',value:id===1?'AWD':id===2?'4WD':'FWD'},
+    {label:'Transmission',value:id===2?'6-Speed Auto':'CVT'},
+  ]);
+
+  // Carfax
+  buildCarfax('dam',ex.owners||1,ex.accidents||0,ex.serviceRecs||4);
+
+  // Condition
+  const condPills=[
+    {label:'Overall: '+a.condition,type:a.condition==='Good'||a.condition==='Excellent'?'good':'warn'},
+    {label:ex.accidents>0?`${ex.accidents} accident(s)`:'No accidents',type:ex.accidents>0?'bad':'good'},
+    {label:`${ex.owners} owner${ex.owners!==1?'s':''}`,type:ex.owners===1?'good':'warn'},
+    {label:a.issues==='None disclosed'?'No disclosed issues':'Issues noted',type:a.issues==='None disclosed'?'good':'warn'},
+  ];
+  buildCondition('dam',condPills);
+
+  document.getElementById('dam-details').innerHTML=`<strong style="color:var(--white)">Seller Notes:</strong> ${ex.comments||a.issues}`;
+  document.getElementById('dam-bid-summary').textContent=`${a.bids} bid${a.bids!==1?'s':''} — top $${a.topBid.toLocaleString()}`;
+
+  // Bids — always anonymous
+  const bids = DEMO_DEALERS.slice(0,a.bids).map((d,i)=>({
+    label: a.iAmTop && i===0 ? '⭐ You' : ANON_LABELS[a.iAmTop ? i : i],
+    amount: a.topBid - i*200,
+    isMe: a.iAmTop && i===0
+  }));
+  document.getElementById('dam-bid-feed').innerHTML = bids.map((b,i)=>`
+    <div class="bid-item ${i===0?'top':'mid'}">
+      <div><div class="bid-dealer-name" style="${b.isMe?'color:var(--white);font-weight:600':''}">${b.label}</div></div>
+      <div><span class="bid-amount">$${b.amount.toLocaleString()}</span>${i===0?'<span class="bid-top-label">TOP</span>':''}</div>
+    </div>`).join('');
+  document.getElementById('dealer-bid-input').value = a.topBid+200;
+
+  // If already top bidder, show banner
+  if(a.iAmTop) showDealerWinBanner(a.myBid, false);
+
+  // Timer — when it hits 0 and dealer is top, show win state
+  let t=a.timeLeft;
+  if(S.dealerModalTimer) clearInterval(S.dealerModalTimer);
+  const fmt=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  document.getElementById('dealer-modal-timer').textContent=fmt(t);
+  S.dealerModalTimer=setInterval(()=>{
+    if(t<=0){
+      clearInterval(S.dealerModalTimer);
+      if(a.iAmTop) showDealerWinBanner(a.myBid, true);
+      return;
+    }
+    t--;
+    const el=document.getElementById('dealer-modal-timer');
+    if(el){el.textContent=fmt(t);el.classList.toggle('urgent',t<=60);}
+  },1000);
+
+  document.getElementById('dealer-auction-modal').classList.add('open');
+}
+
+function placeDealerBid() {
+  const amount = parseInt(document.getElementById('dealer-bid-input').value)||0;
+  const a = DEMO_AUCTIONS.find(x=>x.id===openAuctionId); if(!a) return;
+  if(amount <= a.topBid){ showToast('⚠️','Bid Too Low',`Must exceed current top bid of $${a.topBid.toLocaleString()}`); return; }
+  a.topBid = amount; a.bids++;
+  // Track that "You" (dealer) hold the top bid on this demo auction
+  a.myBid = amount; a.iAmTop = true;
+  // Rebuild anonymous bid feed — You on top, others anon below
+  const otherBids = DEMO_DEALERS.slice(0, Math.max(0,a.bids-1)).map((d,i)=>({
+    label: ANON_LABELS[i], amount: a.topBid - (i+1)*200
+  }));
+  const allRows = [
+    `<div class="bid-item top new-bid">
+      <div><div class="bid-dealer-name" style="color:var(--white);font-weight:600">⭐ You</div></div>
+      <div><span class="bid-amount">$${amount.toLocaleString()}</span><span class="bid-top-label">TOP</span></div>
+    </div>`,
+    ...otherBids.map(b=>`<div class="bid-item mid">
+      <div><div class="bid-dealer-name">${b.label}</div></div>
+      <div><span class="bid-amount">$${b.amount.toLocaleString()}</span></div>
+    </div>`)
+  ];
+  document.getElementById('dam-bid-feed').innerHTML = allRows.join('');
+  document.getElementById('dealer-bid-input').value = amount + 200;
+  document.getElementById('dam-bid-summary').textContent = `${a.bids} bids — top $${a.topBid.toLocaleString()}`;
+  // Show you-are-winning banner
+  showDealerWinBanner(amount, false);
+  showToast('✅','Bid Placed — You\'re on Top!',`Your bid of $${amount.toLocaleString()} is currently leading.`);
+  renderDealerAuctions();
+}
+
+function showDealerWinBanner(amount, isWon) {
+  const banner = document.getElementById('dam-dealer-status');
+  if(!banner) return;
+  if(isWon){
+    banner.innerHTML = `
+      <div style="background:linear-gradient(135deg,rgba(22,163,74,0.25),rgba(22,163,74,0.1));border:1px solid rgba(74,222,128,0.4);border-radius:var(--r);padding:16px;text-align:center;">
+        <div style="font-size:28px;margin-bottom:6px">🏆</div>
+        <div style="font-family:var(--serif);font-size:18px;color:#4ade80;margin-bottom:4px">You Won This Auction!</div>
+        <div style="font-size:13px;color:var(--g5)">Winning bid: <strong style="color:var(--white)">$${amount.toLocaleString()}</strong></div>
+        <div style="font-size:12px;color:var(--g4);margin-top:6px">Seller contact info will be shared after acceptance.</div>
+      </div>`;
+  } else {
+    banner.innerHTML = `
+      <div style="background:rgba(22,163,74,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center;">
+        🏆 You are the top bidder at $${amount.toLocaleString()}
+      </div>`;
+  }
+}
+
+// ═══ ADMIN ═══
+function adminSection(sec,el) {
+  ['overview','auctions','dealers','listings','flags','revenue'].forEach(s=>document.getElementById(`admin-${s}`).classList.toggle('hidden',s!==sec));
+  document.querySelectorAll('.admin-nav-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+// ═══ MODALS ═══
+function openCounterModal(){document.getElementById('counter-modal').classList.add('open');}
+function openMessageModal(){document.getElementById('message-modal').classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function submitCounter(){
+  const a=document.getElementById('counter-amount').value;
+  closeModal('counter-modal');
+  showToast('↩','Counter Sent',`$${parseInt(a).toLocaleString()} sent to top bidder.`);
+}
+function sendMessage(){
+  const t=document.getElementById('msg-input').value.trim(); if(!t)return;
+  const list=document.getElementById('message-list');
+  list.innerHTML+=`<div class="message-item sent"><div class="message-text">${t}</div><div class="message-time">You • just now</div></div>`;
+  document.getElementById('msg-input').value='';
+  list.scrollTop=list.scrollHeight;
+  setTimeout(()=>{
+    list.innerHTML+=`<div class="message-item received"><div class="message-text">Sounds great — Monday or Tuesday 9am–5pm works for us. We'll bring a check.</div><div class="message-time">Winning Dealer • just now</div></div>`;
+    list.scrollTop=list.scrollHeight;
+  },1500);
+}
+
+// ═══ TOAST ═══
+function showToast(icon,title,desc){
+  const c=document.getElementById('toast-container');
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<div class="toast-icon">${icon}</div><div><div class="toast-title">${title}</div><div class="toast-desc">${desc}</div></div>`;
+  c.appendChild(t);
+  setTimeout(()=>{t.classList.add('removing');setTimeout(()=>t.remove(),300);},4000);
+}
+
+// ═══ INIT ═══
+selectRole('seller',document.querySelector('.role-btn[data-role="seller"]'));
+function highlightSellerPayment() {
+  setTimeout(() => {
+    const tab = document.querySelector('#screen-seller .tabs');
+    if(tab) {
+      const payBtn = [...tab.querySelectorAll('.tab-btn')].find(b => b.textContent.includes('Pay'));
+      if(payBtn) { payBtn.style.color = 'var(--accent)'; payBtn.style.borderColor = 'rgba(201,184,255,0.4)'; }
+    }
+  }, 100);
+}
+// ── DEALER PENDING FEES QUEUE ──
+// Each entry: { id, vehicle, winPrice, sellerName, sellerPhone, sellerEmail, paid }
+const D_pendingFees = [];
+let D_selectedFeeId = null;
+
+function dealerAddPendingFee(vehicle, winPrice, sellerName, sellerPhone, sellerEmail) {
+  const id = 'fee_' + Date.now() + '_' + Math.random().toString(36).substr(2,5);
+  D_pendingFees.push({ id, vehicle, winPrice, sellerName, sellerPhone, sellerEmail, paid: false });
+  updateDealerFeeTab();
+}
+
+function updateDealerFeeTab() {
+  const unpaid = D_pendingFees.filter(f => !f.paid);
+  const tab = document.getElementById('dealer-pay-fee-tab');
+  const badge = document.getElementById('dealer-fee-badge');
+  if(!tab) return;
+
+  if(unpaid.length > 0) {
+    // Show the tab
+    tab.classList.remove('hidden');
+    tab.style.color = 'var(--accent)';
+    badge.style.display = 'inline';
+    badge.textContent = unpaid.length;
+  } else {
+    // Hide tab if all paid
+    tab.classList.add('hidden');
+    badge.style.display = 'none';
+  }
+  renderDealerFeeList();
+}
+
+function renderDealerFeeList() {
+  const list = document.getElementById('dealer-pending-fees-list');
+  if(!list) return;
+  const unpaid = D_pendingFees.filter(f => !f.paid);
+
+  if(unpaid.length === 0) {
+    list.innerHTML = `<div class="card"><div class="card-body" style="text-align:center;padding:40px">
+      <div style="font-size:40px;margin-bottom:12px">✅</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px">All fees paid</div>
+      <div style="font-size:13px;color:var(--g5)">No outstanding platform fees.</div>
+    </div></div>`;
+    document.getElementById('dealer-payment-form-wrap').classList.add('hidden');
+    return;
+  }
+
+  list.innerHTML = unpaid.map(f => `
+    <div class="card" style="border:1px solid ${D_selectedFeeId===f.id ? 'rgba(201,184,255,0.4)' : 'rgba(255,255,255,0.08)'}">
+      <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <div style="display:flex;align-items:center;gap:14px;flex:1">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(201,184,255,0.1);border:1px solid rgba(201,184,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🚗</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:3px">${f.vehicle}</div>
+            <div style="font-size:12px;color:var(--g5)">Your winning bid: <strong style="color:var(--accent)">$${f.winPrice.toLocaleString()}</strong> · PrivaBuy fee: <strong style="color:#fff">$500</strong></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+          <span style="font-size:11px;color:var(--accent2);background:rgba(255,214,160,0.1);border:1px solid rgba(255,214,160,0.2);padding:3px 10px;border-radius:50px">Fee Due</span>
+          <button onclick="selectDealerFee('${f.id}')" style="padding:9px 18px;background:rgba(201,184,255,0.15);color:var(--accent);border:1px solid rgba(201,184,255,0.3);border-radius:50px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer">
+            Pay $500 →
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectDealerFee(id) {
+  D_selectedFeeId = id;
+  const fee = D_pendingFees.find(f => f.id === id);
+  if(!fee) return;
+
+  // Show form
+  document.getElementById('dealer-payment-form-wrap').classList.remove('hidden');
+  document.getElementById('dealer-paying-for').textContent = fee.vehicle;
+  document.getElementById('fee-summary-vehicle').textContent = fee.vehicle;
+  document.getElementById('fee-summary-price').textContent = '$' + fee.winPrice.toLocaleString();
+
+  // Reset form fields
+  ['dealer-card-name','dealer-card-num','dealer-card-exp','dealer-card-cvv','dealer-card-zip'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  const btn = document.getElementById('dealer-pay-btn');
+  if(btn) { btn.textContent = 'Pay $500.00 →'; btn.disabled = false; btn.style.cssText = ''; }
+
+  renderDealerFeeList(); // re-render to show selection highlight
+  document.getElementById('dealer-payment-form-wrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function highlightDealerPayment() {
+  // No-op — tab now appears automatically when fee is added
+}
+
+function processDealerPayment() {
+  const name = document.getElementById('dealer-card-name').value;
+  const num = document.getElementById('dealer-card-num').value;
+  const exp = document.getElementById('dealer-card-exp').value;
+  const cvv = document.getElementById('dealer-card-cvv').value;
+  const zip = document.getElementById('dealer-card-zip').value;
+  if(!name||!num||!exp||!cvv||!zip) {
+    showToast('⚠️','Missing Fields','Please fill in all payment details.');
+    return;
+  }
+  if(!D_selectedFeeId) { showToast('⚠️','No Vehicle Selected','Please select a vehicle to pay for.'); return; }
+
+  const btn = document.getElementById('dealer-pay-btn');
+  btn.textContent = 'Processing...'; btn.disabled = true;
+
+  setTimeout(() => {
+    // Mark as paid
+    const fee = D_pendingFees.find(f => f.id === D_selectedFeeId);
+    if(fee) fee.paid = true;
+    D_selectedFeeId = null;
+
+    btn.textContent = '✓ Payment Successful';
+    btn.style.background = 'rgba(168,240,224,0.15)';
+    btn.style.color = 'var(--accent3)';
+    btn.style.border = '1px solid rgba(168,240,224,0.3)';
+
+    // Show unlocked seller contact
+    const form = btn.closest('.card-body');
+    if(form && fee) {
+      const existing = form.querySelector('.seller-contact-reveal');
+      if(!existing) {
+        const reveal = document.createElement('div');
+        reveal.className = 'seller-contact-reveal';
+        reveal.style.cssText = 'margin-top:16px;padding:16px;background:rgba(168,240,224,0.07);border:1px solid rgba(168,240,224,0.25);border-radius:var(--r)';
+        reveal.innerHTML = `<div style="font-size:13px;font-weight:600;color:var(--accent3);margin-bottom:8px">🔓 Seller Contact Unlocked — ${fee.vehicle}</div>
+          <div style="font-size:13px;margin-bottom:4px;font-weight:500">${fee.sellerName}</div>
+          <div style="font-size:12px;color:var(--g5)">📞 ${fee.sellerPhone}</div>
+          <div style="font-size:12px;color:var(--g5)">✉️ ${fee.sellerEmail}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:8px">Arrange pickup within 2 business days</div>`;
+        form.appendChild(reveal);
+      }
+    }
+
+    updateDealerFeeTab(); // re-render list, hide tab if all paid
+    showToast('✅','Payment Complete',`$500 paid for ${fee ? fee.vehicle : 'vehicle'}. Seller contact unlocked.`);
+  }, 1800);
+}
+
+function highlightSellerPayment() {
+  setTimeout(() => {
+    const tab = document.querySelector('#screen-seller .tabs');
+    if(tab) {
+      const payBtn = [...tab.querySelectorAll('.tab-btn')].find(b => b.textContent.includes('Pay'));
+      if(payBtn) { payBtn.style.color = 'var(--accent)'; payBtn.style.borderColor = 'rgba(201,184,255,0.4)'; }
+    }
+  }, 100);
+}
+
+function formatCard(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,16);
+  el.value = v.replace(/(.{4})/g,'$1  ').trim();
+}
+function formatExpiry(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,4);
+  if(v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2);
+  el.value = v;
+}
+function processSellerPayment() {
+  const name = document.getElementById('seller-card-name').value;
+  const num = document.getElementById('seller-card-num').value;
+  const exp = document.getElementById('seller-card-exp').value;
+  const cvv = document.getElementById('seller-card-cvv').value;
+  const zip = document.getElementById('seller-card-zip').value;
+  if(!name||!num||!exp||!cvv||!zip) {
+    showToast('⚠️','Missing Fields','Please fill in all payment details.');
+    return;
+  }
+  const btn = event.target;
+  btn.textContent = 'Processing...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✓ Payment Successful';
+    btn.style.background = 'rgba(168,240,224,0.15)';
+    btn.style.color = 'var(--accent3)';
+    btn.style.borderColor = 'rgba(168,240,224,0.3)';
+    const prompt = document.getElementById('seller-fee-prompt');
+    if(prompt) {
+      prompt.style.borderColor = 'rgba(168,240,224,0.3)';
+      prompt.style.background = 'rgba(168,240,224,0.06)';
+      prompt.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">✅</span><div><div style="font-size:13px;font-weight:600;color:var(--accent3)">Payment Complete</div><div style="font-size:12px;color:var(--g5);margin-top:2px">Dealer pickup will be arranged within 1–2 business days.</div></div></div>`;
+    }
+    showToast('✅','Payment Received','$250.00 received. Your auction is fully processed. Thank you!');
+  }, 1800);
+}
+</script>
+</body>
+</html>
