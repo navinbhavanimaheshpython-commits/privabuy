@@ -1915,7 +1915,15 @@ function processSellerPayment() {
 }
 
 // ═══ INIT ═══
-selectRole('seller',document.querySelector('.role-btn[data-role="seller"]'));
-</script>
-</body>
-</html>
+selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+
+// Auto-select role from URL parameter (?role=seller or ?role=dealer)
+const urlRole = new URLSearchParams(window.location.search).get('role');
+if(urlRole === 'dealer') {
+  selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
+} else if(urlRole === 'seller') {
+  selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+}
+
+
+
