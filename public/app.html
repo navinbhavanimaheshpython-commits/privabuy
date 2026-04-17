@@ -1223,20 +1223,37 @@ function wizardGo(step) {
   if(step===4) buildValueEstimate();
   if(step===5) populateReview();
 }
-function decodeVIN() {
+async function decodeVIN() {
   const vin = document.getElementById('vin-input').value.trim();
-  if(vin.length<10){showToast('⚠️','Invalid VIN','Enter at least 10 characters.');return;}
-  const d = VIN_DB[vin]||VIN_DB['DEFAULT'];
-  document.getElementById('f-year').value = d.year;
-  document.getElementById('f-make').value = d.make;
-  document.getElementById('f-model').value = d.model;
-  document.getElementById('f-trim').value = d.trim;
-  document.getElementById('f-color').value = d.color;
-  S.radioValues['transmission-group'] = d.transmission;
-  S.radioValues['drivetrain-group'] = d.drivetrain;
-  document.getElementById('vin-result').classList.remove('hidden');
-  document.getElementById('vin-result').innerHTML = `<div class="alert alert-success">✅ VIN Decoded: ${d.year} ${d.make} ${d.model} ${d.trim} • ${d.engine} • ${d.transmission} • ${d.drivetrain}</div>`;
-  showToast('✅','VIN Decoded!',`${d.year} ${d.make} ${d.model} auto-populated.`);
+  if(vin.length < 17) { showToast('⚠️','Invalid VIN','VIN must be exactly 17 characters.'); return; }
+  showToast('🔍','Looking up VIN...','Checking NHTSA database...');
+  try {
+    const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
+    const data = await res.json();
+    const results = data.Results;
+    const get = (var_) => results.find(r => r.Variable === var_)?.Value || '';
+    const year = get('Model Year');
+    const make = get('Make');
+    const model = get('Model');
+    const trim = get('Trim');
+    const engine = get('Displacement (L)') ? get('Displacement (L)') + 'L ' + get('Engine Configuration') : '';
+    const transmission = get('Transmission Style') || 'Automatic';
+    const drivetrain = get('Drive Type') || 'FWD';
+    const bodyClass = get('Body Class');
+    if(!make || make === 'null') { showToast('❌','VIN Not Found','Could not decode this VIN. Check and try again.'); return; }
+    document.getElementById('f-year').value = year;
+    document.getElementById('f-make').value = make.charAt(0) + make.slice(1).toLowerCase();
+    document.getElementById('f-model').value = model.charAt(0) + model.slice(1).toLowerCase();
+    document.getElementById('f-trim').value = trim || '';
+    S.radioValues['transmission-group'] = transmission.includes('Manual') ? 'Manual' : transmission.includes('CVT') ? 'CVT' : 'Automatic';
+    S.radioValues['drivetrain-group'] = drivetrain.includes('AWD') || drivetrain.includes('All') ? 'AWD' : drivetrain.includes('4WD') || drivetrain.includes('4x4') ? '4WD' : drivetrain.includes('Rear') ? 'RWD' : 'FWD';
+    document.getElementById('vin-result').classList.remove('hidden');
+    document.getElementById('vin-result').innerHTML = `<div class="alert alert-success">✅ VIN Decoded: ${year} ${make} ${model} ${trim} • ${bodyClass} • ${engine} • Drivetrain: ${S.radioValues['drivetrain-group']}</div>`;
+    showToast('✅','VIN Decoded!',`${year} ${make} ${model} confirmed from NHTSA.`);
+  } catch(err) {
+    showToast('❌','Decode Failed','Could not reach NHTSA. Check your connection.');
+    console.error(err);
+  }
 }
 function checkEligibility() {
   const year = parseInt(document.getElementById('f-year').value)||0;
