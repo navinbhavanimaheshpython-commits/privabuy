@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-
+ 
 /* ─── FONTS ─────────────────────────────────────────────────────────────── */
 const FontLink = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap');
-
+ 
     *, *::before, *::after { box-sizing: border-box; }
-
+ 
     :root {
       --bg: #f5f3ef;
       --fg: #1a1814;
@@ -18,9 +18,9 @@ const FontLink = () => (
       --accent2: #c27c2a;
       --accent3: #2a9e7c;
     }
-
+ 
     html { scroll-behavior: smooth; }
-
+ 
     body {
       margin: 0;
       font-family: 'Barlow', sans-serif;
@@ -29,9 +29,9 @@ const FontLink = () => (
       color: #1a1814;
       overflow-x: hidden;
     }
-
+ 
     h1, h2 { color: #1a1814 !important; }
-
+ 
     /* ── Liquid Glass (light) ── */
     .lg {
       background: rgba(255,255,255,0.72);
@@ -56,7 +56,7 @@ const FontLink = () => (
       mask-composite: exclude;
       pointer-events: none;
     }
-
+ 
     .lg-strong {
       background: rgba(26,24,20,0.88);
       backdrop-filter: blur(50px);
@@ -80,12 +80,12 @@ const FontLink = () => (
       mask-composite: exclude;
       pointer-events: none;
     }
-
+ 
     .serif-italic {
       font-family: 'Instrument Serif', serif;
       font-style: italic;
     }
-
+ 
     .section-badge {
       display: inline-block;
       font-family: 'Barlow', sans-serif;
@@ -100,7 +100,7 @@ const FontLink = () => (
       border: 1px solid rgba(26,24,20,0.15);
       background: rgba(26,24,20,0.05);
     }
-
+ 
     /* grain */
     .grain {
       position: fixed;
@@ -111,7 +111,7 @@ const FontLink = () => (
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       background-size: 128px 128px;
     }
-
+ 
     /* hero fade */
     .hero-fade {
       position: absolute;
@@ -121,7 +121,7 @@ const FontLink = () => (
       z-index: 5;
       pointer-events: none;
     }
-
+ 
     /* Animations */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(22px); }
@@ -158,20 +158,20 @@ const FontLink = () => (
       50%  { transform: scale(1.04); }
       100% { transform: scale(1); }
     }
-
+ 
     .fade-up-1 { animation: fadeUp 0.9s ease both; animation-delay: 0.1s; }
     .fade-up-2 { animation: fadeUp 0.9s ease both; animation-delay: 0.35s; }
     .fade-up-3 { animation: fadeUp 0.9s ease both; animation-delay: 0.6s; }
     .fade-up-4 { animation: fadeUp 0.9s ease both; animation-delay: 0.85s; }
-
+ 
     /* scroll reveal */
     .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.85s ease, transform 0.85s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
-
+ 
     /* Auction demo */
     .bid-row { transition: background 0.3s; }
     .bid-row:hover { background: rgba(26,24,20,0.04); }
-
+ 
     .progress-bar {
       height: 3px;
       border-radius: 2px;
@@ -185,7 +185,7 @@ const FontLink = () => (
       background: linear-gradient(to right, var(--accent), var(--accent2));
       transition: width 1.5s ease;
     }
-
+ 
     /* Step connector line */
     .step-line {
       position: absolute;
@@ -195,7 +195,7 @@ const FontLink = () => (
       width: 1px;
       background: linear-gradient(to bottom, rgba(26,24,20,0.15), transparent);
     }
-
+ 
     /* stat card shimmer */
     .stat-shimmer::after {
       content: '';
@@ -204,17 +204,17 @@ const FontLink = () => (
       background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 60%);
       animation: shimmer 3s infinite;
     }
-
+ 
     /* nav scroll shadow */
     .nav-scrolled {
       box-shadow: 0 8px 40px rgba(26,24,20,0.12), 0 2px 0 rgba(255,255,255,0.70);
     }
   `}</style>
 );
-
+ 
 /* ─── SVG ICON COMPONENTS ───────────────────────────────────────────────── */
 const iconStroke = { fill:"none", strokeLinecap:"round", strokeLinejoin:"round", strokeWidth:"1.6" };
-
+ 
 function CarIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" style={{...iconStroke, stroke:"#7c5cbf"}}>
@@ -224,7 +224,7 @@ function CarIcon() {
     </svg>
   );
 }
-
+ 
 function StepIcon({ name, color }) {
   const s = {...iconStroke, stroke: color || "var(--accent)"};
   const icons = {
@@ -260,7 +260,7 @@ function StepIcon({ name, color }) {
   };
   return icons[name] || null;
 }
-
+ 
 function PerkIcon({ name }) {
   const s = {...iconStroke, stroke:"var(--accent)"};
   const icons = {
@@ -300,7 +300,7 @@ function PerkIcon({ name }) {
   };
   return icons[name] || null;
 }
-
+ 
 /* ─── PARTICLE CANVAS (hero dust) ──────────────────────────────────────── */
 function ParticleCanvas() {
   const ref = useRef(null);
@@ -346,7 +346,7 @@ function ParticleCanvas() {
   }, []);
   return <canvas ref={ref} style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none", zIndex:2 }} />;
 }
-
+ 
 /* ─── SCROLL REVEAL HOOK ────────────────────────────────────────────────── */
 function useReveal() {
   useEffect(() => {
@@ -358,7 +358,7 @@ function useReveal() {
     return () => io.disconnect();
   });
 }
-
+ 
 /* ─── NAVBAR ────────────────────────────────────────────────────────────── */
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -397,7 +397,7 @@ function Navbar() {
     </div>
   );
 }
-
+ 
 /* ─── LIVE AUCTION DEMO WIDGET ──────────────────────────────────────────── */
 function AuctionDemo() {
   const [bids, setBids] = useState([
@@ -407,12 +407,12 @@ function AuctionDemo() {
   ]);
   const [timer, setTimer] = useState(743);
   const [highlight, setHighlight] = useState(null);
-
+ 
   useEffect(() => {
     const iv = setInterval(() => setTimer(t => t > 0 ? t - 1 : 0), 1000);
     return () => clearInterval(iv);
   }, []);
-
+ 
   useEffect(() => {
     if (timer === 0) return;
     const iv = setInterval(() => {
@@ -430,7 +430,7 @@ function AuctionDemo() {
     }, 4800);
     return () => clearInterval(iv);
   }, [bids, timer]);
-
+ 
   const fmtTime = () => {
     const d = new Date();
     return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
@@ -438,7 +438,7 @@ function AuctionDemo() {
   const mm = String(Math.floor(timer/60)).padStart(2,"0");
   const ss = String(timer%60).padStart(2,"0");
   const pct = Math.min(100, (900-timer)/900*100);
-
+ 
   return (
     <div className="lg" style={{ borderRadius:"1.75rem", padding:"2.25rem", width:"100%", border:"1px solid rgba(26,24,20,0.08)" }}>
       {/* Car info */}
@@ -457,7 +457,7 @@ function AuctionDemo() {
           </div>
         </div>
       </div>
-
+ 
       {/* Timer */}
       <div style={{ marginBottom:"1rem" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"0.5rem" }}>
@@ -470,7 +470,7 @@ function AuctionDemo() {
           <div className="progress-bar-fill" style={{ width:`${100 - pct}%` }} />
         </div>
       </div>
-
+ 
       {/* Bids */}
       <div style={{ fontSize:"0.72rem", color:"rgba(26,24,20,0.88)", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:"0.5rem" }}>Live Bids</div>
       <div style={{ display:"flex", flexDirection:"column", gap:"0.15rem" }}>
@@ -495,7 +495,7 @@ function AuctionDemo() {
           </div>
         ))}
       </div>
-
+ 
       {/* Dealer count */}
       <div style={{ marginTop:"1rem", paddingTop:"1rem", borderTop:"1px solid rgba(26,24,20,0.14)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
@@ -514,7 +514,7 @@ function AuctionDemo() {
     </div>
   );
 }
-
+ 
 /* ─── HERO ──────────────────────────────────────────────────────────────── */
 function Hero() {
   return (
@@ -527,38 +527,38 @@ function Hero() {
         <div style={{ position:"absolute", width:"30vw", height:"30vw", borderRadius:"50%", background:"radial-gradient(circle, rgba(124,92,191,0.08) 0%, transparent 65%)", bottom:"5%", left:"15%", animation:"drift2 20s ease-in-out infinite" }} />
       </div>
       <ParticleCanvas />
-
+ 
       {/* Content */}
       <div style={{ position:"relative", zIndex:10, width:"100%", paddingTop:"6rem", paddingBottom:"4rem", paddingLeft:"clamp(1.5rem, 6vw, 5rem)", paddingRight:"clamp(1.5rem, 6vw, 5rem)", display:"flex", flexDirection:"column", alignItems:"center", textAlign:"center" }}>
-
+ 
         {/* Badge */}
         <div className="lg fade-up-1" style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", borderRadius:"9999px", padding:"0.25rem 1rem 0.25rem 0.35rem", marginBottom:"1.75rem", border:"1px solid rgba(26,24,20,0.10)" }}>
           <span style={{ background:"#1a1814", color:"#f5f3ef", borderRadius:"9999px", fontSize:"0.65rem", fontWeight:600, padding:"0.15rem 0.5rem", letterSpacing:"0.04em" }}>NEW</span>
           <span style={{ fontSize:"0.8rem", color:"rgba(26,24,20,0.88)" }}>The smarter way to sell your used car.</span>
         </div>
-
+ 
         {/* Headline */}
         <h1 className="serif-italic fade-up-2" style={{ fontSize:"clamp(3.5rem, 7.5vw, 8rem)", lineHeight:0.9, letterSpacing:"-0.04em", margin:"0 0 1.75rem", fontWeight:400, color:"#1a1814", textShadow:"0 2px 40px rgba(245,243,239,0.9)", maxWidth:"18ch" }}>
           The <span style={{ color:"var(--accent)" }}>highest offer</span><br />
           your car will ever get.<br />
           Done in 15 minutes.
         </h1>
-
+ 
         {/* Subtext */}
         <p className="fade-up-3" style={{ color:"#1a1814", fontSize:"clamp(0.95rem, 1.1vw, 1.1rem)", lineHeight:1.65, maxWidth:"52ch", margin:"0 0 2.25rem", fontWeight:400 }}>
           List your 6–8 year old vehicle and watch 5 local dealers compete for it in a live 15-minute auction. More competition. Bigger offers. No haggling.
         </p>
-
+ 
         {/* CTAs */}
         <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"2.75rem" }}>
-          <button className="lg-strong" style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
+          <button className="lg-strong" onClick={() => window.location.href='/app?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
             List Your Car ↗
           </button>
-          <button className="lg" style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
+          <button className="lg" onClick={() => window.location.href='/app?role=dealer'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
             I'm a Dealer →
           </button>
         </div>
-
+ 
         {/* Trust stats row */}
         <div className="fade-up-4" style={{ display:"flex", gap:"clamp(2rem, 5vw, 5rem)", justifyContent:"center", flexWrap:"wrap", marginBottom:"3rem" }}>
           {[["$2,400", "avg. more vs private sale"],["15 min","live auction window"],["5 dealers","compete per listing"]].map(([v,l]) => (
@@ -568,19 +568,19 @@ function Hero() {
             </div>
           ))}
         </div>
-
+ 
         {/* Auction card */}
         <div className="fade-up-4" style={{ width:"100%", maxWidth:"680px" }}>
           <AuctionDemo />
         </div>
-
+ 
       </div>
-
+ 
       <div className="hero-fade" />
     </section>
   );
 }
-
+ 
 /* ─── HOW IT WORKS ──────────────────────────────────────────────────────── */
 const steps = [
   { n:"01", title:"List in 3 minutes", body:"Enter your VIN and mileage. We pull the vehicle history, photos, and market comps automatically. No lengthy forms.", icon:"clipboard", color:"var(--accent)" },
@@ -588,7 +588,7 @@ const steps = [
   { n:"03", title:"15-minute live auction", body:"Watch real bids roll in on your phone. Dealers compete knowing only one can win — pushing offers higher than they'd go one-on-one.", icon:"timer", color:"var(--accent3)" },
   { n:"04", title:"Accept & hand off", body:"Accept the best offer. The winning dealer arranges pickup or drop-off. You get paid. Done.", icon:"checkCircle", color:"var(--accent)" },
 ];
-
+ 
 function HowItWorks() {
   return (
     <section id="how-it-works" style={{ background:"#f5f3ef", padding:"7rem 1.5rem" }}>
@@ -602,7 +602,7 @@ function HowItWorks() {
             The whole process takes under an hour. Here's how we turn your unused car into a competitive bidding war.
           </p>
         </div>
-
+ 
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(240px, 1fr))", gap:"1.25rem" }}>
           {steps.map((s, i) => (
             <div key={s.n} className="reveal" style={{ transitionDelay:`${i*0.12}s` }}>
@@ -620,7 +620,7 @@ function HowItWorks() {
             </div>
           ))}
         </div>
-
+ 
         {/* Have more questions CTA */}
         <div className="reveal" style={{ textAlign:"center", marginTop:"3rem" }}>
           <a href="#faq" style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", textDecoration:"none", borderRadius:"9999px", padding:"0.75rem 1.75rem", fontSize:"0.88rem", fontWeight:500, color:"#1a1814", border:"1px solid rgba(26,24,20,0.18)", background:"rgba(255,255,255,0.72)", backdropFilter:"blur(10px)", WebkitBackdropFilter:"blur(10px)", transition:"background 0.2s, box-shadow 0.2s", fontFamily:"Barlow, sans-serif" }}
@@ -632,12 +632,12 @@ function HowItWorks() {
             </svg>
           </a>
         </div>
-
+ 
       </div>
     </section>
   );
 }
-
+ 
 /* ─── FOR SELLERS ───────────────────────────────────────────────────────── */
 function ForSellers() {
   const stats = [
@@ -667,7 +667,7 @@ function ForSellers() {
               ))}
             </div>
           </div>
-
+ 
           {/* Right stats grid */}
           <div style={{ flex:"1 1 300px", display:"grid", gridTemplateColumns:"1fr 1fr", gap:"1rem" }} className="reveal" >
             {stats.map((s, i) => (
@@ -682,7 +682,7 @@ function ForSellers() {
     </section>
   );
 }
-
+ 
 /* ─── FOR DEALERS ───────────────────────────────────────────────────────── */
 function ForDealers() {
   const perks = [
@@ -720,7 +720,7 @@ function ForDealers() {
           ))}
         </div>
         <div className="reveal" style={{ textAlign:"center", marginTop:"2.5rem" }}>
-          <button className="lg-strong" style={{ borderRadius:"9999px", padding:"0.85rem 2rem", fontSize:"0.9rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500 }}>
+          <button className="lg-strong" onClick={() => window.location.href='/app?role=dealer'} style={{ borderRadius:"9999px", padding:"0.85rem 2rem", fontSize:"0.9rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500 }}>
             Apply for Dealer Access ↗
           </button>
         </div>
@@ -728,7 +728,7 @@ function ForDealers() {
     </section>
   );
 }
-
+ 
 /* ─── FAQ ───────────────────────────────────────────────────────────────── */
 const faqs = [
   { q:"What vehicles qualify?", a:"We focus on vehicles that are 6–8 years old with 70,000–130,000 miles. These are the highest-demand units for franchised dealers because they carry strong gross profit margins on pre-owned lots." },
@@ -738,7 +738,7 @@ const faqs = [
   { q:"Why only 5 dealers per auction?", a:"More isn't always better. Five geo-scoped dealers create competitive urgency without the chaotic noise of an open marketplace. Each dealer knows they're in a tight race — that's what pushes bids up." },
   { q:"How quickly do I get paid?", a:"After accepting an offer, the winning dealer typically completes payment within 1–2 business days. Most do same-day bank transfers or cashier's checks at pickup." },
 ];
-
+ 
 function FAQ() {
   const [open, setOpen] = useState(null);
   return (
@@ -770,7 +770,7 @@ function FAQ() {
     </section>
   );
 }
-
+ 
 /* ─── CTA ───────────────────────────────────────────────────────────────── */
 function CTA() {
   return (
@@ -785,10 +785,10 @@ function CTA() {
             List in 3 minutes. Watch dealers compete. Walk away with more than you expected.
           </p>
           <div style={{ display:"flex", gap:"0.75rem", justifyContent:"center", flexWrap:"wrap" }}>
-            <button className="lg-strong" style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"0.95rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500, display:"flex", alignItems:"center", gap:"0.4rem" }}>
+            <button className="lg-strong" onClick={() => window.location.href='/app?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"0.95rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500, display:"flex", alignItems:"center", gap:"0.4rem" }}>
               List My Car Free ↗
             </button>
-            <button className="lg" style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"0.95rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:300, background:"rgba(255,255,255,0.4)" }}>
+            <button className="lg" onClick={() => window.location.href='/app?role=dealer'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"0.95rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:300, background:"rgba(255,255,255,0.4)" }}>
               Dealer Access →
             </button>
           </div>
@@ -797,7 +797,7 @@ function CTA() {
     </section>
   );
 }
-
+ 
 /* ─── FOOTER ────────────────────────────────────────────────────────────── */
 function Footer() {
   return (
@@ -824,7 +824,7 @@ function Footer() {
     </footer>
   );
 }
-
+ 
 /* ─── APP ───────────────────────────────────────────────────────────────── */
 export default function App() {
   useReveal();
