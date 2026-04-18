@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PrivaBuy — Platform v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -804,12 +805,8 @@ body::before {
         <div class="card">
           <div class="card-header"><div class="card-title">Payment Details</div></div>
           <div class="card-body">
-            <div class="alert alert-info" style="margin-bottom:24px">🔒 Your payment is processed securely. PrivaBuy never stores your card details.</div>
-            <div class="form-group"><label class="form-label">Cardholder Name</label><input class="form-input" id="seller-card-name" placeholder="Sarah Mitchell"></div>
-            <div class="form-group"><label class="form-label">Card Number</label><input class="form-input" id="seller-card-num" placeholder="1234  5678  9012  3456" maxlength="19" oninput="formatCard(this)"></div>
-            <div class="form-row">
-              <div class="form-group"><label class="form-label">Expiry Date</label><input class="form-input" id="seller-card-exp" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)"></div>
-              <div class="form-group"><label class="form-label">CVV</label><input class="form-input" id="seller-card-cvv" placeholder="•••" maxlength="4" type="password"></div>
+           <div class="form-group"><label class="form-label">Card Details</label><div id="seller-card-element" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;padding:14px;"></div></div>
+              <div id="seller-card-element" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;padding:14px;"></div>
             </div>
             <div class="form-group"><label class="form-label">Billing ZIP Code</label><input class="form-input" id="seller-card-zip" placeholder="60601" maxlength="5" type="number"></div>
             <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 0"></div>
@@ -1084,7 +1081,8 @@ body::before {
 //  API URL — points to live Railway backend
 // ═══════════════════════════════════════════════════════
 const API = 'https://privabuy-backend-production.up.railway.app';
-
+const STRIPE_PK = 'pk_test_51TNGzaLXzhlPcGmdxozAMEP3ek5aec0jPoiV3hY5H20w2eOdnvNWuGEp4rE90Iafil14T9NQnv5azsNRQ7qouDcc00IDByl9kt';
+const stripeClient = Stripe(STRIPE_PK);
 // ═══════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════
@@ -1914,25 +1912,62 @@ function highlightSellerPayment() {
 }
 function formatCard(el){let v=el.value.replace(/\D/g,'').substring(0,16);el.value=v.replace(/(.{4})/g,'$1  ').trim();}
 function formatExpiry(el){let v=el.value.replace(/\D/g,'').substring(0,4);if(v.length>=2)v=v.substring(0,2)+' / '+v.substring(2);el.value=v;}
-function processSellerPayment() {
-  const name=document.getElementById('seller-card-name').value;
-  const num=document.getElementById('seller-card-num').value;
-  const exp=document.getElementById('seller-card-exp').value;
-  const cvv=document.getElementById('seller-card-cvv').value;
-  const zip=document.getElementById('seller-card-zip').value;
-  if(!name||!num||!exp||!cvv||!zip){showToast('⚠️','Missing Fields','Please fill in all payment details.');return;}
-  const btn=event.target;
-  btn.textContent='Processing...';btn.disabled=true;
-  setTimeout(()=>{
-    btn.textContent='✓ Payment Successful';btn.style.background='rgba(168,240,224,0.15)';btn.style.color='var(--accent3)';btn.style.borderColor='rgba(168,240,224,0.3)';
-    const prompt=document.getElementById('seller-fee-prompt');
-    if(prompt){prompt.style.borderColor='rgba(168,240,224,0.3)';prompt.style.background='rgba(168,240,224,0.06)';prompt.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">✅</span><div><div style="font-size:13px;font-weight:600;color:var(--accent3)">Payment Complete</div><div style="font-size:12px;color:var(--g5);margin-top:2px">Dealer pickup will be arranged within 1–2 business days.</div></div></div>`;}
+async function processSellerPayment() {
+  const name = document.getElementById('seller-card-name').value;
+  if(!name) { showToast('⚠️','Missing Name','Enter cardholder name.'); return; }
+  const btn = event.target;
+  btn.textContent = 'Processing...'; btn.disabled = true;
+  try {
+    // Create payment intent on backend
+    const res = await fetch(`${API}/payments/create-intent`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({amount: 25000, description: 'PrivaBuy Seller Platform Fee'})
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.detail || 'Failed to create payment');
+    // Confirm with Stripe
+    const result = await stripeClient.confirmCardPayment(data.client_secret, {
+      payment_method: {
+        card: sellerCardElement,
+        billing_details: { name }
+      }
+    });
+    if(result.error) throw new Error(result.error.message);
+    btn.textContent = '✓ Payment Successful';
+    btn.style.background = 'rgba(168,240,224,0.15)';
+    btn.style.color = 'var(--accent3)';
+    btn.style.borderColor = 'rgba(168,240,224,0.3)';
+    const prompt = document.getElementById('seller-fee-prompt');
+    if(prompt){ prompt.style.borderColor='rgba(168,240,224,0.3)'; prompt.style.background='rgba(168,240,224,0.06)'; prompt.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">✅</span><div><div style="font-size:13px;font-weight:600;color:var(--accent3)">Payment Complete</div><div style="font-size:12px;color:var(--g5);margin-top:2px">Dealer pickup will be arranged within 1–2 business days.</div></div></div>`; }
     showToast('✅','Payment Received','$250.00 received. Your auction is fully processed. Thank you!');
-  },1800);
+  } catch(err) {
+    btn.textContent = 'Pay $250.00 →'; btn.disabled = false;
+    showToast('❌','Payment Failed', err.message);
+    console.error(err);
+  }
 }
 
 // ═══ INIT ═══
-selectRole('seller',document.querySelector('.role-btn[data-role="seller"]'));
-</script>
-</body>
-</html>
+selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+
+const urlRole = new URLSearchParams(window.location.search).get('role');
+if(urlRole === 'dealer') {
+  selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
+} else if(urlRole === 'seller') {
+  selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+}
+
+// Initialize Stripe card elements
+let sellerCardElement, dealerCardElement;
+setTimeout(() => {
+  const elements = stripeClient.elements();
+  const cardStyle = {
+    style: {
+      base: { color: '#ffffff', fontFamily: 'Inter, sans-serif', fontSize: '14px', '::placeholder': { color: 'rgba(255,255,255,0.3)' } },
+      invalid: { color: '#f87171' }
+    }
+  };
+  sellerCardElement = elements.create('card', cardStyle);
+  sellerCardElement.mount('#seller-card-element');
+}, 500);
