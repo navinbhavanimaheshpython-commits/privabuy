@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PrivaBuy ΓÇö Platform v2</title>
+<title>PrivaBuy â€” Platform v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -333,40 +334,40 @@ body::before {
 </head>
 <body>
 
-<!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ LOGIN ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOGIN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="screen-login" class="screen active">
   <div class="login-card">
     <div class="login-logo">Priva<span>Buy</span> <span style="font-size:14px;color:var(--g4);font-family:var(--sans);font-weight:400">v2</span></div>
     <div class="login-tagline">The auction platform for serious vehicle inventory.</div>
     <div class="role-select">
-      <div class="role-btn selected" data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">≡ƒÜù</div><div class="role-name">Seller</div></div>
-      <div class="role-btn" data-role="dealer" onclick="selectRole('dealer',this)"><div class="role-icon">≡ƒÅó</div><div class="role-name">Dealer</div></div>
-      <div class="role-btn" data-role="admin" onclick="selectRole('admin',this)"><div class="role-icon">ΓÜÖ∩╕Å</div><div class="role-name">Admin</div></div>
+      <div class="role-btn selected" data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">ðŸš—</div><div class="role-name">Seller</div></div>
+      <div class="role-btn" data-role="dealer" onclick="selectRole('dealer',this)"><div class="role-icon">ðŸ¢</div><div class="role-name">Dealer</div></div>
+      <div class="role-btn" data-role="admin" onclick="selectRole('admin',this)"><div class="role-icon">âš™ï¸</div><div class="role-name">Admin</div></div>
     </div>
     <div id="login-seller-fields">
       <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="seller-phone-input" type="tel" placeholder="+1 (312) 555-0100"></div>
       <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="seller-email-input" type="email" placeholder="you@example.com"></div>
     </div>
     <div id="login-dealer-fields" class="hidden">
-      <div class="alert alert-info">≡ƒöÉ Dealer access requires verification. Use your registered dealer email.</div>
+      <div class="alert alert-info">ðŸ” Dealer access requires verification. Use your registered dealer email.</div>
       <div class="form-group"><label class="form-label">Dealer License Number</label><input class="form-input" placeholder="IL-12345678"></div>
       <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="dealer-email-input" type="email" placeholder="dealer@automotivegroup.com"></div>
     </div>
     <div id="login-admin-fields" class="hidden">
       <div class="form-group"><label class="form-label">Admin Email</label><input class="form-input" type="email" placeholder="admin@privabuy.com"></div>
-      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"></div>
     </div>
-    <button class="btn btn-primary btn-full btn-lg mt-16" onclick="login()" style="border-radius:12px">Continue ΓåÆ</button>
+    <button class="btn btn-primary btn-full btn-lg mt-16" onclick="login()" style="border-radius:12px">Continue â†’</button>
     <p class="text-muted mt-8" style="text-align:center;font-size:12px" id="login-status-msg">Enter your details above</p>
   </div>
 </div>
 
-<!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ SELLER ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SELLER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="screen-seller" class="screen">
   <div class="topbar">
     <div class="topbar-logo">Priva<span>Buy</span></div>
     <div class="topbar-right">
-      <span class="topbar-user" id="seller-topbar-user">≡ƒæñ Seller</span>
+      <span class="topbar-user" id="seller-topbar-user">ðŸ‘¤ Seller</span>
       <button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button>
     </div>
   </div>
@@ -375,7 +376,7 @@ body::before {
       <button class="tab-btn active" onclick="sellerTab('list',this)">List Vehicle</button>
       <button class="tab-btn" onclick="sellerTab('auction',this)">My Auction</button>
       <button class="tab-btn" onclick="sellerTab('history',this)">History</button>
-      <button class="tab-btn" onclick="sellerTab('payment',this)">≡ƒÆ│ Pay Fee</button>
+      <button class="tab-btn" onclick="sellerTab('payment',this)">ðŸ’³ Pay Fee</button>
     </div>
 
     <div id="seller-tab-list">
@@ -395,7 +396,7 @@ body::before {
               <label class="form-label">VIN Number</label>
               <div class="vin-row">
                 <input class="form-input" id="vin-input" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()">
-                <button class="btn btn-secondary" onclick="decodeVIN()">≡ƒöì Decode VIN</button>
+                <button class="btn btn-secondary" onclick="decodeVIN()">ðŸ” Decode VIN</button>
               </div>
               <div id="vin-result" class="hidden mt-8"></div>
             </div>
@@ -462,37 +463,37 @@ body::before {
                 <label class="form-label">Two or More Keys? *</label>
                 <div class="radio-group" id="keys-group">
                   <div class="radio-pill selected" onclick="selectRadio('keys-group',this,'Yes')">Yes</div>
-                  <div class="radio-pill" onclick="selectRadio('keys-group',this,'No')">No ΓÇö 1 Key</div>
+                  <div class="radio-pill" onclick="selectRadio('keys-group',this,'No')">No â€” 1 Key</div>
                 </div>
               </div>
             </div>
             <div id="eligibility-result"></div>
           </div>
         </div>
-        <div class="flex-between"><div></div><button class="btn btn-primary" onclick="checkEligibility()">Check Eligibility & Continue ΓåÆ</button></div>
+        <div class="flex-between"><div></div><button class="btn btn-primary" onclick="checkEligibility()">Check Eligibility & Continue â†’</button></div>
       </div>
 
       <div id="wizard-step-2" class="hidden">
         <div class="card mb-24">
-          <div class="card-header"><div class="card-title">Vehicle Photos</div><span class="text-muted text-sm">6 required ΓÇó 2 optional</span></div>
+          <div class="card-header"><div class="card-title">Vehicle Photos</div><span class="text-muted text-sm">6 required â€¢ 2 optional</span></div>
           <div class="card-body">
-            <div class="alert alert-info">≡ƒô╕ <strong>Better photos = higher bids.</strong> Required shots marked in red.</div>
+            <div class="alert alert-info">ðŸ“¸ <strong>Better photos = higher bids.</strong> Required shots marked in red.</div>
             <div class="photo-grid" id="photo-grid">
-              <div class="photo-slot" onclick="simulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">≡ƒô╖</div><div class="photo-slot-label">Front Exterior</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Rear Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">≡ƒô╖</div><div class="photo-slot-label">Rear Exterior</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Driver Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">≡ƒô╖</div><div class="photo-slot-label">Driver Side</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Passenger Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">≡ƒô╖</div><div class="photo-slot-label">Passenger Side</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Interior / Dashboard',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">≡ƒô╖</div><div class="photo-slot-label">Interior / Dash</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Odometer',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">≡ƒô╖</div><div class="photo-slot-label">Odometer Reading</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Engine Bay',false)"><div class="photo-slot-icon">≡ƒô╖</div><div class="photo-slot-label">Engine Bay</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Any Damage',false)"><div class="photo-slot-icon">≡ƒô╖</div><div class="photo-slot-label">Any Damage</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">ðŸ“·</div><div class="photo-slot-label">Front Exterior</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Rear Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">ðŸ“·</div><div class="photo-slot-label">Rear Exterior</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Driver Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">ðŸ“·</div><div class="photo-slot-label">Driver Side</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Passenger Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">ðŸ“·</div><div class="photo-slot-label">Passenger Side</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Interior / Dashboard',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">ðŸ“·</div><div class="photo-slot-label">Interior / Dash</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Odometer',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">ðŸ“·</div><div class="photo-slot-label">Odometer Reading</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Engine Bay',false)"><div class="photo-slot-icon">ðŸ“·</div><div class="photo-slot-label">Engine Bay</div></div>
+              <div class="photo-slot" onclick="simulatePhoto(this,'Any Damage',false)"><div class="photo-slot-icon">ðŸ“·</div><div class="photo-slot-label">Any Damage</div></div>
             </div>
             <div id="photos-uploaded-count" class="text-muted mt-16 text-sm">0 of 8 photos uploaded (6 required)</div>
           </div>
         </div>
         <div class="flex-between">
-          <button class="btn btn-secondary" onclick="wizardGo(1)">ΓåÉ Back</button>
-          <button class="btn btn-primary" id="photos-next-btn" onclick="wizardGo(3)">Continue ΓåÆ</button>
+          <button class="btn btn-secondary" onclick="wizardGo(1)">â† Back</button>
+          <button class="btn btn-primary" id="photos-next-btn" onclick="wizardGo(3)">Continue â†’</button>
         </div>
       </div>
 
@@ -501,9 +502,9 @@ body::before {
           <div class="card-header"><div class="card-title">Condition & Damage Disclosure</div></div>
           <div class="card-body">
             <div class="damage-tabs">
-              <button class="damage-tab active" onclick="switchDamageTab('exterior',this)">≡ƒÜù Exterior</button>
-              <button class="damage-tab" onclick="switchDamageTab('interior',this)">≡ƒÆ║ Interior</button>
-              <button class="damage-tab" onclick="switchDamageTab('mechanical',this)">ΓÜÖ∩╕Å Mechanical</button>
+              <button class="damage-tab active" onclick="switchDamageTab('exterior',this)">ðŸš— Exterior</button>
+              <button class="damage-tab" onclick="switchDamageTab('interior',this)">ðŸ’º Interior</button>
+              <button class="damage-tab" onclick="switchDamageTab('mechanical',this)">âš™ï¸ Mechanical</button>
             </div>
             <div id="damage-exterior">
               <p style="font-size:14px;color:var(--g5);margin-bottom:16px;text-align:center">Click areas to mark damage.</p>
@@ -564,10 +565,10 @@ body::before {
             </div>
             <div id="damage-interior" class="hidden">
               <div class="damage-section-grid">
-                <div class="damage-area-card" id="area-odor" onclick="toggleAreaDamage(this,'odor')"><div class="damage-area-name">≡ƒî¼∩╕Å Persistent Odor</div><div class="damage-area-desc">Smoke, pet, mildew, or other odors</div></div>
-                <div class="damage-area-card" id="area-stains" onclick="toggleAreaDamage(this,'stains')"><div class="damage-area-name">≡ƒÆº Stains</div><div class="damage-area-desc">Seat, carpet, or headliner staining</div></div>
-                <div class="damage-area-card" id="area-rips" onclick="toggleAreaDamage(this,'rips')"><div class="damage-area-name">Γ£é∩╕Å Rips / Tears</div><div class="damage-area-desc">Upholstery damage on seats or panels</div></div>
-                <div class="damage-area-card" id="area-dash" onclick="toggleAreaDamage(this,'dash')"><div class="damage-area-name">≡ƒôƒ Dashboard Damage</div><div class="damage-area-desc">Cracked, faded, or damaged dash panels</div></div>
+                <div class="damage-area-card" id="area-odor" onclick="toggleAreaDamage(this,'odor')"><div class="damage-area-name">ðŸŒ¬ï¸ Persistent Odor</div><div class="damage-area-desc">Smoke, pet, mildew, or other odors</div></div>
+                <div class="damage-area-card" id="area-stains" onclick="toggleAreaDamage(this,'stains')"><div class="damage-area-name">ðŸ’§ Stains</div><div class="damage-area-desc">Seat, carpet, or headliner staining</div></div>
+                <div class="damage-area-card" id="area-rips" onclick="toggleAreaDamage(this,'rips')"><div class="damage-area-name">âœ‚ï¸ Rips / Tears</div><div class="damage-area-desc">Upholstery damage on seats or panels</div></div>
+                <div class="damage-area-card" id="area-dash" onclick="toggleAreaDamage(this,'dash')"><div class="damage-area-name">ðŸ“Ÿ Dashboard Damage</div><div class="damage-area-desc">Cracked, faded, or damaged dash panels</div></div>
               </div>
               <div class="form-group mt-16">
                 <label class="form-label">Moonroof / Sunroof</label>
@@ -629,11 +630,11 @@ body::before {
             <div class="form-group">
               <label class="form-label">Overall Condition *</label>
               <div class="radio-group" id="overall-condition-group">
-                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Like New')">Γ£¿ Like New</div>
-                <div class="radio-pill selected" onclick="selectRadio('overall-condition-group',this,'Pretty Great')">Γ¡É Pretty Great</div>
-                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Just Okay')">≡ƒæì Just Okay</div>
-                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Kind of Rough')">ΓÜá∩╕Å Kind of Rough</div>
-                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Major Issues')">≡ƒö┤ Major Issues</div>
+                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Like New')">âœ¨ Like New</div>
+                <div class="radio-pill selected" onclick="selectRadio('overall-condition-group',this,'Pretty Great')">â­ Pretty Great</div>
+                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Just Okay')">ðŸ‘ Just Okay</div>
+                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Kind of Rough')">âš ï¸ Kind of Rough</div>
+                <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Major Issues')">ðŸ”´ Major Issues</div>
               </div>
             </div>
             <div class="form-group mt-16">
@@ -643,15 +644,15 @@ body::before {
             <div class="form-group">
               <label class="form-label" style="margin-bottom:12px">Is all information above true and accurate? *</label>
               <div class="radio-group" id="truthful-group">
-                <div class="radio-pill selected" onclick="selectRadio('truthful-group',this,'Yes')">Γ£ô Yes, everything is accurate</div>
+                <div class="radio-pill selected" onclick="selectRadio('truthful-group',this,'Yes')">âœ“ Yes, everything is accurate</div>
                 <div class="radio-pill" onclick="selectRadio('truthful-group',this,'No')">No</div>
               </div>
             </div>
           </div>
         </div>
         <div class="flex-between">
-          <button class="btn btn-secondary" onclick="wizardGo(2)">ΓåÉ Back</button>
-          <button class="btn btn-primary" onclick="wizardGo(4)">Calculate My Value ΓåÆ</button>
+          <button class="btn btn-secondary" onclick="wizardGo(2)">â† Back</button>
+          <button class="btn btn-primary" onclick="wizardGo(4)">Calculate My Value â†’</button>
         </div>
       </div>
 
@@ -661,8 +662,8 @@ body::before {
           <div class="card-body" id="value-estimate-content"></div>
         </div>
         <div class="flex-between">
-          <button class="btn btn-secondary" onclick="wizardGo(3)">ΓåÉ Back</button>
-          <button class="btn btn-primary" onclick="wizardGo(5)">Review Listing ΓåÆ</button>
+          <button class="btn btn-secondary" onclick="wizardGo(3)">â† Back</button>
+          <button class="btn btn-primary" onclick="wizardGo(5)">Review Listing â†’</button>
         </div>
       </div>
 
@@ -673,9 +674,9 @@ body::before {
         </div>
         <div class="card mb-24">
           <div class="card-body">
-            <div class="alert alert-info">≡ƒÜÇ Once you submit, your auction goes live immediately. 5 local dealers are notified. Your auction stays open with no time limit ΓÇö accept whenever you're ready.</div>
+            <div class="alert alert-info">ðŸš€ Once you submit, your auction goes live immediately. 5 local dealers are notified. Your auction stays open with no time limit â€” accept whenever you're ready.</div>
             <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:var(--r-lg);padding:20px;margin-bottom:20px">
-              <div style="font-size:14px;font-weight:600;margin-bottom:12px">Terms & Conditions ΓÇö Seller Agreement</div>
+              <div style="font-size:14px;font-weight:600;margin-bottom:12px">Terms & Conditions â€” Seller Agreement</div>
               <div style="height:160px;overflow-y:auto;font-size:12px;color:var(--g5);line-height:1.8;border:1px solid rgba(255,255,255,0.06);border-radius:var(--r-sm);padding:12px;margin-bottom:16px">
                 <strong style="color:var(--white);display:block;margin-bottom:8px">1. Accuracy of Vehicle Information</strong>
                 I confirm that all information submitted about my vehicle is true, complete, and accurate to the best of my knowledge. Misrepresentation may result in cancellation of any accepted offer without recourse.
@@ -698,8 +699,8 @@ body::before {
               </label>
             </div>
             <div class="flex-between">
-              <button class="btn btn-secondary" onclick="wizardGo(4)">ΓåÉ Back</button>
-              <button class="btn btn-primary btn-lg" id="start-auction-btn" onclick="startAuction()" disabled style="opacity:0.4;cursor:not-allowed">≡ƒÜÇ Start My Auction ΓÇö It's Free</button>
+              <button class="btn btn-secondary" onclick="wizardGo(4)">â† Back</button>
+              <button class="btn btn-primary btn-lg" id="start-auction-btn" onclick="startAuction()" disabled style="opacity:0.4;cursor:not-allowed">ðŸš€ Start My Auction â€” It's Free</button>
             </div>
           </div>
         </div>
@@ -708,20 +709,20 @@ body::before {
 
     <div id="seller-tab-auction" class="hidden">
       <div id="no-auction-msg" class="hidden" style="text-align:center;padding:80px 24px;">
-        <div style="font-size:64px;margin-bottom:16px">≡ƒÜù</div>
+        <div style="font-size:64px;margin-bottom:16px">ðŸš—</div>
         <div class="section-title">No Active Auction</div>
         <div class="section-sub">List your vehicle to start a live auction.</div>
-        <button class="btn btn-primary btn-lg" onclick="sellerTab('list',document.querySelector('.tab-btn'))">List Your Vehicle ΓåÆ</button>
+        <button class="btn btn-primary btn-lg" onclick="sellerTab('list',document.querySelector('.tab-btn'))">List Your Vehicle â†’</button>
       </div>
       <div id="live-auction-view" class="hidden">
         <div class="auction-timer-block">
           <div>
-            <div style="font-size:13px;font-weight:600;color:var(--accent3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px">ΓùÅ Auction Live</div>
+            <div style="font-size:13px;font-weight:600;color:var(--accent3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px">â— Auction Live</div>
             <div id="seller-elapsed" style="font-size:36px;font-weight:700;letter-spacing:1px;color:var(--white)">0:00</div>
-            <div class="timer-label">Time elapsed ┬╖ No time limit ΓÇö accept when you're ready</div>
+            <div class="timer-label">Time elapsed Â· No time limit â€” accept when you're ready</div>
           </div>
           <div style="text-align:right">
-            <div class="badge badge-live" style="margin-bottom:8px">ΓùÅ Open</div>
+            <div class="badge badge-live" style="margin-bottom:8px">â— Open</div>
             <div id="dealer-count-display" style="font-size:13px;color:var(--g5)">5 dealers notified</div>
           </div>
         </div>
@@ -740,30 +741,30 @@ body::before {
               <div class="card-body">
                 <div id="seller-auction-buttons">
                   <div class="text-muted text-sm mb-16">Your auction is open. Accept a bid whenever you're satisfied.</div>
-                  <div id="floor-warning" class="alert alert-warning hidden">ΓÜá∩╕Å Current top bid is below your floor price of <strong id="floor-display"></strong>. You are not required to accept.</div>
-                  <button class="btn btn-success btn-full mb-16" id="accept-bid-btn" onclick="acceptTopBid()" disabled>Γ£ô Accept Top Bid ΓÇö <span id="top-bid-display">$0</span></button>
-                  <button class="btn btn-secondary btn-full" onclick="openCounterModal()">Γå⌐ Counter Offer</button>
+                  <div id="floor-warning" class="alert alert-warning hidden">âš ï¸ Current top bid is below your floor price of <strong id="floor-display"></strong>. You are not required to accept.</div>
+                  <button class="btn btn-success btn-full mb-16" id="accept-bid-btn" onclick="acceptTopBid()" disabled>âœ“ Accept Top Bid â€” <span id="top-bid-display">$0</span></button>
+                  <button class="btn btn-secondary btn-full" onclick="openCounterModal()">â†© Counter Offer</button>
                 </div>
                 <div id="seller-auction-closed" class="hidden">
-                  <div class="alert alert-success">≡ƒÄë Offer accepted! You agreed to <strong id="accepted-amount"></strong></div>
+                  <div class="alert alert-success">ðŸŽ‰ Offer accepted! You agreed to <strong id="accepted-amount"></strong></div>
                   <div class="alert alert-info mt-8" id="dealer-contact-reveal"></div>
-                  <button class="btn btn-primary btn-full mt-16" onclick="openMessageModal()">≡ƒÆ¼ Message Dealer</button>
+                  <button class="btn btn-primary btn-full mt-16" onclick="openMessageModal()">ðŸ’¬ Message Dealer</button>
                   <div id="seller-awaiting-payment" style="margin-top:20px;background:rgba(255,214,160,0.06);border:1px solid rgba(255,214,160,0.2);border-radius:var(--r-lg);padding:20px">
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-                      <span style="font-size:22px">ΓÅ│</span>
+                      <span style="font-size:22px">â³</span>
                       <div>
                         <div style="font-size:14px;font-weight:600;color:var(--accent2)">Waiting for Dealer Payment</div>
                         <div style="font-size:12px;color:var(--g5);margin-top:2px;line-height:1.5">Once the dealer pays you, confirm it below. Your PrivaBuy fee is only due after you receive funds.</div>
                       </div>
                     </div>
-                    <button class="btn btn-full" onclick="sellerConfirmReceivedPayment()" style="background:rgba(255,214,160,0.12);color:var(--accent2);border:1px solid rgba(255,214,160,0.3);border-radius:50px;font-weight:600;font-size:14px;padding:12px">Γ£ô I Have Received Payment from the Dealer</button>
+                    <button class="btn btn-full" onclick="sellerConfirmReceivedPayment()" style="background:rgba(255,214,160,0.12);color:var(--accent2);border:1px solid rgba(255,214,160,0.3);border-radius:50px;font-weight:600;font-size:14px;padding:12px">âœ“ I Have Received Payment from the Dealer</button>
                     <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.25);margin-top:10px">Only confirm once funds are in your account</p>
                   </div>
                   <div id="seller-fee-prompt" class="hidden" style="margin-top:16px;background:rgba(201,184,255,0.07);border:1px solid rgba(201,184,255,0.25);border-radius:var(--r-lg);padding:20px">
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-                      <span style="font-size:22px">≡ƒÆ│</span>
+                      <span style="font-size:22px">ðŸ’³</span>
                       <div>
-                        <div style="font-size:14px;font-weight:600">PrivaBuy Platform Fee ΓÇö Required</div>
+                        <div style="font-size:14px;font-weight:600">PrivaBuy Platform Fee â€” Required</div>
                         <div style="font-size:12px;color:var(--g5);margin-top:2px">The $250 PrivaBuy fee is now due.</div>
                       </div>
                     </div>
@@ -771,7 +772,7 @@ body::before {
                       <span style="font-size:13px;color:var(--g5)">Platform fee</span>
                       <span style="font-size:18px;font-weight:700;color:var(--accent)">$250.00</span>
                     </div>
-                    <button class="btn btn-full" onclick="sellerTab('payment', null); highlightSellerPayment();" style="background:rgba(201,184,255,0.15);color:var(--accent);border:1px solid rgba(201,184,255,0.35);border-radius:50px;font-weight:600;font-size:14px;padding:12px">Pay $250 Platform Fee ΓåÆ</button>
+                    <button class="btn btn-full" onclick="sellerTab('payment', null); highlightSellerPayment();" style="background:rgba(201,184,255,0.15);color:var(--accent);border:1px solid rgba(201,184,255,0.35);border-radius:50px;font-weight:600;font-size:14px;padding:12px">Pay $250 Platform Fee â†’</button>
                   </div>
                 </div>
               </div>
@@ -804,12 +805,8 @@ body::before {
         <div class="card">
           <div class="card-header"><div class="card-title">Payment Details</div></div>
           <div class="card-body">
-            <div class="alert alert-info" style="margin-bottom:24px">≡ƒöÆ Your payment is processed securely. PrivaBuy never stores your card details.</div>
-            <div class="form-group"><label class="form-label">Cardholder Name</label><input class="form-input" id="seller-card-name" placeholder="Sarah Mitchell"></div>
-            <div class="form-group"><label class="form-label">Card Number</label><input class="form-input" id="seller-card-num" placeholder="1234  5678  9012  3456" maxlength="19" oninput="formatCard(this)"></div>
-            <div class="form-row">
-              <div class="form-group"><label class="form-label">Expiry Date</label><input class="form-input" id="seller-card-exp" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)"></div>
-              <div class="form-group"><label class="form-label">CVV</label><input class="form-input" id="seller-card-cvv" placeholder="ΓÇóΓÇóΓÇó" maxlength="4" type="password"></div>
+           <div class="form-group"><label class="form-label">Cardholder Name</label><input class="form-input" id="seller-card-name" placeholder="Sarah Mitchell"></div><div class="form-group"><label class="form-label">Card Details</label><div id="seller-card-element" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;padding:14px;"></div></div><div class="form-group"><label class="form-label">Billing ZIP Code</label><input class="form-input" id="seller-card-zip" placeholder="60601" maxlength="5" type="number"></div>
+              <div id="seller-card-element" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;padding:14px;"></div>
             </div>
             <div class="form-group"><label class="form-label">Billing ZIP Code</label><input class="form-input" id="seller-card-zip" placeholder="60601" maxlength="5" type="number"></div>
             <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 0"></div>
@@ -817,26 +814,26 @@ body::before {
               <span style="font-size:15px;font-weight:600">Total Due</span>
               <span style="font-size:22px;font-weight:700;color:var(--accent)">$250.00</span>
             </div>
-            <button class="btn btn-primary btn-full btn-lg" onclick="processSellerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $250.00 ΓåÆ</button>
+            <button class="btn btn-primary btn-full btn-lg" onclick="processSellerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $250.00 â†’</button>
             <p style="text-align:center;font-size:12px;color:var(--g5);margin-top:12px">By paying you agree to PrivaBuy's Terms of Service</p>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:16px">
-          <div class="card"><div class="card-header"><div class="card-title">Order Summary</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:12px"><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Service</span><span style="font-size:13px">Auction Platform Fee</span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Fee type</span><span style="font-size:13px">One-time ┬╖ Non-refundable</span></div></div></div></div>
-          <div class="card"><div class="card-body"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:20px">≡ƒöÆ</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">256-bit SSL Encryption</div><div style="font-size:12px;color:var(--g5);line-height:1.5">Your card information is encrypted and never stored.</div></div></div></div></div>
-          <div class="card"><div class="card-body"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:20px">Γ¥ô</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Questions?</div><div style="font-size:12px;color:var(--g5);line-height:1.5">Email <span style="color:var(--accent)">support@privabuy.com</span> or call (312) 555-0199</div></div></div></div></div>
+          <div class="card"><div class="card-header"><div class="card-title">Order Summary</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:12px"><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Service</span><span style="font-size:13px">Auction Platform Fee</span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Fee type</span><span style="font-size:13px">One-time Â· Non-refundable</span></div></div></div></div>
+          <div class="card"><div class="card-body"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:20px">ðŸ”’</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">256-bit SSL Encryption</div><div style="font-size:12px;color:var(--g5);line-height:1.5">Your card information is encrypted and never stored.</div></div></div></div></div>
+          <div class="card"><div class="card-body"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:20px">â“</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Questions?</div><div style="font-size:12px;color:var(--g5);line-height:1.5">Email <span style="color:var(--accent)">support@privabuy.com</span> or call (312) 555-0199</div></div></div></div></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ DEALER ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DEALER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="screen-dealer" class="screen">
   <div class="topbar">
     <div class="topbar-logo">Priva<span>Buy</span> <span style="font-size:12px;color:var(--g5);font-family:var(--sans);font-weight:400">Dealer Portal</span></div>
     <div class="topbar-right">
-      <span class="topbar-user">≡ƒÅó Northside Auto Group</span>
+      <span class="topbar-user">ðŸ¢ Northside Auto Group</span>
       <button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button>
     </div>
   </div>
@@ -846,24 +843,24 @@ body::before {
       <button class="tab-btn" onclick="dealerTab('watchlist',this)">Watchlist</button>
       <button class="tab-btn" onclick="dealerTab('won',this)">Won Vehicles</button>
       <button class="tab-btn hidden" id="dealer-pay-fee-tab" onclick="dealerTab('payment',this)" style="position:relative">
-        ≡ƒÆ│ Pay Fee <span id="dealer-fee-badge" style="display:none;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:50px;margin-left:4px;vertical-align:middle">0</span>
+        ðŸ’³ Pay Fee <span id="dealer-fee-badge" style="display:none;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:50px;margin-left:4px;vertical-align:middle">0</span>
       </button>
       <button class="tab-btn" onclick="dealerTab('analytics',this)">Analytics</button>
     </div>
     <div id="dealer-tab-feed">
       <div class="flex-between mb-24">
-        <div><div class="section-title">Active Auctions</div><div class="section-sub">≡ƒôì Within 25mi of Chicago, IL ΓÇö Your territory</div></div>
+        <div><div class="section-title">Active Auctions</div><div class="section-sub">ðŸ“ Within 25mi of Chicago, IL â€” Your territory</div></div>
       </div>
       <div id="real-seller-auction-card" class="hidden mb-24">
-        <div class="alert alert-warning">ΓÜí <strong>New listing just posted in your territory!</strong> Real seller auction ΓÇö place your bid now.</div>
+        <div class="alert alert-warning">âš¡ <strong>New listing just posted in your territory!</strong> Real seller auction â€” place your bid now.</div>
         <div class="vehicle-card" onclick="openRealAuction()">
           <div class="vehicle-card-img" style="background:linear-gradient(135deg,rgba(201,184,255,0.12),var(--g1))">
-            ≡ƒÜù
-            <div class="badge badge-live" style="position:absolute;top:12px;left:12px">ΓùÅ Live ΓÇö Real Seller</div>
+            ðŸš—
+            <div class="badge badge-live" style="position:absolute;top:12px;left:12px">â— Live â€” Real Seller</div>
             <div style="position:absolute;top:12px;right:12px;background:rgba(201,184,255,0.2);border:1px solid var(--accent);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--accent);font-weight:600">NEW</div>
           </div>
           <div class="vehicle-card-body">
-            <div class="vehicle-card-title" id="rc-title">ΓÇö</div>
+            <div class="vehicle-card-title" id="rc-title">â€”</div>
             <div class="vehicle-card-meta" id="rc-meta"></div>
             <div class="vehicle-card-bid">
               <div><div class="current-bid-label">Top Bid</div><div class="current-bid-amount" id="rc-top-bid">$0</div></div>
@@ -878,39 +875,39 @@ body::before {
       <div class="section-title mb-16">My Watchlist</div>
       <div class="alert alert-info">Set up alerts for vehicles matching your criteria.</div>
       <div class="card mb-16">
-        <div class="card-header"><div class="card-title">Alert Criteria</div><button class="btn btn-primary btn-sm" onclick="showToast('Γ£à','Alert saved!','You will be notified when matching vehicles list.')">+ Add Alert</button></div>
+        <div class="card-header"><div class="card-title">Alert Criteria</div><button class="btn btn-primary btn-sm" onclick="showToast('âœ…','Alert saved!','You will be notified when matching vehicles list.')">+ Add Alert</button></div>
         <div class="card-body">
           <div class="form-row-3">
             <div class="form-group"><label class="form-label">Make</label><select class="form-select"><option>Honda</option><option>Toyota</option><option>Ford</option></select></div>
-            <div class="form-group"><label class="form-label">Year Range</label><input class="form-input" value="2016 ΓÇô 2019"></div>
+            <div class="form-group"><label class="form-label">Year Range</label><input class="form-input" value="2016 â€“ 2019"></div>
             <div class="form-group"><label class="form-label">Max Mileage</label><input class="form-input" placeholder="120,000 mi"></div>
           </div>
         </div>
       </div>
-      <div class="card"><table class="data-table"><thead><tr><th>Alert</th><th>Created</th><th>Matches (30d)</th><th>Status</th></tr></thead><tbody><tr><td><strong>Honda CRV/Pilot, 2016ΓÇô2019</strong><br><span class="text-muted">Under 120k mi</span></td><td>Jan 15</td><td>8 vehicles</td><td><span class="badge badge-live">Active</span></td></tr></tbody></table></div>
+      <div class="card"><table class="data-table"><thead><tr><th>Alert</th><th>Created</th><th>Matches (30d)</th><th>Status</th></tr></thead><tbody><tr><td><strong>Honda CRV/Pilot, 2016â€“2019</strong><br><span class="text-muted">Under 120k mi</span></td><td>Jan 15</td><td>8 vehicles</td><td><span class="badge badge-live">Active</span></td></tr></tbody></table></div>
     </div>
     <div id="dealer-tab-won" class="hidden">
       <div class="section-title mb-16">Won Vehicles</div>
-      <div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Won</th><th>Paid</th><th>Seller</th><th>Status</th></tr></thead><tbody><tr><td><strong>2016 Toyota Camry SE</strong><br><span class="text-muted">88,400 mi ΓÇó Clean</span></td><td>Mar 14</td><td class="text-purple" style="font-family:var(--serif)">$11,200</td><td>Sarah M. ΓÇö 312-555-0100</td><td><span class="badge badge-won">Pickup Scheduled</span></td></tr></tbody></table></div>
+      <div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Won</th><th>Paid</th><th>Seller</th><th>Status</th></tr></thead><tbody><tr><td><strong>2016 Toyota Camry SE</strong><br><span class="text-muted">88,400 mi â€¢ Clean</span></td><td>Mar 14</td><td class="text-purple" style="font-family:var(--serif)">$11,200</td><td>Sarah M. â€” 312-555-0100</td><td><span class="badge badge-won">Pickup Scheduled</span></td></tr></tbody></table></div>
     </div>
 
     <div id="dealer-tab-payment" class="hidden">
       <div class="flex-between mb-24">
         <div><div class="section-title">Outstanding Platform Fees</div><div class="section-sub" style="margin-bottom:0">$500 per vehicle won</div></div>
-        <div class="badge badge-live" style="font-size:13px;padding:8px 16px">≡ƒöÆ Secure Checkout</div>
+        <div class="badge badge-live" style="font-size:13px;padding:8px 16px">ðŸ”’ Secure Checkout</div>
       </div>
       <div id="dealer-pending-fees-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px"></div>
       <div id="dealer-payment-form-wrap" class="hidden">
         <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start">
           <div class="card">
-            <div class="card-header"><div class="card-title">Pay for: <span id="dealer-paying-for" style="color:var(--accent)">ΓÇö</span></div></div>
+            <div class="card-header"><div class="card-title">Pay for: <span id="dealer-paying-for" style="color:var(--accent)">â€”</span></div></div>
             <div class="card-body">
-              <div class="alert alert-info" style="margin-bottom:20px">≡ƒöÆ Secure payment. PrivaBuy never stores your card details.</div>
+              <div class="alert alert-info" style="margin-bottom:20px">ðŸ”’ Secure payment. PrivaBuy never stores your card details.</div>
               <div class="form-group"><label class="form-label">Cardholder Name</label><input class="form-input" id="dealer-card-name" placeholder="James Kowalski"></div>
               <div class="form-group"><label class="form-label">Card Number</label><input class="form-input" id="dealer-card-num" placeholder="1234  5678  9012  3456" maxlength="19" oninput="formatCard(this)"></div>
               <div class="form-row">
                 <div class="form-group"><label class="form-label">Expiry Date</label><input class="form-input" id="dealer-card-exp" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)"></div>
-                <div class="form-group"><label class="form-label">CVV</label><input class="form-input" id="dealer-card-cvv" placeholder="ΓÇóΓÇóΓÇó" maxlength="4" type="password"></div>
+                <div class="form-group"><label class="form-label">CVV</label><input class="form-input" id="dealer-card-cvv" placeholder="â€¢â€¢â€¢" maxlength="4" type="password"></div>
               </div>
               <div class="form-group"><label class="form-label">Billing ZIP Code</label><input class="form-input" id="dealer-card-zip" placeholder="60601" maxlength="5" type="number"></div>
               <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 0"></div>
@@ -918,12 +915,12 @@ body::before {
                 <span style="font-size:15px;font-weight:600">Total Due</span>
                 <span style="font-size:22px;font-weight:700;color:var(--accent)">$500.00</span>
               </div>
-              <button class="btn btn-primary btn-full btn-lg" id="dealer-pay-btn" onclick="processDealerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $500.00 ΓåÆ</button>
+              <button class="btn btn-primary btn-full btn-lg" id="dealer-pay-btn" onclick="processDealerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $500.00 â†’</button>
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:16px">
-            <div class="card"><div class="card-header"><div class="card-title">Fee Summary</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:10px"><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Vehicle</span><span style="font-size:13px" id="fee-summary-vehicle">ΓÇö</span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Win price</span><span style="font-size:13px" id="fee-summary-price">ΓÇö</span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Fee type</span><span style="font-size:13px">One-time ┬╖ Per vehicle</span></div></div></div></div>
-            <div class="card"><div class="card-body"><div style="display:flex;gap:10px"><span style="font-size:20px">Γ¥ô</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Questions?</div><div style="font-size:12px;color:var(--g5)">Email <span style="color:var(--accent)">support@privabuy.com</span></div></div></div></div></div>
+            <div class="card"><div class="card-header"><div class="card-title">Fee Summary</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:10px"><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Vehicle</span><span style="font-size:13px" id="fee-summary-vehicle">â€”</span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Win price</span><span style="font-size:13px" id="fee-summary-price">â€”</span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Fee type</span><span style="font-size:13px">One-time Â· Per vehicle</span></div></div></div></div>
+            <div class="card"><div class="card-body"><div style="display:flex;gap:10px"><span style="font-size:20px">â“</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Questions?</div><div style="font-size:12px;color:var(--g5)">Email <span style="color:var(--accent)">support@privabuy.com</span></div></div></div></div></div>
           </div>
         </div>
       </div>
@@ -931,7 +928,7 @@ body::before {
 
     <div id="dealer-tab-analytics" class="hidden">
       <div class="flex-between mb-24">
-        <div><div class="section-title">Performance Analytics</div><div class="section-sub" style="margin-bottom:0;font-size:13px">Northside Auto Group ┬╖ Chicago North Territory ┬╖ Last 30 days</div></div>
+        <div><div class="section-title">Performance Analytics</div><div class="section-sub" style="margin-bottom:0;font-size:13px">Northside Auto Group Â· Chicago North Territory Â· Last 30 days</div></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
         <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Win Rate</div><div class="stat-value" style="color:var(--accent3)">34.8%</div><div class="stat-label">23 auctions entered</div></div>
@@ -943,68 +940,68 @@ body::before {
   </div>
 </div>
 
-<!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ ADMIN ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ADMIN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="screen-admin" class="screen">
   <div class="topbar">
     <div class="topbar-logo">Priva<span>Buy</span> <span style="font-size:12px;color:var(--g5);font-family:var(--sans);font-weight:400">Admin</span></div>
-    <div class="topbar-right"><span class="topbar-user">ΓÜÖ∩╕Å Platform Admin</span><button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button></div>
+    <div class="topbar-right"><span class="topbar-user">âš™ï¸ Platform Admin</span><button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button></div>
   </div>
   <div style="display:flex;flex:1;min-height:0;overflow:hidden;">
     <div class="admin-sidebar">
-      <div class="admin-nav-item active" onclick="adminSection('overview',this)">≡ƒôè Overview</div>
-      <div class="admin-nav-item" onclick="adminSection('auctions',this)">ΓÜí Live Auctions</div>
-      <div class="admin-nav-item" onclick="adminSection('dealers',this)">≡ƒÅó Dealers</div>
-      <div class="admin-nav-item" onclick="adminSection('listings',this)">≡ƒÜù Listings</div>
-      <div class="admin-nav-item" onclick="adminSection('flags',this)">≡ƒÜ⌐ Flagged</div>
-      <div class="admin-nav-item" onclick="adminSection('revenue',this)">≡ƒÆ░ Revenue</div>
+      <div class="admin-nav-item active" onclick="adminSection('overview',this)">ðŸ“Š Overview</div>
+      <div class="admin-nav-item" onclick="adminSection('auctions',this)">âš¡ Live Auctions</div>
+      <div class="admin-nav-item" onclick="adminSection('dealers',this)">ðŸ¢ Dealers</div>
+      <div class="admin-nav-item" onclick="adminSection('listings',this)">ðŸš— Listings</div>
+      <div class="admin-nav-item" onclick="adminSection('flags',this)">ðŸš© Flagged</div>
+      <div class="admin-nav-item" onclick="adminSection('revenue',this)">ðŸ’° Revenue</div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:24px;">
       <div id="admin-overview">
         <div class="section-title mb-24">Platform Overview</div>
         <div class="stats-row">
-          <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Live Auctions</div><div class="stat-change text-green">ΓùÅ Active now</div></div>
+          <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Live Auctions</div><div class="stat-change text-green">â— Active now</div></div>
           <div class="stat-card"><div class="stat-value">47</div><div class="stat-label">Dealers (Active)</div><div class="stat-change">+3 this week</div></div>
-          <div class="stat-card"><div class="stat-value">182</div><div class="stat-label">Auctions (30d)</div><div class="stat-change">Γåæ 22% vs prior</div></div>
-          <div class="stat-card"><div class="stat-value" style="color:var(--accent)">$28k</div><div class="stat-label">Revenue (30d)</div><div class="stat-change">Γåæ 31% vs prior</div></div>
+          <div class="stat-card"><div class="stat-value">182</div><div class="stat-label">Auctions (30d)</div><div class="stat-change">â†‘ 22% vs prior</div></div>
+          <div class="stat-card"><div class="stat-value" style="color:var(--accent)">$28k</div><div class="stat-label">Revenue (30d)</div><div class="stat-change">â†‘ 31% vs prior</div></div>
         </div>
         <div class="grid-2">
-          <div class="card"><div class="card-header"><div class="card-title">Recent Activity</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:12px;"><div class="flex-between"><span class="text-sm">≡ƒƒó 2018 Honda CR-V listed ΓÇö Chicago, IL</span><span class="text-muted text-sm">2 min ago</span></div><div class="flex-between"><span class="text-sm">≡ƒÆ░ Bid $14,200 placed on 2017 F-150</span><span class="text-muted text-sm">5 min ago</span></div><div class="flex-between"><span class="text-sm">Γ£à 2016 Camry auction settled ΓÇö $11,200</span><span class="text-muted text-sm">18 min ago</span></div><div class="flex-between"><span class="text-sm">≡ƒÅó New dealer application: DuPage Motors</span><span class="text-muted text-sm">1 hr ago</span></div></div></div></div>
+          <div class="card"><div class="card-header"><div class="card-title">Recent Activity</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:12px;"><div class="flex-between"><span class="text-sm">ðŸŸ¢ 2018 Honda CR-V listed â€” Chicago, IL</span><span class="text-muted text-sm">2 min ago</span></div><div class="flex-between"><span class="text-sm">ðŸ’° Bid $14,200 placed on 2017 F-150</span><span class="text-muted text-sm">5 min ago</span></div><div class="flex-between"><span class="text-sm">âœ… 2016 Camry auction settled â€” $11,200</span><span class="text-muted text-sm">18 min ago</span></div><div class="flex-between"><span class="text-sm">ðŸ¢ New dealer application: DuPage Motors</span><span class="text-muted text-sm">1 hr ago</span></div></div></div></div>
           <div class="card"><div class="card-header"><div class="card-title">Platform Health</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:16px;margin-top:4px"><div><div class="flex-between mb-4"><span class="text-sm">Auction fill rate (5 dealers)</span><span class="text-sm text-green">94%</span></div><div class="progress-bar"><div class="progress-fill" style="width:94%"></div></div></div><div><div class="flex-between mb-4"><span class="text-sm">Seller acceptance rate</span><span class="text-sm text-green">71%</span></div><div class="progress-bar"><div class="progress-fill" style="width:71%"></div></div></div><div><div class="flex-between mb-4"><span class="text-sm">Avg bids per auction</span><span class="text-sm">4.2</span></div><div class="progress-bar"><div class="progress-fill" style="width:84%"></div></div></div></div></div></div>
         </div>
       </div>
-      <div id="admin-auctions" class="hidden"><div class="section-title mb-24">Live Auctions</div><div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Seller</th><th>Dealers</th><th>Top Bid</th><th>Action</th></tr></thead><tbody><tr><td><strong>2017 Honda CR-V EX</strong><br><span class="text-muted">94,200 mi</span></td><td>Sarah M.</td><td>5/5</td><td class="text-purple" style="font-family:var(--serif)">$12,400</td><td><button class="btn btn-secondary btn-sm" onclick="showToast('ΓÜá∩╕Å','Extended','Added 2 minutes.')">Extend</button> <button class="btn btn-danger btn-sm" onclick="showToast('≡ƒ¢æ','Cancelled','Notifying all parties.')">Cancel</button></td></tr></tbody></table></div></div>
-      <div id="admin-dealers" class="hidden"><div class="section-title mb-24">Dealer Roster</div><div class="card"><table class="data-table"><thead><tr><th>Dealer</th><th>Territory</th><th>Status</th><th>Action</th></tr></thead><tbody><tr><td><strong>Northside Auto Group</strong></td><td>Chicago N. (25mi)</td><td><span class="badge badge-live">Verified</span></td><td><button class="btn btn-secondary btn-sm">Edit</button></td></tr><tr><td><strong>DuPage Motors</strong></td><td>Pending</td><td><span class="badge badge-pending">Pending</span></td><td><button class="btn btn-success btn-sm" onclick="showToast('Γ£à','Approved','DuPage Motors is now active.')">Approve</button></td></tr></tbody></table></div></div>
+      <div id="admin-auctions" class="hidden"><div class="section-title mb-24">Live Auctions</div><div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Seller</th><th>Dealers</th><th>Top Bid</th><th>Action</th></tr></thead><tbody><tr><td><strong>2017 Honda CR-V EX</strong><br><span class="text-muted">94,200 mi</span></td><td>Sarah M.</td><td>5/5</td><td class="text-purple" style="font-family:var(--serif)">$12,400</td><td><button class="btn btn-secondary btn-sm" onclick="showToast('âš ï¸','Extended','Added 2 minutes.')">Extend</button> <button class="btn btn-danger btn-sm" onclick="showToast('ðŸ›‘','Cancelled','Notifying all parties.')">Cancel</button></td></tr></tbody></table></div></div>
+      <div id="admin-dealers" class="hidden"><div class="section-title mb-24">Dealer Roster</div><div class="card"><table class="data-table"><thead><tr><th>Dealer</th><th>Territory</th><th>Status</th><th>Action</th></tr></thead><tbody><tr><td><strong>Northside Auto Group</strong></td><td>Chicago N. (25mi)</td><td><span class="badge badge-live">Verified</span></td><td><button class="btn btn-secondary btn-sm">Edit</button></td></tr><tr><td><strong>DuPage Motors</strong></td><td>Pending</td><td><span class="badge badge-pending">Pending</span></td><td><button class="btn btn-success btn-sm" onclick="showToast('âœ…','Approved','DuPage Motors is now active.')">Approve</button></td></tr></tbody></table></div></div>
       <div id="admin-listings" class="hidden"><div class="section-title mb-24">All Listings</div><div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Seller</th><th>Bids</th><th>Outcome</th><th>Status</th></tr></thead><tbody><tr><td><strong>2017 Honda CR-V EX</strong></td><td>Sarah M.</td><td>7</td><td class="text-purple" style="font-family:var(--serif)">$12,400</td><td><span class="badge badge-live">Live</span></td></tr></tbody></table></div></div>
-      <div id="admin-flags" class="hidden"><div class="section-title mb-24">Flagged Listings</div><div class="alert alert-warning">1 item requires review.</div><div class="card"><div class="card-body"><div class="flex-between"><div><div style="font-weight:600;margin-bottom:4px">2016 Chrysler 200 ΓÇö VIN Mismatch</div><div class="text-muted text-sm">Listed by: Robert Q.</div></div><div class="flex-gap"><button class="btn btn-success btn-sm" onclick="showToast('Γ£à','Approved','Sent to live queue.')">Approve</button><button class="btn btn-danger btn-sm" onclick="showToast('≡ƒÜ⌐','Rejected','Seller notified.')">Reject</button></div></div></div></div></div>
+      <div id="admin-flags" class="hidden"><div class="section-title mb-24">Flagged Listings</div><div class="alert alert-warning">1 item requires review.</div><div class="card"><div class="card-body"><div class="flex-between"><div><div style="font-weight:600;margin-bottom:4px">2016 Chrysler 200 â€” VIN Mismatch</div><div class="text-muted text-sm">Listed by: Robert Q.</div></div><div class="flex-gap"><button class="btn btn-success btn-sm" onclick="showToast('âœ…','Approved','Sent to live queue.')">Approve</button><button class="btn btn-danger btn-sm" onclick="showToast('ðŸš©','Rejected','Seller notified.')">Reject</button></div></div></div></div></div>
       <div id="admin-revenue" class="hidden"><div class="section-title mb-24">Revenue Dashboard</div><div class="stats-row"><div class="stat-card"><div class="stat-value" style="color:var(--accent)">$28,400</div><div class="stat-label">Revenue (30d)</div></div><div class="stat-card"><div class="stat-value">$156</div><div class="stat-label">Avg Rev / Auction</div></div><div class="stat-card"><div class="stat-value">$14,200</div><div class="stat-label">Subscriptions MRR</div></div><div class="stat-card"><div class="stat-value text-green">$14,200</div><div class="stat-label">Per-bid Fees</div></div></div></div>
     </div>
   </div>
 </div>
 
-<!-- ΓòÉΓòÉ DEALER AUCTION MODAL (Real Seller) ΓòÉΓòÉ -->
+<!-- â•â• DEALER AUCTION MODAL (Real Seller) â•â• -->
 <div class="modal-overlay" id="real-auction-modal">
   <div class="modal" style="max-width:900px;width:95vw;">
     <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px;">
-      <div><div class="modal-title" id="ram-title">Live Auction</div><div style="font-size:12px;color:var(--g5);margin-top:3px">Real Seller Listing ΓÇö Chicago, IL</div></div>
-      <div style="display:flex;align-items:center;gap:12px;"><div class="badge badge-live">ΓùÅ Live ΓÇö Real Seller</div><button class="modal-close" onclick="closeModal('real-auction-modal')">Γ£ò</button></div>
+      <div><div class="modal-title" id="ram-title">Live Auction</div><div style="font-size:12px;color:var(--g5);margin-top:3px">Real Seller Listing â€” Chicago, IL</div></div>
+      <div style="display:flex;align-items:center;gap:12px;"><div class="badge badge-live">â— Live â€” Real Seller</div><button class="modal-close" onclick="closeModal('real-auction-modal')">âœ•</button></div>
     </div>
     <div class="modal-body" style="padding-top:20px;">
       <div class="auction-timer-block" style="margin-bottom:20px;padding:16px 20px;">
-        <div><div style="font-size:11px;color:var(--accent3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">ΓùÅ Live ΓÇö Open Auction</div><div class="timer-digits" id="ram-timer" style="font-size:40px;">0:00</div><div class="timer-label">Elapsed ┬╖ No time limit</div></div>
+        <div><div style="font-size:11px;color:var(--accent3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">â— Live â€” Open Auction</div><div class="timer-digits" id="ram-timer" style="font-size:40px;">0:00</div><div class="timer-label">Elapsed Â· No time limit</div></div>
         <div style="text-align:right;font-size:13px;color:var(--g5)" id="ram-bid-summary">0 bids so far</div>
       </div>
       <div class="auction-modal-layout">
         <div class="auction-modal-left">
-          <div class="modal-section"><div class="modal-section-title">≡ƒô╖ Photos</div><div class="photo-gallery"><div class="photo-main" id="ram-photo-main" onclick="cyclePhoto('ram')"><span id="ram-photo-emoji">≡ƒÜù</span><div class="photo-main-label" id="ram-photo-label">Front Exterior</div><div class="photo-main-count" id="ram-photo-count">1 / 6</div></div><div class="photo-thumbs" id="ram-thumbs"></div></div></div>
-          <div class="modal-section"><div class="modal-section-title">≡ƒôï Title & Registration</div><div class="docs-row" id="ram-docs"></div></div>
-          <div class="modal-section"><div class="modal-section-title">≡ƒöº Vehicle Specs</div><div class="spec-grid" id="ram-specs"></div></div>
-          <div class="modal-section"><div class="modal-section-title">≡ƒöì Carfax Summary</div><div class="carfax-row" id="ram-carfax"></div></div>
-          <div class="modal-section"><div class="modal-section-title">Γ¡É Seller Condition Disclosure</div><div id="ram-condition"></div></div>
+          <div class="modal-section"><div class="modal-section-title">ðŸ“· Photos</div><div class="photo-gallery"><div class="photo-main" id="ram-photo-main" onclick="cyclePhoto('ram')"><span id="ram-photo-emoji">ðŸš—</span><div class="photo-main-label" id="ram-photo-label">Front Exterior</div><div class="photo-main-count" id="ram-photo-count">1 / 6</div></div><div class="photo-thumbs" id="ram-thumbs"></div></div></div>
+          <div class="modal-section"><div class="modal-section-title">ðŸ“‹ Title & Registration</div><div class="docs-row" id="ram-docs"></div></div>
+          <div class="modal-section"><div class="modal-section-title">ðŸ”§ Vehicle Specs</div><div class="spec-grid" id="ram-specs"></div></div>
+          <div class="modal-section"><div class="modal-section-title">ðŸ” Carfax Summary</div><div class="carfax-row" id="ram-carfax"></div></div>
+          <div class="modal-section"><div class="modal-section-title">â­ Seller Condition Disclosure</div><div id="ram-condition"></div></div>
           <div id="ram-details" style="font-size:13px;color:var(--g5);line-height:1.7;margin-top:8px;"></div>
         </div>
         <div class="auction-modal-right">
-          <div id="ram-dealer-status"><div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;">≡ƒöÆ All dealer identities are anonymous ΓÇö place a bid to enter</div></div>
-          <div class="card" style="flex:1;"><div class="card-body" style="padding:16px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--g4);margin-bottom:6px;">Current Bids</div><div style="font-size:11px;color:var(--g4);margin-bottom:10px;">Your bids show as <strong style="color:var(--white)">Γ¡É You</strong></div><div class="bid-feed" id="ram-bid-feed"><div class="text-muted text-sm" style="text-align:center;padding:16px;">No bids yet ΓÇö be first!</div></div></div></div>
+          <div id="ram-dealer-status"><div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;">ðŸ”’ All dealer identities are anonymous â€” place a bid to enter</div></div>
+          <div class="card" style="flex:1;"><div class="card-body" style="padding:16px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--g4);margin-bottom:6px;">Current Bids</div><div style="font-size:11px;color:var(--g4);margin-bottom:10px;">Your bids show as <strong style="color:var(--white)">â­ You</strong></div><div class="bid-feed" id="ram-bid-feed"><div class="text-muted text-sm" style="text-align:center;padding:16px;">No bids yet â€” be first!</div></div></div></div>
           <div class="bid-panel" style="position:static;">
             <div style="font-size:13px;color:var(--g5);margin-bottom:8px;">Place Your Bid</div>
             <div class="bid-input-row"><div class="bid-input-wrapper"><span class="bid-currency">$</span><input class="bid-amount-input" id="real-bid-input" type="number" placeholder="0" min="0" step="100"></div><button class="btn btn-primary" onclick="placeRealBid()">Bid Now</button></div>
@@ -1016,30 +1013,30 @@ body::before {
   </div>
 </div>
 
-<!-- ΓòÉΓòÉ DEALER DEMO AUCTION MODAL ΓòÉΓòÉ -->
+<!-- â•â• DEALER DEMO AUCTION MODAL â•â• -->
 <div class="modal-overlay" id="dealer-auction-modal">
   <div class="modal" style="max-width:900px;width:95vw;">
     <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px;">
-      <div><div class="modal-title" id="dam-title">ΓÇö</div><div style="font-size:12px;color:var(--g5);margin-top:3px" id="dam-subtitle">Chicago, IL</div></div>
-      <div style="display:flex;align-items:center;gap:12px;"><div class="badge badge-live">ΓùÅ Live</div><button class="modal-close" onclick="closeModal('dealer-auction-modal')">Γ£ò</button></div>
+      <div><div class="modal-title" id="dam-title">â€”</div><div style="font-size:12px;color:var(--g5);margin-top:3px" id="dam-subtitle">Chicago, IL</div></div>
+      <div style="display:flex;align-items:center;gap:12px;"><div class="badge badge-live">â— Live</div><button class="modal-close" onclick="closeModal('dealer-auction-modal')">âœ•</button></div>
     </div>
     <div class="modal-body" style="padding-top:20px;">
       <div class="auction-timer-block" style="margin-bottom:20px;padding:16px 20px;">
-        <div><div style="font-size:11px;color:var(--accent3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">ΓùÅ Open Auction</div><div class="timer-digits" id="dealer-modal-timer" style="font-size:40px;">ΓÇö</div><div class="timer-label">No time limit ┬╖ Bid at any time</div></div>
+        <div><div style="font-size:11px;color:var(--accent3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">â— Open Auction</div><div class="timer-digits" id="dealer-modal-timer" style="font-size:40px;">â€”</div><div class="timer-label">No time limit Â· Bid at any time</div></div>
         <div style="text-align:right;font-size:13px;color:var(--g5)" id="dam-bid-summary">Loading bids...</div>
       </div>
       <div class="auction-modal-layout">
         <div class="auction-modal-left">
-          <div class="modal-section"><div class="modal-section-title">≡ƒô╖ Photos</div><div class="photo-gallery"><div class="photo-main" id="dam-photo-main" onclick="cyclePhoto('dam')"><span id="dam-photo-emoji">≡ƒÜù</span><div class="photo-main-label" id="dam-photo-label">Front Exterior</div><div class="photo-main-count" id="dam-photo-count">1 / 6</div></div><div class="photo-thumbs" id="dam-thumbs"></div></div></div>
-          <div class="modal-section"><div class="modal-section-title">≡ƒôï Title & Registration</div><div class="docs-row" id="dam-docs"></div></div>
-          <div class="modal-section"><div class="modal-section-title">≡ƒöº Vehicle Specs</div><div class="spec-grid" id="dam-specs"></div></div>
-          <div class="modal-section"><div class="modal-section-title">≡ƒöì Carfax Summary</div><div class="carfax-row" id="dam-carfax"></div></div>
-          <div class="modal-section"><div class="modal-section-title">Γ¡É Condition Disclosure</div><div id="dam-condition"></div></div>
+          <div class="modal-section"><div class="modal-section-title">ðŸ“· Photos</div><div class="photo-gallery"><div class="photo-main" id="dam-photo-main" onclick="cyclePhoto('dam')"><span id="dam-photo-emoji">ðŸš—</span><div class="photo-main-label" id="dam-photo-label">Front Exterior</div><div class="photo-main-count" id="dam-photo-count">1 / 6</div></div><div class="photo-thumbs" id="dam-thumbs"></div></div></div>
+          <div class="modal-section"><div class="modal-section-title">ðŸ“‹ Title & Registration</div><div class="docs-row" id="dam-docs"></div></div>
+          <div class="modal-section"><div class="modal-section-title">ðŸ”§ Vehicle Specs</div><div class="spec-grid" id="dam-specs"></div></div>
+          <div class="modal-section"><div class="modal-section-title">ðŸ” Carfax Summary</div><div class="carfax-row" id="dam-carfax"></div></div>
+          <div class="modal-section"><div class="modal-section-title">â­ Condition Disclosure</div><div id="dam-condition"></div></div>
           <div id="dam-details" style="font-size:13px;color:var(--g5);line-height:1.7;margin-top:8px;"></div>
         </div>
         <div class="auction-modal-right">
-          <div id="dam-dealer-status"><div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;">≡ƒöÆ All dealer identities are anonymous ΓÇö place a bid to enter</div></div>
-          <div class="card" style="flex:1;"><div class="card-body" style="padding:16px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--g4);margin-bottom:6px;">Current Bids</div><div style="font-size:11px;color:var(--g4);margin-bottom:10px;">Your bids show as <strong style="color:var(--white)">Γ¡É You</strong></div><div class="bid-feed" id="dam-bid-feed"></div></div></div>
+          <div id="dam-dealer-status"><div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;">ðŸ”’ All dealer identities are anonymous â€” place a bid to enter</div></div>
+          <div class="card" style="flex:1;"><div class="card-body" style="padding:16px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--g4);margin-bottom:6px;">Current Bids</div><div style="font-size:11px;color:var(--g4);margin-bottom:10px;">Your bids show as <strong style="color:var(--white)">â­ You</strong></div><div class="bid-feed" id="dam-bid-feed"></div></div></div>
           <div class="bid-panel" style="position:static;">
             <div style="font-size:13px;color:var(--g5);margin-bottom:8px;">Place Your Bid</div>
             <div class="bid-input-row"><div class="bid-input-wrapper"><span class="bid-currency">$</span><input class="bid-amount-input" id="dealer-bid-input" type="number" placeholder="0" min="0" step="100"></div><button class="btn btn-primary" onclick="placeDealerBid()">Bid Now</button></div>
@@ -1051,25 +1048,25 @@ body::before {
   </div>
 </div>
 
-<!-- ΓòÉΓòÉ COUNTER MODAL ΓòÉΓòÉ -->
+<!-- â•â• COUNTER MODAL â•â• -->
 <div class="modal-overlay" id="counter-modal">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">Counter Offer</div><button class="modal-close" onclick="closeModal('counter-modal')">Γ£ò</button></div>
+    <div class="modal-header"><div class="modal-title">Counter Offer</div><button class="modal-close" onclick="closeModal('counter-modal')">âœ•</button></div>
     <div class="modal-body">
-      <div class="alert alert-warning">ΓÜá∩╕Å Your counter pauses the auction. The top bidder has 5 minutes to respond.</div>
+      <div class="alert alert-warning">âš ï¸ Your counter pauses the auction. The top bidder has 5 minutes to respond.</div>
       <div class="form-group mt-16"><label class="form-label">Your Counter Amount</label><div class="bid-input-wrapper"><span class="bid-currency">$</span><input class="bid-amount-input" id="counter-amount" placeholder="0" style="width:100%"></div></div>
-      <div class="form-group"><label class="form-label">Optional Note</label><textarea class="form-textarea" placeholder="e.g. I recently replaced all four tires ΓÇö asking a bit more."></textarea></div>
+      <div class="form-group"><label class="form-label">Optional Note</label><textarea class="form-textarea" placeholder="e.g. I recently replaced all four tires â€” asking a bit more."></textarea></div>
     </div>
     <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('counter-modal')">Cancel</button><button class="btn btn-primary" onclick="submitCounter()">Send Counter</button></div>
   </div>
 </div>
 
-<!-- ΓòÉΓòÉ MESSAGE MODAL ΓòÉΓòÉ -->
+<!-- â•â• MESSAGE MODAL â•â• -->
 <div class="modal-overlay" id="message-modal">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">Message Dealer</div><button class="modal-close" onclick="closeModal('message-modal')">Γ£ò</button></div>
+    <div class="modal-header"><div class="modal-title">Message Dealer</div><button class="modal-close" onclick="closeModal('message-modal')">âœ•</button></div>
     <div class="modal-body">
-      <div class="message-list" id="message-list"><div class="message-item received"><div class="message-text">Congratulations! Looking forward to picking up the vehicle. What days work for you?</div><div class="message-time">Winning Dealer ΓÇó 2:34 PM</div></div></div>
+      <div class="message-list" id="message-list"><div class="message-item received"><div class="message-text">Congratulations! Looking forward to picking up the vehicle. What days work for you?</div><div class="message-time">Winning Dealer â€¢ 2:34 PM</div></div></div>
       <div class="divider"></div>
       <div class="form-group"><textarea class="form-textarea" id="msg-input" placeholder="Type your message..."></textarea></div>
     </div>
@@ -1080,14 +1077,15 @@ body::before {
 <div id="toast-container"></div>
 
 <script>
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-//  API URL ΓÇö points to live Railway backend
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  API URL â€” points to live Railway backend
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const API = 'https://privabuy-backend-production.up.railway.app';
-
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+const STRIPE_PK = 'pk_test_51TNGzaLXzhlPcGmdxozAMEP3ek5aec0jPoiV3hY5H20w2eOdnvNWuGEp4rE90Iafil14T9NQnv5azsNRQ7qouDcc00IDByl9kt';
+const stripeClient = Stripe(STRIPE_PK);
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  STATE
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const S = {
   role:'seller', auctionActive:false, auctionData:null,
   timerInterval:null, bidInterval:null, timeLeft:900,
@@ -1101,9 +1099,9 @@ const S = {
 
 const DEMO_DEALERS = ['Northside Auto Group','Lakeview Motors','Chicago Auto Exchange','Westside Pre-Owned','Lincoln Park Cars'];
 const DEMO_AUCTIONS = [
-  {id:1,year:2018,make:'Honda',model:'CR-V',trim:'EX-L',mileage:'91,200',city:'Chicago',topBid:13400,bids:5,timeLeft:742,emoji:'≡ƒÜÖ',color:'Lunar Silver',condition:'Good',issues:'Minor scratch on rear bumper'},
-  {id:2,year:2017,make:'Ford',model:'F-150',trim:'XLT',mileage:'108,000',city:'Evanston',topBid:19100,bids:4,timeLeft:333,emoji:'≡ƒ¢╗',color:'Blue Jeans',condition:'Good',issues:'None disclosed'},
-  {id:3,year:2016,make:'Toyota',model:'Camry',trim:'SE',mileage:'96,500',city:'Oak Park',topBid:10200,bids:3,timeLeft:890,emoji:'≡ƒÜù',color:'Midnight Black',condition:'Good',issues:'AC compressor replaced 2023'},
+  {id:1,year:2018,make:'Honda',model:'CR-V',trim:'EX-L',mileage:'91,200',city:'Chicago',topBid:13400,bids:5,timeLeft:742,emoji:'ðŸš™',color:'Lunar Silver',condition:'Good',issues:'Minor scratch on rear bumper'},
+  {id:2,year:2017,make:'Ford',model:'F-150',trim:'XLT',mileage:'108,000',city:'Evanston',topBid:19100,bids:4,timeLeft:333,emoji:'ðŸ›»',color:'Blue Jeans',condition:'Good',issues:'None disclosed'},
+  {id:3,year:2016,make:'Toyota',model:'Camry',trim:'SE',mileage:'96,500',city:'Oak Park',topBid:10200,bids:3,timeLeft:890,emoji:'ðŸš—',color:'Midnight Black',condition:'Good',issues:'AC compressor replaced 2023'},
 ];
 const VIN_DB = {
   '1HGBH41JXMN109186':{year:2017,make:'Honda',model:'Civic',trim:'EX',color:'Lunar Silver Metallic',engine:'1.5L Turbo I4',transmission:'CVT',drivetrain:'FWD'},
@@ -1114,12 +1112,12 @@ const VIN_DB = {
 const DEMO_EXTRA = {
   1:{vin:'2HKRM4H79GH638591',plate:'HND-8821',owners:1,accidents:0,serviceRecs:6,loan:'None',comments:'Recently detailed. Tires replaced at 88k. All service records available.'},
   2:{vin:'1FTFW1EF7EKE08122',plate:'FRD-4410',owners:2,accidents:0,serviceRecs:4,loan:'None',comments:'Previous owner was a contractor. Bed liner installed.'},
-  3:{vin:'4T1BF1FK7GU236540',plate:'TOY-3391',owners:1,accidents:1,serviceRecs:8,loan:'Loan ΓÇö payoff est. $2,100',comments:'Minor fender bender 2022, repaired professionally.'},
+  3:{vin:'4T1BF1FK7GU236540',plate:'TOY-3391',owners:1,accidents:1,serviceRecs:8,loan:'Loan â€” payoff est. $2,100',comments:'Minor fender bender 2022, repaired professionally.'},
 };
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  NAVIGATION
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let selectedRole = 'seller';
 function selectRole(role, el) {
   selectedRole = role;
@@ -1128,9 +1126,9 @@ function selectRole(role, el) {
   ['seller','dealer','admin'].forEach(r=>document.getElementById(`login-${r}-fields`).classList.toggle('hidden',r!==role));
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-//  LOGIN ΓÇö CONNECTED TO REAL BACKEND
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  LOGIN â€” CONNECTED TO REAL BACKEND
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 async function login() {
   S.role = selectedRole;
   const statusMsg = document.getElementById('login-status-msg');
@@ -1141,7 +1139,7 @@ async function login() {
       const phone = document.getElementById('seller-phone-input').value.trim();
       const email = document.getElementById('seller-email-input').value.trim();
       if(!phone || !email) {
-        showToast('ΓÜá∩╕Å','Missing Info','Enter your phone and email.');
+        showToast('âš ï¸','Missing Info','Enter your phone and email.');
         statusMsg.textContent = 'Enter your details above';
         return;
       }
@@ -1153,26 +1151,26 @@ async function login() {
       const data = await res.json();
       if(!res.ok) throw new Error(data.detail || 'Registration failed');
       S.seller_id = data.seller_id;
-      document.getElementById('seller-topbar-user').textContent = `≡ƒæñ ${email.split('@')[0]} ΓÇö Seller`;
-      showToast('Γ£à','Account Ready',`Seller ID: ${S.seller_id.slice(0,8)}...`);
+      document.getElementById('seller-topbar-user').textContent = `ðŸ‘¤ ${email.split('@')[0]} â€” Seller`;
+      showToast('âœ…','Account Ready',`Seller ID: ${S.seller_id.slice(0,8)}...`);
     }
 
     if(selectedRole === 'dealer') {
       const email = document.getElementById('dealer-email-input').value.trim();
-      if(!email) { showToast('ΓÜá∩╕Å','Missing Info','Enter your dealer email.'); statusMsg.textContent = 'Enter your details above'; return; }
+      if(!email) { showToast('âš ï¸','Missing Info','Enter your dealer email.'); statusMsg.textContent = 'Enter your details above'; return; }
       S.dealer_email = email;
       S.dealer_id = null;
-      showToast('≡ƒæï','Dealer Portal','Logged in. Dealer bids require a registered dealer ID.');
+      showToast('ðŸ‘‹','Dealer Portal','Logged in. Dealer bids require a registered dealer ID.');
     }
 
     showScreen(`screen-${selectedRole}`);
     if(selectedRole==='seller') initSellerView();
     else if(selectedRole==='dealer') initDealerView();
-    else showToast('≡ƒæï','Admin','Dashboard loaded.');
+    else showToast('ðŸ‘‹','Admin','Dashboard loaded.');
 
   } catch(err) {
-    showToast('Γ¥î','Connection Error','Could not reach the server. Check your internet.');
-    statusMsg.textContent = 'Connection failed ΓÇö try again';
+    showToast('âŒ','Connection Error','Could not reach the server. Check your internet.');
+    statusMsg.textContent = 'Connection failed â€” try again';
     console.error(err);
   }
 }
@@ -1180,9 +1178,9 @@ async function login() {
 function logout() { clearAuction(); showScreen('screen-login'); }
 function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  FORM HELPERS
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function selectRadio(groupId, el, value) {
   document.querySelectorAll(`#${groupId} .radio-pill`).forEach(p=>p.classList.remove('selected'));
   el.classList.add('selected');
@@ -1191,9 +1189,9 @@ function selectRadio(groupId, el, value) {
 function togglePill(el) { el.classList.toggle('selected'); }
 function getRadio(groupId) { return S.radioValues[groupId] || null; }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  SELLER FLOW
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function initSellerView() {
   sellerTab('list',document.querySelector('#screen-seller .tab-btn'));
   wizardGo(1);
@@ -1223,52 +1221,69 @@ function wizardGo(step) {
   if(step===4) buildValueEstimate();
   if(step===5) populateReview();
 }
-function decodeVIN() {
+async function decodeVIN() {
   const vin = document.getElementById('vin-input').value.trim();
-  if(vin.length<10){showToast('ΓÜá∩╕Å','Invalid VIN','Enter at least 10 characters.');return;}
-  const d = VIN_DB[vin]||VIN_DB['DEFAULT'];
-  document.getElementById('f-year').value = d.year;
-  document.getElementById('f-make').value = d.make;
-  document.getElementById('f-model').value = d.model;
-  document.getElementById('f-trim').value = d.trim;
-  document.getElementById('f-color').value = d.color;
-  S.radioValues['transmission-group'] = d.transmission;
-  S.radioValues['drivetrain-group'] = d.drivetrain;
-  document.getElementById('vin-result').classList.remove('hidden');
-  document.getElementById('vin-result').innerHTML = `<div class="alert alert-success">Γ£à VIN Decoded: ${d.year} ${d.make} ${d.model} ${d.trim} ΓÇó ${d.engine} ΓÇó ${d.transmission} ΓÇó ${d.drivetrain}</div>`;
-  showToast('Γ£à','VIN Decoded!',`${d.year} ${d.make} ${d.model} auto-populated.`);
+  if(vin.length < 17) { showToast('âš ï¸','Invalid VIN','VIN must be exactly 17 characters.'); return; }
+  showToast('ðŸ”','Looking up VIN...','Checking NHTSA database...');
+  try {
+    const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
+    const data = await res.json();
+    const results = data.Results;
+    const get = (var_) => results.find(r => r.Variable === var_)?.Value || '';
+    const year = get('Model Year');
+    const make = get('Make');
+    const model = get('Model');
+    const trim = get('Trim');
+    const engine = get('Displacement (L)') ? get('Displacement (L)') + 'L ' + get('Engine Configuration') : '';
+    const transmission = get('Transmission Style') || 'Automatic';
+    const drivetrain = get('Drive Type') || 'FWD';
+    const bodyClass = get('Body Class');
+    if(!make || make === 'null') { showToast('âŒ','VIN Not Found','Could not decode this VIN. Check and try again.'); return; }
+    document.getElementById('f-year').value = year;
+    document.getElementById('f-make').value = make.charAt(0) + make.slice(1).toLowerCase();
+    document.getElementById('f-model').value = model.charAt(0) + model.slice(1).toLowerCase();
+    document.getElementById('f-trim').value = trim || '';
+    S.radioValues['transmission-group'] = transmission.includes('Manual') ? 'Manual' : transmission.includes('CVT') ? 'CVT' : 'Automatic';
+    S.radioValues['drivetrain-group'] = drivetrain.includes('AWD') || drivetrain.includes('All') ? 'AWD' : drivetrain.includes('4WD') || drivetrain.includes('4x4') ? '4WD' : drivetrain.includes('Rear') ? 'RWD' : 'FWD';
+    document.getElementById('vin-result').classList.remove('hidden');
+    document.getElementById('vin-result').innerHTML = `<div class="alert alert-success">âœ… VIN Decoded: ${year} ${make} ${model} ${trim} â€¢ ${bodyClass} â€¢ ${engine} â€¢ Drivetrain: ${S.radioValues['drivetrain-group']}</div>`;
+    showToast('âœ…','VIN Decoded!',`${year} ${make} ${model} confirmed from NHTSA.`);
+  } catch(err) {
+    showToast('âŒ','Decode Failed','Could not reach NHTSA. Check your connection.');
+    console.error(err);
+  }
 }
 function checkEligibility() {
   const year = parseInt(document.getElementById('f-year').value)||0;
   const mileage = parseInt(document.getElementById('f-mileage').value)||0;
   const make = document.getElementById('f-make').value.trim();
   const model = document.getElementById('f-model').value.trim();
-  if(!year||!make||!model){showToast('ΓÜá∩╕Å','Missing Info','Fill in year, make, and model first.');return;}
+  if(!year||!make||!model){showToast('âš ï¸','Missing Info','Fill in year, make, and model first.');return;}
   const age = 2025-year;
   const isEligible = age>=5&&age<=10&&mileage>=50000;
   const el = document.getElementById('eligibility-result');
   S.formData = {year,make,model,trim:document.getElementById('f-trim').value||'',color:document.getElementById('f-color').value||'',mileage,addons:document.getElementById('f-addons').value||'N/A',zip:document.getElementById('f-zip').value||'',transmission:getRadio('transmission-group')||'Automatic',drivetrain:getRadio('drivetrain-group')||'FWD',title:getRadio('title-group')||'Clean',loan:getRadio('loan-group')||'None',keys:getRadio('keys-group')||'Yes'};
   if(isEligible){
-    el.innerHTML=`<div class="eligibility-card pass"><div class="eligibility-icon">Γ£à</div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px">Your vehicle qualifies!</div><div class="text-muted text-sm">A ${year} ${make} ${model} with ${mileage.toLocaleString()} miles is prime dealer inventory.</div></div></div>`;
+    el.innerHTML=`<div class="eligibility-card pass"><div class="eligibility-icon">âœ…</div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px">Your vehicle qualifies!</div><div class="text-muted text-sm">A ${year} ${make} ${model} with ${mileage.toLocaleString()} miles is prime dealer inventory.</div></div></div>`;
     setTimeout(()=>wizardGo(2),500);
   } else {
-    el.innerHTML=`<div class="eligibility-card fail"><div class="eligibility-icon">ΓÜá∩╕Å</div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px">Outside ideal range</div><div class="text-muted text-sm">${age<5?'Too new (under 5 years).':age>10?'May be too old (over 10 years).':'Under 50k miles ΓÇö dealers prefer higher mileage inventory.'} We\'ll still list it ΓÇö dealers can opt in.</div></div></div>`;
+    el.innerHTML=`<div class="eligibility-card fail"><div class="eligibility-icon">âš ï¸</div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px">Outside ideal range</div><div class="text-muted text-sm">${age<5?'Too new (under 5 years).':age>10?'May be too old (over 10 years).':'Under 50k miles â€” dealers prefer higher mileage inventory.'} We\'ll still list it â€” dealers can opt in.</div></div></div>`;
     setTimeout(()=>wizardGo(2),700);
   }
 }
 let photoCount=0, requiredFilled=0;
 function simulatePhoto(el,label,required) {
   if(el.classList.contains('filled'))return;
-  const emojis=['≡ƒÜù','≡ƒ¢₧','≡ƒ¬ƒ','≡ƒ¢ú∩╕Å','≡ƒÜÖ','≡ƒôè','ΓÜÖ∩╕Å','≡ƒöº'];
+  const emojis=['ðŸš—','ðŸ›ž','ðŸªŸ','ðŸ›£ï¸','ðŸš™','ðŸ“Š','âš™ï¸','ðŸ”§'];
   el.classList.add('filled');
   const wasReq = required && el.querySelector('.photo-required-badge');
-  if(wasReq){ wasReq.style.background='var(--green)'; wasReq.textContent='Γ£ô'; requiredFilled++; }
-  el.innerHTML = `${wasReq?`<div class="photo-required-badge" style="background:var(--green)">Γ£ô</div>`:''}
+  if(wasReq){ wasReq.style.background='var(--green)'; wasReq.textContent='âœ“'; requiredFilled++; }
+  el.innerHTML = `${wasReq?`<div class="photo-required-badge" style="background:var(--green)">âœ“</div>`:''}
     <div style="font-size:40px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.07)">${emojis[photoCount%emojis.length]}</div>
-    <div class="photo-slot-label" style="position:absolute;bottom:6px;z-index:1;background:rgba(0,0,0,0.6);padding:2px 8px;border-radius:4px;font-size:10px">Γ£ô ${label}</div>`;
+    <div class="photo-slot-label" style="position:absolute;bottom:6px;z-index:1;background:rgba(0,0,0,0.6);padding:2px 8px;border-radius:4px;font-size:10px">âœ“ ${label}</div>`;
   photoCount++;
-  document.getElementById('photos-uploaded-count').textContent = `${photoCount} of 8 uploaded ΓÇó ${requiredFilled}/6 required complete`;
-  showToast('≡ƒô╕','Photo Added',`${label} uploaded.`);
+  document.getElementById('photos-uploaded-count').textContent = `${photoCount} of 8 uploaded â€¢ ${requiredFilled}/6 required complete`;
+  showToast('ðŸ“¸','Photo Added',`${label} uploaded.`);
 }
 function switchDamageTab(tab, el) {
   ['exterior','interior','mechanical'].forEach(t=>document.getElementById(`damage-${t}`).classList.toggle('hidden',t!==tab));
@@ -1279,8 +1294,8 @@ const damagePins = {};
 function togglePin(id, label) {
   const pin = document.getElementById(`pin-${id}`);
   const dot = pin.querySelector('.damage-pin-dot');
-  if(damagePins[id]){delete damagePins[id];pin.classList.remove('has-damage');dot.textContent='+';showToast('Γ£ô','Damage Cleared',`${label} marked as undamaged.`);}
-  else{damagePins[id]=label;pin.classList.add('has-damage');dot.textContent='!';showToast('≡ƒö┤','Damage Noted',`${label} marked ΓÇö dealers will be informed.`);}
+  if(damagePins[id]){delete damagePins[id];pin.classList.remove('has-damage');dot.textContent='+';showToast('âœ“','Damage Cleared',`${label} marked as undamaged.`);}
+  else{damagePins[id]=label;pin.classList.add('has-damage');dot.textContent='!';showToast('ðŸ”´','Damage Noted',`${label} marked â€” dealers will be informed.`);}
 }
 const areaDamage = {};
 function toggleAreaDamage(el, id) {
@@ -1290,7 +1305,7 @@ function toggleAreaDamage(el, id) {
 
 function buildValueEstimate() {
   const d = S.formData;
-  if(!d.year||!d.make){document.getElementById('value-estimate-content').innerHTML='<div class="alert alert-warning">ΓÜá∩╕Å Please complete Step 1 first.</div>';return;}
+  if(!d.year||!d.make){document.getElementById('value-estimate-content').innerHTML='<div class="alert alert-warning">âš ï¸ Please complete Step 1 first.</div>';return;}
   const baseValues = {Honda:13500,Toyota:14200,Ford:13000,Chevrolet:11800,Nissan:10800,Hyundai:10000,Subaru:13000,Mazda:12200,BMW:17500,'Mercedes-Benz':19000,Volkswagen:11500,Kia:9800};
   const base = baseValues[d.make]||11000;
   const ageDepr = (2025-d.year)*1300;
@@ -1320,18 +1335,18 @@ function buildValueEstimate() {
   if(conditionMult<0.85) factors.push({label:'Below average condition',type:'neg'});
   factors.push({label:'Market demand high for this age/mileage',type:'pos'});
   document.getElementById('value-estimate-content').innerHTML = `
-    <div class="alert alert-info" style="margin-bottom:20px">≡ƒôè <strong>How we calculate this:</strong> Based on your vehicle's year, mileage, condition, drivetrain, and current dealer demand.</div>
+    <div class="alert alert-info" style="margin-bottom:20px">ðŸ“Š <strong>How we calculate this:</strong> Based on your vehicle's year, mileage, condition, drivetrain, and current dealer demand.</div>
     <div style="background:linear-gradient(135deg,rgba(201,184,255,0.15) 0%,rgba(201,184,255,0.05) 100%);border:1px solid rgba(201,184,255,0.35);border-radius:var(--r-lg);padding:32px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden">
       <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(201,184,255,0.7);margin-bottom:10px">Trade-In Value</div>
       <div style="font-size:52px;font-weight:700;color:var(--accent);line-height:1;margin-bottom:8px">$${tradeIn.toLocaleString()}</div>
       <div style="font-size:14px;color:rgba(255,255,255,0.55)">What a dealership typically offers</div>
     </div>
-    <div class="value-factors" style="margin-bottom:20px">${factors.map(f=>`<span class="factor-tag factor-${f.type}">${f.type==='pos'?'Γåæ':f.type==='neg'?'Γåô':'ΓÇô'} ${f.label}</span>`).join('')}</div>
+    <div class="value-factors" style="margin-bottom:20px">${factors.map(f=>`<span class="factor-tag factor-${f.type}">${f.type==='pos'?'â†‘':f.type==='neg'?'â†“':'â€“'} ${f.label}</span>`).join('')}</div>
     <div class="floor-price-row">
       <div style="font-size:16px;font-weight:600;margin-bottom:6px">Set Your Minimum Price</div>
       <div style="font-size:13px;color:var(--g5);line-height:1.6">This is the <strong style="color:var(--white)">minimum you'll accept</strong>.</div>
       <div class="floor-price-input-wrap"><span class="floor-currency">$</span><input class="floor-input" id="floor-price-input" type="number" value="${tradeIn}" min="1000" step="100" oninput="updateFloor(this.value)"></div>
-      <div id="floor-feedback" style="font-size:12px;margin-top:8px;color:var(--g5)">Floor set to trade-in value ΓÇö a reasonable starting point.</div>
+      <div id="floor-feedback" style="font-size:12px;margin-top:8px;color:var(--g5)">Floor set to trade-in value â€” a reasonable starting point.</div>
     </div>`;
 }
 function updateFloor(val) {
@@ -1339,9 +1354,9 @@ function updateFloor(val) {
   const pb = S.formData.pbExpected||10000;
   const ti = S.formData.tradeIn||8000;
   const el = document.getElementById('floor-feedback');
-  if(S.floorPrice < ti*0.85) el.innerHTML='<span style="color:#f87171">ΓÜá∩╕Å Below trade-in ΓÇö you might undersell.</span>';
-  else if(S.floorPrice > pb*1.1) el.innerHTML='<span style="color:#fbbf24">ΓÜá∩╕Å Above expected range ΓÇö dealers may not bid to your floor.</span>';
-  else if(S.floorPrice >= ti && S.floorPrice <= pb) el.innerHTML='<span style="color:#4ade80">Γ£ô Good floor ΓÇö realistic and protective.</span>';
+  if(S.floorPrice < ti*0.85) el.innerHTML='<span style="color:#f87171">âš ï¸ Below trade-in â€” you might undersell.</span>';
+  else if(S.floorPrice > pb*1.1) el.innerHTML='<span style="color:#fbbf24">âš ï¸ Above expected range â€” dealers may not bid to your floor.</span>';
+  else if(S.floorPrice >= ti && S.floorPrice <= pb) el.innerHTML='<span style="color:#4ade80">âœ“ Good floor â€” realistic and protective.</span>';
   else el.innerHTML='<span style="color:var(--g5)">Floor updated.</span>';
   S.formData.floorPrice = S.floorPrice;
   const floorDisplay = document.getElementById('floor-display');
@@ -1351,30 +1366,30 @@ function populateReview() {
   const d = S.formData;
   document.getElementById('listing-review-body').innerHTML = `
     <div class="grid-2 mb-16">
-      <div><div class="text-muted text-sm mb-4">Vehicle</div><div style="font-family:var(--serif);font-size:22px">${d.year||'ΓÇö'} ${d.make||'ΓÇö'} ${d.model||'ΓÇö'}</div><div class="text-muted mt-4">${d.trim||''} ΓÇó ${d.color||''} ΓÇó ${(d.mileage||0).toLocaleString()} mi ΓÇó ${d.drivetrain||''}</div></div>
+      <div><div class="text-muted text-sm mb-4">Vehicle</div><div style="font-family:var(--serif);font-size:22px">${d.year||'â€”'} ${d.make||'â€”'} ${d.model||'â€”'}</div><div class="text-muted mt-4">${d.trim||''} â€¢ ${d.color||''} â€¢ ${(d.mileage||0).toLocaleString()} mi â€¢ ${d.drivetrain||''}</div></div>
       <div><div class="text-muted text-sm mb-4">Your Minimum Price</div><div style="font-size:28px;font-weight:700;color:var(--accent)">$${(S.floorPrice||d.tradeIn||8000).toLocaleString()}</div><div class="text-muted mt-4">Dealers will not be shown this figure</div></div>
     </div>
     <div class="divider"></div>
     <div class="form-row">
       <div><div class="text-muted text-sm">Title</div><div class="mt-4">${d.title||'Clean'}</div></div>
-      <div><div class="text-muted text-sm">Transmission</div><div class="mt-4">${d.transmission||'ΓÇö'}</div></div>
+      <div><div class="text-muted text-sm">Transmission</div><div class="mt-4">${d.transmission||'â€”'}</div></div>
       <div><div class="text-muted text-sm">Loan/Lease</div><div class="mt-4">${d.loan||'None'}</div></div>
     </div>
     <div class="form-row mt-16">
       <div><div class="text-muted text-sm">Photos</div><div class="mt-4">${photoCount} uploaded (${requiredFilled}/6 required)</div></div>
       <div><div class="text-muted text-sm">Damage Areas</div><div class="mt-4">${Object.values(damagePins).length>0?Object.values(damagePins).join(', '):'None disclosed'}</div></div>
-      <div><div class="text-muted text-sm">ZIP Code</div><div class="mt-4">${d.zip||'ΓÇö'}</div></div>
+      <div><div class="text-muted text-sm">ZIP Code</div><div class="mt-4">${d.zip||'â€”'}</div></div>
     </div>`;
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-//  START AUCTION ΓÇö CONNECTED TO REAL BACKEND
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  START AUCTION â€” CONNECTED TO REAL BACKEND
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 async function startAuction() {
-  if(!S.seller_id) { showToast('ΓÜá∩╕Å','Not Logged In','Please log in as a seller first.'); return; }
+  if(!S.seller_id) { showToast('âš ï¸','Not Logged In','Please log in as a seller first.'); return; }
   const d = S.formData;
   const btn = document.getElementById('start-auction-btn');
-  btn.textContent = 'ΓÅ│ Submitting...'; btn.disabled = true;
+  btn.textContent = 'â³ Submitting...'; btn.disabled = true;
 
   try {
     const res = await fetch(`${API}/cars/list-car`, {
@@ -1406,18 +1421,18 @@ async function startAuction() {
     document.getElementById('floor-display').textContent = '$'+(S.floorPrice||0).toLocaleString();
     document.getElementById('auction-vehicle-summary').innerHTML = `
       <div style="font-family:var(--serif);font-size:20px;margin-bottom:8px">${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'}</div>
-      <div class="vehicle-card-meta"><span class="meta-tag">≡ƒ¢ú ${(d.mileage||0).toLocaleString()} mi</span><span class="meta-tag">Γ£ô ${d.title||'Clean'}</span><span class="meta-tag">≡ƒôì ZIP ${d.zip||''}</span></div>
+      <div class="vehicle-card-meta"><span class="meta-tag">ðŸ›£ ${(d.mileage||0).toLocaleString()} mi</span><span class="meta-tag">âœ“ ${d.title||'Clean'}</span><span class="meta-tag">ðŸ“ ZIP ${d.zip||''}</span></div>
       <div class="text-muted mt-16 text-sm">Car ID: <strong style="color:var(--accent);font-family:monospace;font-size:11px">${S.car_id.slice(0,8)}...</strong></div>
       <div class="text-muted mt-8 text-sm">Floor: <strong style="color:var(--accent)">$${(S.floorPrice||0).toLocaleString()}</strong></div>`;
 
     notifyDealerPortal();
-    showToast('≡ƒÜÇ','Auction Live!',`${data.connected_dealers} dealers notified. Car ID: ${S.car_id.slice(0,8)}...`);
+    showToast('ðŸš€','Auction Live!',`${data.connected_dealers} dealers notified. Car ID: ${S.car_id.slice(0,8)}...`);
     startAuctionTimer();
     setTimeout(()=>startBidSimulation(), 4000);
 
   } catch(err) {
-    showToast('Γ¥î','Failed to Start','Could not create listing: ' + err.message);
-    btn.textContent = '≡ƒÜÇ Start My Auction ΓÇö It\'s Free';
+    showToast('âŒ','Failed to Start','Could not create listing: ' + err.message);
+    btn.textContent = 'ðŸš€ Start My Auction â€” It\'s Free';
     btn.disabled = false;
     console.error(err);
   }
@@ -1427,7 +1442,7 @@ function notifyDealerPortal() {
   const d = S.auctionData;
   document.getElementById('real-seller-auction-card').classList.remove('hidden');
   document.getElementById('rc-title').textContent = `${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'} ${d.trim||''}`;
-  document.getElementById('rc-meta').innerHTML = `<span class="meta-tag">≡ƒôì ZIP ${d.zip||'60601'}</span><span class="meta-tag">≡ƒ¢ú ${(d.mileage||0).toLocaleString()} mi</span><span class="meta-tag">${d.drivetrain||'FWD'}</span>`;
+  document.getElementById('rc-meta').innerHTML = `<span class="meta-tag">ðŸ“ ZIP ${d.zip||'60601'}</span><span class="meta-tag">ðŸ›£ ${(d.mileage||0).toLocaleString()} mi</span><span class="meta-tag">${d.drivetrain||'FWD'}</span>`;
 }
 
 function sellerConfirmReceivedPayment() {
@@ -1435,11 +1450,11 @@ function sellerConfirmReceivedPayment() {
   if(awaiting) {
     awaiting.style.borderColor = 'rgba(168,240,224,0.3)';
     awaiting.style.background = 'rgba(168,240,224,0.05)';
-    awaiting.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">Γ£à</span><div><div style="font-size:13px;font-weight:600;color:var(--accent3)">Dealer Payment Confirmed</div><div style="font-size:12px;color:var(--g5);margin-top:2px">Great ΓÇö your PrivaBuy platform fee is now due below.</div></div></div>`;
+    awaiting.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">âœ…</span><div><div style="font-size:13px;font-weight:600;color:var(--accent3)">Dealer Payment Confirmed</div><div style="font-size:12px;color:var(--g5);margin-top:2px">Great â€” your PrivaBuy platform fee is now due below.</div></div></div>`;
   }
   const fee = document.getElementById('seller-fee-prompt');
   if(fee) fee.classList.remove('hidden');
-  showToast('Γ£à','Payment Confirmed','Now please complete your $250 PrivaBuy platform fee.');
+  showToast('âœ…','Payment Confirmed','Now please complete your $250 PrivaBuy platform fee.');
 }
 
 function updateStartBtn() {
@@ -1494,7 +1509,7 @@ function addBid(dealer, amount, isReal=false) {
   document.getElementById('seller-bid-count').textContent = `${S.bids.length} bid${S.bids.length!==1?'s':''}`;
   document.getElementById('rc-top-bid').textContent = '$'+amount.toLocaleString();
   document.getElementById('rc-bid-count').textContent = `${S.bids.length} bids`;
-  showToast('≡ƒÆ░','New Bid',`${getAnon(dealer)} bid $${amount.toLocaleString()}`);
+  showToast('ðŸ’°','New Bid',`${getAnon(dealer)} bid $${amount.toLocaleString()}`);
   updateRealAuctionFeed();
 }
 
@@ -1511,22 +1526,22 @@ function updateBidFeed() {
 function updateRealAuctionFeed() {
   const feed = document.getElementById('ram-bid-feed');
   if(!feed) return;
-  if(S.bids.length===0){ feed.innerHTML='<div class="text-muted text-sm" style="text-align:center;padding:16px">No bids yet ΓÇö be first!</div>'; return; }
+  if(S.bids.length===0){ feed.innerHTML='<div class="text-muted text-sm" style="text-align:center;padding:16px">No bids yet â€” be first!</div>'; return; }
   const topBid = S.bids[0];
   const iAmTop = topBid.isReal;
   const statusEl = document.getElementById('ram-dealer-status');
   if(statusEl){
-    if(iAmTop){ statusEl.innerHTML = `<div style="background:rgba(22,163,74,0.15);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center">≡ƒÅå You are the top bidder at $${topBid.amount.toLocaleString()}</div>`; }
+    if(iAmTop){ statusEl.innerHTML = `<div style="background:rgba(22,163,74,0.15);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center">ðŸ† You are the top bidder at $${topBid.amount.toLocaleString()}</div>`; }
     else {
       const yourBid = S.bids.find(b=>b.isReal);
       statusEl.innerHTML = yourBid
-        ? `<div style="background:rgba(217,119,6,0.12);border:1px solid rgba(251,191,36,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#fbbf24;font-weight:600;text-align:center">ΓÜá∩╕Å You've been outbid ΓÇö your last bid: $${yourBid.amount.toLocaleString()}</div>`
+        ? `<div style="background:rgba(217,119,6,0.12);border:1px solid rgba(251,191,36,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#fbbf24;font-weight:600;text-align:center">âš ï¸ You've been outbid â€” your last bid: $${yourBid.amount.toLocaleString()}</div>`
         : `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--g5);text-align:center">Place a bid to enter this auction</div>`;
     }
   }
   feed.innerHTML = S.bids.map((b,i) => `
     <div class="bid-item ${i===0?'top':'mid'} ${i===0?'new-bid':''}">
-      <div><div class="bid-dealer-name" style="${b.isReal?'color:var(--white);font-weight:600':''}">${b.isReal ? 'Γ¡É You' : getAnon(b.dealer)}</div></div>
+      <div><div class="bid-dealer-name" style="${b.isReal?'color:var(--white);font-weight:600':''}">${b.isReal ? 'â­ You' : getAnon(b.dealer)}</div></div>
       <div><span class="bid-amount">$${b.amount.toLocaleString()}</span>${i===0?'<span class="bid-top-label">TOP</span>':''}</div>
     </div>`).join('');
   const summaryEl = document.getElementById('ram-bid-summary');
@@ -1534,16 +1549,16 @@ function updateRealAuctionFeed() {
 }
 
 const PHOTO_LABELS = ['Front Exterior','Rear Exterior','Driver Side','Passenger Side','Interior / Dash','Odometer','Engine Bay','Damage Area'];
-const PHOTO_EMOJIS = ['≡ƒÜù','≡ƒÜÖ','≡ƒ¢₧','≡ƒ¢ú∩╕Å','≡ƒÆ║','≡ƒôè','ΓÜÖ∩╕Å','≡ƒöº'];
+const PHOTO_EMOJIS = ['ðŸš—','ðŸš™','ðŸ›ž','ðŸ›£ï¸','ðŸ’º','ðŸ“Š','âš™ï¸','ðŸ”§'];
 function buildPhotoGallery(prefix, emoji, count) {
   count = Math.max(count||0, 1);
   const mainEl = document.getElementById(`${prefix}-photo-main`);
   if(!mainEl) return;
-  document.getElementById(`${prefix}-photo-emoji`).textContent = emoji || '≡ƒÜù';
+  document.getElementById(`${prefix}-photo-emoji`).textContent = emoji || 'ðŸš—';
   document.getElementById(`${prefix}-photo-label`).textContent = PHOTO_LABELS[0];
   document.getElementById(`${prefix}-photo-count`).textContent = `1 / ${count}`;
-  S[`${prefix}PhotoIdx`] = 0; S[`${prefix}PhotoCount`] = count; S[`${prefix}Emoji`] = emoji || '≡ƒÜù';
-  document.getElementById(`${prefix}-thumbs`).innerHTML = Array.from({length:Math.min(count,6)},(_,i)=>`<div class="photo-thumb${i===0?' active':''}" onclick="selectPhoto('${prefix}',${i})" title="${PHOTO_LABELS[i]||'Photo '+(i+1)}">${PHOTO_EMOJIS[i]||'≡ƒô╖'}</div>`).join('');
+  S[`${prefix}PhotoIdx`] = 0; S[`${prefix}PhotoCount`] = count; S[`${prefix}Emoji`] = emoji || 'ðŸš—';
+  document.getElementById(`${prefix}-thumbs`).innerHTML = Array.from({length:Math.min(count,6)},(_,i)=>`<div class="photo-thumb${i===0?' active':''}" onclick="selectPhoto('${prefix}',${i})" title="${PHOTO_LABELS[i]||'Photo '+(i+1)}">${PHOTO_EMOJIS[i]||'ðŸ“·'}</div>`).join('');
 }
 function selectPhoto(prefix, idx) {
   S[`${prefix}PhotoIdx`] = idx;
@@ -1559,10 +1574,10 @@ function buildDocs(prefix, titleStatus, licPlate, licState, vinNum) {
   if(!el) return;
   const isClean = !titleStatus||titleStatus==='Clean';
   el.innerHTML = `
-    <div class="doc-card"><div class="doc-icon">≡ƒôä</div><div><div class="doc-label">Title Status</div><div class="doc-value">${titleStatus||'Clean Title'}</div><span class="doc-badge ${isClean?'doc-badge-clean':'doc-badge-issue'}">${isClean?'Γ£ô Clear':'ΓÜá Check'}</span></div></div>
-    <div class="doc-card"><div class="doc-icon">≡ƒ¬¬</div><div><div class="doc-label">License Plate</div><div class="doc-value" style="font-family:monospace;letter-spacing:2px;font-size:15px">${licPlate||'AB-12345'}</div><span class="doc-badge doc-badge-clean">${licState||'IL'} ΓÇö Registered</span></div></div>
-    <div class="doc-card"><div class="doc-icon">≡ƒöæ</div><div><div class="doc-label">VIN</div><div class="doc-value" style="font-family:monospace;font-size:11px;letter-spacing:1px">${vinNum||'ΓÇö'}</div><span class="doc-badge doc-badge-clean">Γ£ô Verified</span></div></div>
-    <div class="doc-card"><div class="doc-icon">≡ƒôï</div><div><div class="doc-label">Loan / Lease</div><div class="doc-value" id="${prefix}-loan-val">ΓÇö</div><span class="doc-badge doc-badge-clean">Γ£ô Disclosed</span></div></div>`;
+    <div class="doc-card"><div class="doc-icon">ðŸ“„</div><div><div class="doc-label">Title Status</div><div class="doc-value">${titleStatus||'Clean Title'}</div><span class="doc-badge ${isClean?'doc-badge-clean':'doc-badge-issue'}">${isClean?'âœ“ Clear':'âš  Check'}</span></div></div>
+    <div class="doc-card"><div class="doc-icon">ðŸªª</div><div><div class="doc-label">License Plate</div><div class="doc-value" style="font-family:monospace;letter-spacing:2px;font-size:15px">${licPlate||'AB-12345'}</div><span class="doc-badge doc-badge-clean">${licState||'IL'} â€” Registered</span></div></div>
+    <div class="doc-card"><div class="doc-icon">ðŸ”‘</div><div><div class="doc-label">VIN</div><div class="doc-value" style="font-family:monospace;font-size:11px;letter-spacing:1px">${vinNum||'â€”'}</div><span class="doc-badge doc-badge-clean">âœ“ Verified</span></div></div>
+    <div class="doc-card"><div class="doc-icon">ðŸ“‹</div><div><div class="doc-label">Loan / Lease</div><div class="doc-value" id="${prefix}-loan-val">â€”</div><span class="doc-badge doc-badge-clean">âœ“ Disclosed</span></div></div>`;
 }
 function buildSpecs(prefix, specs) {
   const el = document.getElementById(`${prefix}-specs`);
@@ -1585,13 +1600,13 @@ function buildCondition(prefix, conditionPills) {
 
 function openRealAuction() {
   const d = S.auctionData;
-  if(!d){showToast('Γä╣∩╕Å','No Active Auction','Start a seller auction first.');return;}
+  if(!d){showToast('â„¹ï¸','No Active Auction','Start a seller auction first.');return;}
   const vin = document.getElementById('vin-input')?.value||'1HGBH41JXMN109186';
   document.getElementById('ram-title').textContent=`${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'} ${d.trim||''}`;
-  buildPhotoGallery('ram','≡ƒÜù',photoCount||6);
+  buildPhotoGallery('ram','ðŸš—',photoCount||6);
   buildDocs('ram',d.title||'Clean','AB-'+Math.floor(10000+Math.random()*90000),'IL',vin);
   const loanEl=document.getElementById('ram-loan-val'); if(loanEl) loanEl.textContent=d.loan||'None';
-  buildSpecs('ram',[{label:'Year',value:d.year||2017},{label:'Make',value:d.make||'Honda'},{label:'Model',value:d.model||'CR-V'},{label:'Trim',value:d.trim||'EX'},{label:'Color',value:d.color||'ΓÇö'},{label:'Mileage',value:(d.mileage||0).toLocaleString()+' mi'},{label:'Transmission',value:d.transmission||'CVT'},{label:'Drivetrain',value:d.drivetrain||'AWD'},{label:'Add-ons',value:d.addons||'N/A'}]);
+  buildSpecs('ram',[{label:'Year',value:d.year||2017},{label:'Make',value:d.make||'Honda'},{label:'Model',value:d.model||'CR-V'},{label:'Trim',value:d.trim||'EX'},{label:'Color',value:d.color||'â€”'},{label:'Mileage',value:(d.mileage||0).toLocaleString()+' mi'},{label:'Transmission',value:d.transmission||'CVT'},{label:'Drivetrain',value:d.drivetrain||'AWD'},{label:'Add-ons',value:d.addons||'N/A'}]);
   const accVal=S.radioValues?.['accident-group']||'None';
   buildCarfax('ram',1,accVal==='None'?0:accVal==='One'?1:2,4);
   const condPills=[{label:'Overall: '+(S.radioValues?.['overall-condition-group']||'Pretty Great'),type:'good'}];
@@ -1607,19 +1622,19 @@ function openRealAuction() {
   document.getElementById('real-auction-modal').classList.add('open');
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-//  PLACE REAL BID ΓÇö CONNECTED TO REAL BACKEND
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  PLACE REAL BID â€” CONNECTED TO REAL BACKEND
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 async function placeRealBid() {
   const amount = parseInt(document.getElementById('real-bid-input').value)||0;
-  if(S.bids.length>0&&amount<=S.bids[0].amount){showToast('ΓÜá∩╕Å','Bid Too Low',`Must exceed $${S.bids[0].amount.toLocaleString()}`);return;}
-  if(!S.car_id){showToast('ΓÜá∩╕Å','No Active Auction','No real auction running.');return;}
+  if(S.bids.length>0&&amount<=S.bids[0].amount){showToast('âš ï¸','Bid Too Low',`Must exceed $${S.bids[0].amount.toLocaleString()}`);return;}
+  if(!S.car_id){showToast('âš ï¸','No Active Auction','No real auction running.');return;}
   if(!S.dealer_id){
-    // Demo mode ΓÇö no real dealer registered yet
+    // Demo mode â€” no real dealer registered yet
     addBid('Northside Auto Group',amount,true);
     document.getElementById('real-bid-input').value=amount+200;
     showRealDealerStatus(amount,false);
-    showToast('Γ£à','Bid Placed (Demo)!',`$${amount.toLocaleString()} placed. Register a dealer account to submit real bids.`);
+    showToast('âœ…','Bid Placed (Demo)!',`$${amount.toLocaleString()} placed. Register a dealer account to submit real bids.`);
     return;
   }
   try {
@@ -1630,9 +1645,9 @@ async function placeRealBid() {
     addBid('Northside Auto Group',amount,true);
     document.getElementById('real-bid-input').value=amount+200;
     showRealDealerStatus(amount,false);
-    showToast('Γ£à','Bid Placed!',`$${amount.toLocaleString()} submitted. Offer ID: ${data.offer_id.slice(0,8)}...`);
+    showToast('âœ…','Bid Placed!',`$${amount.toLocaleString()} submitted. Offer ID: ${data.offer_id.slice(0,8)}...`);
   } catch(err) {
-    showToast('Γ¥î','Bid Failed',err.message);
+    showToast('âŒ','Bid Failed',err.message);
     console.error(err);
   }
 }
@@ -1646,22 +1661,22 @@ function showRealDealerStatus(amount, isWon) {
     dealerAddPendingFee(vehicle,amount,'Sarah Mitchell','(312) 555-0100','sarah.m@email.com');
     banner.innerHTML=`
       <div style="background:linear-gradient(135deg,rgba(22,163,74,0.25),rgba(22,163,74,0.1));border:1px solid rgba(74,222,128,0.4);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:14px">
-        <div style="font-size:28px;margin-bottom:6px">≡ƒÅå</div>
+        <div style="font-size:28px;margin-bottom:6px">ðŸ†</div>
         <div style="font-size:18px;font-weight:700;color:#4ade80;margin-bottom:4px">You Won This Auction!</div>
         <div style="font-size:13px;color:var(--g5)">Winning bid: <strong style="color:var(--white)">$${amount.toLocaleString()}</strong></div>
       </div>
       <div style="background:rgba(201,184,255,0.07);border:1px solid rgba(201,184,255,0.25);border-radius:var(--r-lg);padding:14px;text-align:center">
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px">≡ƒÆ│ $500 platform fee added to your Pay Fee tab</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">ðŸ’³ $500 platform fee added to your Pay Fee tab</div>
         <div style="font-size:12px;color:var(--g5)">Seller contact will be unlocked after payment.</div>
       </div>`;
   } else {
-    banner.innerHTML=`<div style="background:rgba(22,163,74,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center;">≡ƒÅå You are the top bidder at $${amount.toLocaleString()}</div>`;
+    banner.innerHTML=`<div style="background:rgba(22,163,74,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center;">ðŸ† You are the top bidder at $${amount.toLocaleString()}</div>`;
   }
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-//  ACCEPT TOP BID ΓÇö CONNECTED TO REAL BACKEND
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  ACCEPT TOP BID â€” CONNECTED TO REAL BACKEND
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 async function acceptTopBid() {
   if(!S.bids.length) return;
   const top = S.bids[0];
@@ -1671,9 +1686,9 @@ async function acceptTopBid() {
       const res = await fetch(`${API}/offers/accept/${S.latest_offer_id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({seller_id:S.seller_id})});
       const data = await res.json();
       if(!res.ok) throw new Error(data.detail||'Accept failed');
-      showToast('≡ƒÄë','Offer Accepted in Database!',`$${top.amount.toLocaleString()} confirmed.`);
+      showToast('ðŸŽ‰','Offer Accepted in Database!',`$${top.amount.toLocaleString()} confirmed.`);
     } catch(err) {
-      showToast('Γ¥î','Accept Failed',err.message);
+      showToast('âŒ','Accept Failed',err.message);
       console.error(err);
       return;
     }
@@ -1684,14 +1699,14 @@ async function acceptTopBid() {
   document.getElementById('seller-auction-closed').classList.remove('hidden');
   document.getElementById('accepted-amount').textContent='$'+top.amount.toLocaleString();
   const elapsed=document.getElementById('seller-elapsed'); if(elapsed) elapsed.textContent='SOLD';
-  document.getElementById('dealer-contact-reveal').innerHTML=`<strong>Winning Dealer:</strong> ${top.dealer}<br>≡ƒô₧ (312) 555-0192 ΓÇó dealer@${top.dealer.toLowerCase().replace(/ /g,'')}.com<br><em style="font-size:11px;color:var(--g4)">Contact info revealed only after you accept</em>`;
+  document.getElementById('dealer-contact-reveal').innerHTML=`<strong>Winning Dealer:</strong> ${top.dealer}<br>ðŸ“ž (312) 555-0192 â€¢ dealer@${top.dealer.toLowerCase().replace(/ /g,'')}.com<br><em style="font-size:11px;color:var(--g4)">Contact info revealed only after you accept</em>`;
   if(top.isReal) showRealDealerStatus(top.amount,true);
-  showToast('≡ƒÄë','Offer Accepted!',`You accepted $${top.amount.toLocaleString()}.`);
+  showToast('ðŸŽ‰','Offer Accepted!',`You accepted $${top.amount.toLocaleString()}.`);
 }
 
 function clearAuction() { clearInterval(S.timerInterval); S.auctionActive=false; S.bids=[]; clearInterval(S.dealerCardTimerInterval); }
 
-// ΓòÉΓòÉΓòÉ DEALER ΓòÉΓòÉΓòÉ
+// â•â•â• DEALER â•â•â•
 function initDealerView() { dealerTab('feed',document.querySelector('#screen-dealer .tab-btn')); renderDealerAuctions(); }
 function dealerTab(tab,el) {
   ['feed','watchlist','won','payment','analytics'].forEach(t=>document.getElementById(`dealer-tab-${t}`).classList.add('hidden'));
@@ -1704,10 +1719,10 @@ function renderDealerAuctions() {
   grid.innerHTML=DEMO_AUCTIONS.map(a=>{
     const m=Math.floor(a.timeLeft/60),sec=a.timeLeft%60,urgent=a.timeLeft<120;
     return `<div class="vehicle-card" onclick="openDealerAuction(${a.id})">
-      <div class="vehicle-card-img">${a.emoji}<div class="badge ${urgent?'badge-pending':'badge-live'}" style="position:absolute;top:12px;left:12px">${urgent?'ΓÜí Ending':'ΓùÅ Live'}</div></div>
+      <div class="vehicle-card-img">${a.emoji}<div class="badge ${urgent?'badge-pending':'badge-live'}" style="position:absolute;top:12px;left:12px">${urgent?'âš¡ Ending':'â— Live'}</div></div>
       <div class="vehicle-card-body">
         <div class="vehicle-card-title">${a.year} ${a.make} ${a.model}</div>
-        <div class="vehicle-card-meta"><span class="meta-tag">≡ƒôì ${a.city}</span><span class="meta-tag">≡ƒ¢ú ${a.mileage} mi</span><span class="meta-tag">${a.trim}</span></div>
+        <div class="vehicle-card-meta"><span class="meta-tag">ðŸ“ ${a.city}</span><span class="meta-tag">ðŸ›£ ${a.mileage} mi</span><span class="meta-tag">${a.trim}</span></div>
         <div class="vehicle-card-bid">
           <div><div class="current-bid-label">Top Bid</div><div class="current-bid-amount">$${a.topBid.toLocaleString()}</div></div>
           <div style="text-align:right"><div class="text-muted text-sm">${a.bids} bids</div><div style="font-family:monospace;font-size:13px;color:${urgent?'#f87171':'#4ade80'}">${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}</div></div>
@@ -1723,11 +1738,11 @@ function openDealerAuction(id) {
   const ex=DEMO_EXTRA[id]||{};
   openAuctionId=id;
   document.getElementById('dam-title').textContent=`${a.year} ${a.make} ${a.model} ${a.trim}`;
-  document.getElementById('dam-subtitle').textContent=`${a.city}, IL ΓÇó ${a.mileage} mi`;
+  document.getElementById('dam-subtitle').textContent=`${a.city}, IL â€¢ ${a.mileage} mi`;
   const statusBanner=document.getElementById('dam-dealer-status');
-  if(statusBanner&&!a.iAmTop) statusBanner.innerHTML=`<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;">≡ƒöÆ All dealer identities are anonymous ΓÇö place a bid to enter</div>`;
-  buildPhotoGallery('dam',a.emoji||'≡ƒÜù',6);
-  buildDocs('dam','Clean',ex.plate||'AB-12345','IL',ex.vin||'ΓÇö');
+  if(statusBanner&&!a.iAmTop) statusBanner.innerHTML=`<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;">ðŸ”’ All dealer identities are anonymous â€” place a bid to enter</div>`;
+  buildPhotoGallery('dam',a.emoji||'ðŸš—',6);
+  buildDocs('dam','Clean',ex.plate||'AB-12345','IL',ex.vin||'â€”');
   const lv=document.getElementById('dam-loan-val'); if(lv) lv.textContent=ex.loan||'None';
   buildSpecs('dam',[{label:'Year',value:a.year},{label:'Make',value:a.make},{label:'Model',value:a.model},{label:'Trim',value:a.trim},{label:'Color',value:a.color},{label:'Mileage',value:a.mileage+' mi'},{label:'Condition',value:a.condition},{label:'Drivetrain',value:id===1?'AWD':id===2?'4WD':'FWD'},{label:'Transmission',value:id===2?'6-Speed Auto':'CVT'}]);
   buildCarfax('dam',ex.owners||1,ex.accidents||0,ex.serviceRecs||4);
@@ -1738,8 +1753,8 @@ function openDealerAuction(id) {
     {label:a.issues==='None disclosed'?'No disclosed issues':'Issues noted',type:a.issues==='None disclosed'?'good':'warn'},
   ]);
   document.getElementById('dam-details').innerHTML=`<strong style="color:var(--white)">Seller Notes:</strong> ${ex.comments||a.issues}`;
-  document.getElementById('dam-bid-summary').textContent=`${a.bids} bid${a.bids!==1?'s':''} ΓÇö top $${a.topBid.toLocaleString()}`;
-  const bids=DEMO_DEALERS.slice(0,a.bids).map((d,i)=>({label:a.iAmTop&&i===0?'Γ¡É You':ANON_LABELS[i],amount:a.topBid-i*200,isMe:a.iAmTop&&i===0}));
+  document.getElementById('dam-bid-summary').textContent=`${a.bids} bid${a.bids!==1?'s':''} â€” top $${a.topBid.toLocaleString()}`;
+  const bids=DEMO_DEALERS.slice(0,a.bids).map((d,i)=>({label:a.iAmTop&&i===0?'â­ You':ANON_LABELS[i],amount:a.topBid-i*200,isMe:a.iAmTop&&i===0}));
   document.getElementById('dam-bid-feed').innerHTML=bids.map((b,i)=>`<div class="bid-item ${i===0?'top':'mid'}"><div><div class="bid-dealer-name" style="${b.isMe?'color:var(--white);font-weight:600':''}">${b.label}</div></div><div><span class="bid-amount">$${b.amount.toLocaleString()}</span>${i===0?'<span class="bid-top-label">TOP</span>':''}</div></div>`).join('');
   document.getElementById('dealer-bid-input').value=a.topBid+200;
   if(a.iAmTop) showDealerWinBanner(a.myBid,false);
@@ -1759,17 +1774,17 @@ function openDealerAuction(id) {
 function placeDealerBid() {
   const amount=parseInt(document.getElementById('dealer-bid-input').value)||0;
   const a=DEMO_AUCTIONS.find(x=>x.id===openAuctionId); if(!a)return;
-  if(amount<=a.topBid){showToast('ΓÜá∩╕Å','Bid Too Low',`Must exceed $${a.topBid.toLocaleString()}`);return;}
+  if(amount<=a.topBid){showToast('âš ï¸','Bid Too Low',`Must exceed $${a.topBid.toLocaleString()}`);return;}
   a.topBid=amount; a.bids++; a.myBid=amount; a.iAmTop=true;
   const otherBids=DEMO_DEALERS.slice(0,Math.max(0,a.bids-1)).map((d,i)=>({label:ANON_LABELS[i],amount:a.topBid-(i+1)*200}));
   document.getElementById('dam-bid-feed').innerHTML=[
-    `<div class="bid-item top new-bid"><div><div class="bid-dealer-name" style="color:var(--white);font-weight:600">Γ¡É You</div></div><div><span class="bid-amount">$${amount.toLocaleString()}</span><span class="bid-top-label">TOP</span></div></div>`,
+    `<div class="bid-item top new-bid"><div><div class="bid-dealer-name" style="color:var(--white);font-weight:600">â­ You</div></div><div><span class="bid-amount">$${amount.toLocaleString()}</span><span class="bid-top-label">TOP</span></div></div>`,
     ...otherBids.map(b=>`<div class="bid-item mid"><div><div class="bid-dealer-name">${b.label}</div></div><div><span class="bid-amount">$${b.amount.toLocaleString()}</span></div></div>`)
   ].join('');
   document.getElementById('dealer-bid-input').value=amount+200;
-  document.getElementById('dam-bid-summary').textContent=`${a.bids} bids ΓÇö top $${a.topBid.toLocaleString()}`;
+  document.getElementById('dam-bid-summary').textContent=`${a.bids} bids â€” top $${a.topBid.toLocaleString()}`;
   showDealerWinBanner(amount,false);
-  showToast('Γ£à','Bid Placed!',`$${amount.toLocaleString()} is currently leading.`);
+  showToast('âœ…','Bid Placed!',`$${amount.toLocaleString()} is currently leading.`);
   renderDealerAuctions();
 }
 
@@ -1777,34 +1792,34 @@ function showDealerWinBanner(amount,isWon) {
   const banner=document.getElementById('dam-dealer-status');
   if(!banner)return;
   if(isWon){
-    banner.innerHTML=`<div style="background:linear-gradient(135deg,rgba(22,163,74,0.25),rgba(22,163,74,0.1));border:1px solid rgba(74,222,128,0.4);border-radius:var(--r);padding:16px;text-align:center;"><div style="font-size:28px;margin-bottom:6px">≡ƒÅå</div><div style="font-family:var(--serif);font-size:18px;color:#4ade80;margin-bottom:4px">You Won This Auction!</div><div style="font-size:13px;color:var(--g5)">Winning bid: <strong style="color:var(--white)">$${amount.toLocaleString()}</strong></div></div>`;
+    banner.innerHTML=`<div style="background:linear-gradient(135deg,rgba(22,163,74,0.25),rgba(22,163,74,0.1));border:1px solid rgba(74,222,128,0.4);border-radius:var(--r);padding:16px;text-align:center;"><div style="font-size:28px;margin-bottom:6px">ðŸ†</div><div style="font-family:var(--serif);font-size:18px;color:#4ade80;margin-bottom:4px">You Won This Auction!</div><div style="font-size:13px;color:var(--g5)">Winning bid: <strong style="color:var(--white)">$${amount.toLocaleString()}</strong></div></div>`;
   } else {
-    banner.innerHTML=`<div style="background:rgba(22,163,74,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center;">≡ƒÅå You are the top bidder at $${amount.toLocaleString()}</div>`;
+    banner.innerHTML=`<div style="background:rgba(22,163,74,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center;">ðŸ† You are the top bidder at $${amount.toLocaleString()}</div>`;
   }
 }
 
-// ΓòÉΓòÉΓòÉ ADMIN ΓòÉΓòÉΓòÉ
+// â•â•â• ADMIN â•â•â•
 function adminSection(sec,el) {
   ['overview','auctions','dealers','listings','flags','revenue'].forEach(s=>document.getElementById(`admin-${s}`).classList.toggle('hidden',s!==sec));
   document.querySelectorAll('.admin-nav-item').forEach(i=>i.classList.remove('active'));
   if(el) el.classList.add('active');
 }
 
-// ΓòÉΓòÉΓòÉ MODALS ΓòÉΓòÉΓòÉ
+// â•â•â• MODALS â•â•â•
 function openCounterModal(){document.getElementById('counter-modal').classList.add('open');}
 function openMessageModal(){document.getElementById('message-modal').classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
-function submitCounter(){const a=document.getElementById('counter-amount').value;closeModal('counter-modal');showToast('Γå⌐','Counter Sent',`$${parseInt(a).toLocaleString()} sent to top bidder.`);}
+function submitCounter(){const a=document.getElementById('counter-amount').value;closeModal('counter-modal');showToast('â†©','Counter Sent',`$${parseInt(a).toLocaleString()} sent to top bidder.`);}
 function sendMessage(){
   const t=document.getElementById('msg-input').value.trim(); if(!t)return;
   const list=document.getElementById('message-list');
-  list.innerHTML+=`<div class="message-item sent"><div class="message-text">${t}</div><div class="message-time">You ΓÇó just now</div></div>`;
+  list.innerHTML+=`<div class="message-item sent"><div class="message-text">${t}</div><div class="message-time">You â€¢ just now</div></div>`;
   document.getElementById('msg-input').value='';
   list.scrollTop=list.scrollHeight;
-  setTimeout(()=>{list.innerHTML+=`<div class="message-item received"><div class="message-text">Sounds great ΓÇö Monday or Tuesday 9amΓÇô5pm works for us. We'll bring a check.</div><div class="message-time">Winning Dealer ΓÇó just now</div></div>`;list.scrollTop=list.scrollHeight;},1500);
+  setTimeout(()=>{list.innerHTML+=`<div class="message-item received"><div class="message-text">Sounds great â€” Monday or Tuesday 9amâ€“5pm works for us. We'll bring a check.</div><div class="message-time">Winning Dealer â€¢ just now</div></div>`;list.scrollTop=list.scrollHeight;},1500);
 }
 
-// ΓòÉΓòÉΓòÉ TOAST ΓòÉΓòÉΓòÉ
+// â•â•â• TOAST â•â•â•
 function showToast(icon,title,desc){
   const c=document.getElementById('toast-container');
   const t=document.createElement('div'); t.className='toast';
@@ -1813,7 +1828,7 @@ function showToast(icon,title,desc){
   setTimeout(()=>{t.classList.add('removing');setTimeout(()=>t.remove(),300);},4000);
 }
 
-// ΓòÉΓòÉΓòÉ DEALER FEE QUEUE ΓòÉΓòÉΓòÉ
+// â•â•â• DEALER FEE QUEUE â•â•â•
 const D_pendingFees = [];
 let D_selectedFeeId = null;
 function dealerAddPendingFee(vehicle,winPrice,sellerName,sellerPhone,sellerEmail) {
@@ -1834,17 +1849,17 @@ function renderDealerFeeList() {
   const list=document.getElementById('dealer-pending-fees-list');
   if(!list)return;
   const unpaid=D_pendingFees.filter(f=>!f.paid);
-  if(unpaid.length===0){list.innerHTML=`<div class="card"><div class="card-body" style="text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:12px">Γ£à</div><div style="font-size:16px;font-weight:600;margin-bottom:6px">All fees paid</div></div></div>`;document.getElementById('dealer-payment-form-wrap').classList.add('hidden');return;}
+  if(unpaid.length===0){list.innerHTML=`<div class="card"><div class="card-body" style="text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:12px">âœ…</div><div style="font-size:16px;font-weight:600;margin-bottom:6px">All fees paid</div></div></div>`;document.getElementById('dealer-payment-form-wrap').classList.add('hidden');return;}
   list.innerHTML=unpaid.map(f=>`
     <div class="card" style="border:1px solid ${D_selectedFeeId===f.id?'rgba(201,184,255,0.4)':'rgba(255,255,255,0.08)'}">
       <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
         <div style="display:flex;align-items:center;gap:14px;flex:1">
-          <div style="width:44px;height:44px;border-radius:10px;background:rgba(201,184,255,0.1);border:1px solid rgba(201,184,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">≡ƒÜù</div>
-          <div><div style="font-size:14px;font-weight:600;margin-bottom:3px">${f.vehicle}</div><div style="font-size:12px;color:var(--g5)">Winning bid: <strong style="color:var(--accent)">$${f.winPrice.toLocaleString()}</strong> ┬╖ Fee: <strong style="color:#fff">$500</strong></div></div>
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(201,184,255,0.1);border:1px solid rgba(201,184,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">ðŸš—</div>
+          <div><div style="font-size:14px;font-weight:600;margin-bottom:3px">${f.vehicle}</div><div style="font-size:12px;color:var(--g5)">Winning bid: <strong style="color:var(--accent)">$${f.winPrice.toLocaleString()}</strong> Â· Fee: <strong style="color:#fff">$500</strong></div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
           <span style="font-size:11px;color:var(--accent2);background:rgba(255,214,160,0.1);border:1px solid rgba(255,214,160,0.2);padding:3px 10px;border-radius:50px">Fee Due</span>
-          <button onclick="selectDealerFee('${f.id}')" style="padding:9px 18px;background:rgba(201,184,255,0.15);color:var(--accent);border:1px solid rgba(201,184,255,0.3);border-radius:50px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Pay $500 ΓåÆ</button>
+          <button onclick="selectDealerFee('${f.id}')" style="padding:9px 18px;background:rgba(201,184,255,0.15);color:var(--accent);border:1px solid rgba(201,184,255,0.3);border-radius:50px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Pay $500 â†’</button>
         </div>
       </div>
     </div>`).join('');
@@ -1858,7 +1873,7 @@ function selectDealerFee(id) {
   document.getElementById('fee-summary-price').textContent='$'+fee.winPrice.toLocaleString();
   ['dealer-card-name','dealer-card-num','dealer-card-exp','dealer-card-cvv','dealer-card-zip'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const btn=document.getElementById('dealer-pay-btn');
-  if(btn){btn.textContent='Pay $500.00 ΓåÆ';btn.disabled=false;btn.style.cssText='';}
+  if(btn){btn.textContent='Pay $500.00 â†’';btn.disabled=false;btn.style.cssText='';}
   renderDealerFeeList();
   document.getElementById('dealer-payment-form-wrap').scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -1868,15 +1883,15 @@ function processDealerPayment() {
   const exp=document.getElementById('dealer-card-exp').value;
   const cvv=document.getElementById('dealer-card-cvv').value;
   const zip=document.getElementById('dealer-card-zip').value;
-  if(!name||!num||!exp||!cvv||!zip){showToast('ΓÜá∩╕Å','Missing Fields','Please fill in all payment details.');return;}
-  if(!D_selectedFeeId){showToast('ΓÜá∩╕Å','No Vehicle Selected','Please select a vehicle to pay for.');return;}
+  if(!name||!num||!exp||!cvv||!zip){showToast('âš ï¸','Missing Fields','Please fill in all payment details.');return;}
+  if(!D_selectedFeeId){showToast('âš ï¸','No Vehicle Selected','Please select a vehicle to pay for.');return;}
   const btn=document.getElementById('dealer-pay-btn');
   btn.textContent='Processing...';btn.disabled=true;
   setTimeout(()=>{
     const fee=D_pendingFees.find(f=>f.id===D_selectedFeeId);
     if(fee)fee.paid=true;
     D_selectedFeeId=null;
-    btn.textContent='Γ£ô Payment Successful';btn.style.background='rgba(168,240,224,0.15)';btn.style.color='var(--accent3)';btn.style.border='1px solid rgba(168,240,224,0.3)';
+    btn.textContent='âœ“ Payment Successful';btn.style.background='rgba(168,240,224,0.15)';btn.style.color='var(--accent3)';btn.style.border='1px solid rgba(168,240,224,0.3)';
     const form=btn.closest('.card-body');
     if(form&&fee){
       const existing=form.querySelector('.seller-contact-reveal');
@@ -1884,12 +1899,12 @@ function processDealerPayment() {
         const reveal=document.createElement('div');
         reveal.className='seller-contact-reveal';
         reveal.style.cssText='margin-top:16px;padding:16px;background:rgba(168,240,224,0.07);border:1px solid rgba(168,240,224,0.25);border-radius:var(--r)';
-        reveal.innerHTML=`<div style="font-size:13px;font-weight:600;color:var(--accent3);margin-bottom:8px">≡ƒöô Seller Contact Unlocked ΓÇö ${fee.vehicle}</div><div style="font-size:13px;margin-bottom:4px;font-weight:500">${fee.sellerName}</div><div style="font-size:12px;color:var(--g5)">≡ƒô₧ ${fee.sellerPhone}</div><div style="font-size:12px;color:var(--g5)">Γ£ë∩╕Å ${fee.sellerEmail}</div><div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:8px">Arrange pickup within 2 business days</div>`;
+        reveal.innerHTML=`<div style="font-size:13px;font-weight:600;color:var(--accent3);margin-bottom:8px">ðŸ”“ Seller Contact Unlocked â€” ${fee.vehicle}</div><div style="font-size:13px;margin-bottom:4px;font-weight:500">${fee.sellerName}</div><div style="font-size:12px;color:var(--g5)">ðŸ“ž ${fee.sellerPhone}</div><div style="font-size:12px;color:var(--g5)">âœ‰ï¸ ${fee.sellerEmail}</div><div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:8px">Arrange pickup within 2 business days</div>`;
         form.appendChild(reveal);
       }
     }
     updateDealerFeeTab();
-    showToast('Γ£à','Payment Complete',`$500 paid. Seller contact unlocked.`);
+    showToast('âœ…','Payment Complete',`$500 paid. Seller contact unlocked.`);
   },1800);
 }
 function highlightSellerPayment() {
@@ -1897,25 +1912,67 @@ function highlightSellerPayment() {
 }
 function formatCard(el){let v=el.value.replace(/\D/g,'').substring(0,16);el.value=v.replace(/(.{4})/g,'$1  ').trim();}
 function formatExpiry(el){let v=el.value.replace(/\D/g,'').substring(0,4);if(v.length>=2)v=v.substring(0,2)+' / '+v.substring(2);el.value=v;}
-function processSellerPayment() {
-  const name=document.getElementById('seller-card-name').value;
-  const num=document.getElementById('seller-card-num').value;
-  const exp=document.getElementById('seller-card-exp').value;
-  const cvv=document.getElementById('seller-card-cvv').value;
-  const zip=document.getElementById('seller-card-zip').value;
-  if(!name||!num||!exp||!cvv||!zip){showToast('ΓÜá∩╕Å','Missing Fields','Please fill in all payment details.');return;}
-  const btn=event.target;
-  btn.textContent='Processing...';btn.disabled=true;
-  setTimeout(()=>{
-    btn.textContent='Γ£ô Payment Successful';btn.style.background='rgba(168,240,224,0.15)';btn.style.color='var(--accent3)';btn.style.borderColor='rgba(168,240,224,0.3)';
-    const prompt=document.getElementById('seller-fee-prompt');
-    if(prompt){prompt.style.borderColor='rgba(168,240,224,0.3)';prompt.style.background='rgba(168,240,224,0.06)';prompt.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">Γ£à</span><div><div style="font-size:13px;font-weight:600;color:var(--accent3)">Payment Complete</div><div style="font-size:12px;color:var(--g5);margin-top:2px">Dealer pickup will be arranged within 1ΓÇô2 business days.</div></div></div>`;}
-    showToast('Γ£à','Payment Received','$250.00 received. Your auction is fully processed. Thank you!');
-  },1800);
+async function processSellerPayment() {
+  const name = document.getElementById('seller-card-name').value;
+  if(!name) { showToast('âš ï¸','Missing Name','Enter cardholder name.'); return; }
+  const btn = event.target;
+  btn.textContent = 'Processing...'; btn.disabled = true;
+  try {
+    // Create payment intent on backend
+    const res = await fetch(`${API}/payments/create-intent`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({amount: 25000, description: 'PrivaBuy Seller Platform Fee'})
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.detail || 'Failed to create payment');
+    // Confirm with Stripe
+    const result = await stripeClient.confirmCardPayment(data.client_secret, {
+      payment_method: {
+        card: sellerCardElement,
+        billing_details: { name }
+      }
+    });
+    if(result.error) throw new Error(result.error.message);
+    btn.textContent = 'âœ“ Payment Successful';
+    btn.style.background = 'rgba(168,240,224,0.15)';
+    btn.style.color = 'var(--accent3)';
+    btn.style.borderColor = 'rgba(168,240,224,0.3)';
+    const prompt = document.getElementById('seller-fee-prompt');
+    if(prompt){ prompt.style.borderColor='rgba(168,240,224,0.3)'; prompt.style.background='rgba(168,240,224,0.06)'; prompt.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">âœ…</span><div><div style="font-size:13px;font-weight:600;color:var(--accent3)">Payment Complete</div><div style="font-size:12px;color:var(--g5);margin-top:2px">Dealer pickup will be arranged within 1â€“2 business days.</div></div></div>`; }
+    showToast('âœ…','Payment Received','$250.00 received. Your auction is fully processed. Thank you!');
+  } catch(err) {
+    btn.textContent = 'Pay $250.00 â†’'; btn.disabled = false;
+    showToast('âŒ','Payment Failed', err.message);
+    console.error(err);
+  }
 }
 
-// ΓòÉΓòÉΓòÉ INIT ΓòÉΓòÉΓòÉ
-selectRole('seller',document.querySelector('.role-btn[data-role="seller"]'));
-</script>
+// â•â•â• INIT â•â•â•
+selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+
+const urlRole = new URLSearchParams(window.location.search).get('role');
+if(urlRole === 'dealer') {
+  selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
+} else if(urlRole === 'seller') {
+  selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+}
+
+// Initialize Stripe card elements
+let sellerCardElement, dealerCardElement;
+setTimeout(() => {
+  const elements = stripeClient.elements();
+  const cardStyle = {
+    style: {
+      base: { color: '#ffffff', fontFamily: 'Inter, sans-serif', fontSize: '14px', '::placeholder': { color: 'rgba(255,255,255,0.3)' } },
+      invalid: { color: '#f87171' }
+    }
+  };
+  sellerCardElement = elements.create('card', cardStyle);
+  sellerCardElement.mount('#seller-card-element');
+}, 500);</script>
 </body>
 </html>
+
+
+
