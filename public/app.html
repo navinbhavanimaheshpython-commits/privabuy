@@ -1432,8 +1432,17 @@ async function startAuction() {
 
   } catch(err) {
     showToast('','Failed to Start','Could not create listing: ' + err.message);
-    btn.textContent = ' Start My Auction  It's Free  document.getElementById('rc-meta').innerHTML = `<span class="meta-tag"> ZIP ${d.zip||'60601'}</span><span class="meta-tag"> ${(d.mileage||0).toLocaleString()} mi</span><span class="meta-tag">${d.drivetrain||'FWD'}</span>`;
+    btn.textContent = 'Start My Auction — It\'s Free';
+  }
 }
+
+function notifyDealerPortal() {
+  const d = S.auctionData;
+  document.getElementById('real-seller-auction-card').classList.remove('hidden');
+  document.getElementById('rc-title').textContent = `${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'} ${d.trim||''}`;
+  document.getElementById('rc-meta').innerHTML = `<span class="meta-tag">ZIP ${d.zip||'60601'}</span><span class="meta-tag">${(d.mileage||0).toLocaleString()} mi</span><span class="meta-tag">${d.drivetrain||'FWD'}</span>`;
+}
+
 
 function sellerConfirmReceivedPayment() {
   const awaiting = document.getElementById('seller-awaiting-payment');
