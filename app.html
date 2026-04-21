@@ -1765,16 +1765,6 @@ async function loadDealerAnalytics() {
   }
 }
 
-let dealerCardMounted = false;
-function mountDealerCard() {
-  if(dealerCardMounted) return;
-  try {
-    dealerCardElement.mount('#dealer-card-element');
-    dealerCardMounted = true;
-  } catch(e) {
-    console.log('Dealer card mount:', e);
-  }
-}
 
 function dealerTab(tab,el) {
   ['feed','watchlist','won','payment','analytics'].forEach(t=>document.getElementById(`dealer-tab-${t}`).classList.add('hidden'));
@@ -1783,7 +1773,7 @@ function dealerTab(tab,el) {
   if(el) el.classList.add('active');
   if(tab==='won') loadDealerWon();
   if(tab==='analytics') loadDealerAnalytics();
-  if(tab==='payment') mountDealerCard();
+  
 }
 async function renderDealerAuctions() {
   const grid = document.getElementById('dealer-auction-grid');
@@ -2076,7 +2066,8 @@ setTimeout(() => {
   sellerCardElement = elements.create('card', cardStyle);
   sellerCardElement.mount('#seller-card-element');
   dealerCardElement = elements.create('card', cardStyle);
-}, 500);
+  dealerCardElement.mount('#dealer-card-element');
+}, 2000);
 </script>
 </body>
 </html>
