@@ -886,8 +886,10 @@ body::before {
     </div>
     <div id="dealer-tab-won" class="hidden">
       <div class="section-title mb-16">Won Vehicles</div>
-      <div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Won</th><th>Paid</th><th>Seller</th><th>Status</th></tr></thead><tbody><tr><td><strong>2016 Toyota Camry SE</strong><br><span class="text-muted">88,400 mi  Clean</span></td><td>Mar 14</td><td class="text-purple" style="font-family:var(--serif)">$11,200</td><td>Sarah M.  312-555-0100</td><td><span class="badge badge-won">Pickup Scheduled</span></td></tr></tbody></table></div>
-    </div>
+      <div id="won-vehicles-content">
+      <div class="text-muted" style="text-align:center;padding:40px">Loading...</div>
+   </div>
+  </div>
 
     <div id="dealer-tab-payment" class="hidden">
       <div class="flex-between mb-24">
@@ -925,14 +927,14 @@ body::before {
     </div>
 
     <div id="dealer-tab-analytics" class="hidden">
-      <div class="flex-between mb-24">
-        <div><div class="section-title">Performance Analytics</div><div class="section-sub" style="margin-bottom:0;font-size:13px">Northside Auto Group · Chicago North Territory · Last 30 days</div></div>
+  <div class="flex-between mb-24">
+      <div><div class="section-title">Performance Analytics</div><div class="section-sub" style="margin-bottom:0;font-size:13px" id="analytics-subtitle">Loading...</div></div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
-        <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Win Rate</div><div class="stat-value" style="color:var(--accent3)">34.8%</div><div class="stat-label">23 auctions entered</div></div>
-        <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Vehicles Won</div><div class="stat-value">8</div><div class="stat-label">of 23 auctions</div></div>
-        <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Total Spend</div><div class="stat-value" style="color:var(--accent)">$94k</div><div class="stat-label">avg $11.8k/unit</div></div>
-        <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Est. Gross Profit</div><div class="stat-value" style="color:var(--accent3)">$31k</div><div class="stat-label">avg $3,875/unit</div></div>
+      <div id="analytics-stats-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+        <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Win Rate</div><div class="stat-value" id="stat-win-rate" style="color:var(--accent3)">--</div><div class="stat-label" id="stat-entered">-- auctions entered</div></div>
+        <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Vehicles Won</div><div class="stat-value" id="stat-won">--</div><div class="stat-label" id="stat-won-sub">of -- auctions</div></div>
+        <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Total Spend</div><div class="stat-value" id="stat-spend" style="color:var(--accent)">--</div><div class="stat-label" id="stat-avg-price">avg --/unit</div></div>
+        <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Avg Per Unit</div><div class="stat-value" id="stat-avg">--</div><div class="stat-label">per vehicle won</div></div>
       </div>
     </div>
   </div>
@@ -1721,11 +1723,59 @@ function clearAuction() { clearInterval(S.timerInterval); S.auctionActive=false;
 
 //  DEALER 
 function initDealerView() { dealerTab('feed',document.querySelector('#screen-dealer .tab-btn')); renderDealerAuctions(); }
+
+async function loadDealerWon() {
+  if(!S.dealer_id) return;
+  const el = document.getElementById('won-vehicles-content');
+  el.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">Loading...</div>';
+  try {
+    const res = await fetch(`${API}/offers/dealer/${S.dealer_id}/won`);
+    const data = await res.json();
+    if(!data.length) {
+      el.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:12px">🏆</div><div style="font-size:16px;font-weight:600;margin-bottom:6px">No won vehicles yet</div><div class="text-muted">Win an auction to see vehicles here.</div></div></div>';
+      return;
+    }
+    el.innerHTML = `<div class="card"><table class="data-table">
+      <thead><tr><th>Vehicle</th><th>Won</th><th>Paid</th><th>Seller</th><th>Status</th></tr></thead>
+      <tbody>${data.map(v => `
+        <tr>
+          <td><strong>${v.year} ${v.make} ${v.model}</strong><br><span class="text-muted">${(v.mileage||0).toLocaleString()} mi · ${v.condition||''}</span></td>
+          <td>${new Date(v.won_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td>
+          <td class="text-purple" style="font-family:var(--serif)">$${v.amount.toLocaleString()}</td>
+          <td>${v.seller_phone||''}<br><span class="text-muted" style="font-size:11px">${v.seller_email||''}</span></td>
+          <td><span class="badge badge-won">Pickup Scheduled</span></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
+  } catch(err) {
+    el.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">Could not load won vehicles.</div>';
+  }
+}
+
+async function loadDealerAnalytics() {
+  if(!S.dealer_id) return;
+  try {
+    const res = await fetch(`${API}/offers/dealer/${S.dealer_id}/analytics`);
+    const d = await res.json();
+    document.getElementById('analytics-subtitle').textContent = `${S.dealer_name || 'Your Dealership'} · Last 30 days`;
+    document.getElementById('stat-win-rate').textContent = d.win_rate + '%';
+    document.getElementById('stat-entered').textContent = d.total_entered + ' auctions entered';
+    document.getElementById('stat-won').textContent = d.total_won;
+    document.getElementById('stat-won-sub').textContent = 'of ' + d.total_entered + ' auctions';
+    document.getElementById('stat-spend').textContent = d.total_spend >= 1000 ? '$' + Math.round(d.total_spend/1000) + 'k' : '$' + d.total_spend;
+    document.getElementById('stat-avg').textContent = d.avg_price_per_unit ? '$' + d.avg_price_per_unit.toLocaleString() : '$0';
+    document.getElementById('stat-avg-price').textContent = 'avg $' + (d.avg_price_per_unit||0).toLocaleString() + '/unit';
+  } catch(err) {
+    console.error('Analytics load failed', err);
+  }
+}
+
 function dealerTab(tab,el) {
   ['feed','watchlist','won','payment','analytics'].forEach(t=>document.getElementById(`dealer-tab-${t}`).classList.add('hidden'));
   document.getElementById(`dealer-tab-${tab}`).classList.remove('hidden');
   document.querySelectorAll('#dealer-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   if(el) el.classList.add('active');
+  if(tab==='won') loadDealerWon();
+  if(tab==='analytics') loadDealerAnalytics();
 }
 async function renderDealerAuctions() {
   const grid = document.getElementById('dealer-auction-grid');
