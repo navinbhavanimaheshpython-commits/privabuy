@@ -1953,6 +1953,8 @@ function selectDealerFee(id) {
   if(btn){btn.textContent='Pay $500.00 →';btn.disabled=false;btn.style.cssText='';}
   renderDealerFeeList();
   document.getElementById('dealer-payment-form-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+// Mount Stripe card element now that the form is visible
+  setTimeout(() => { try { sellerCardElement.mount('#dealer-card-element'); } catch(e) {} }, 100);
 }
 async function processDealerPayment() {
   const name = document.getElementById('dealer-card-name').value;
