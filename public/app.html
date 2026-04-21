@@ -349,9 +349,9 @@ body::before {
       <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="seller-email-input" type="email" placeholder="you@example.com"></div>
     </div>
     <div id="login-dealer-fields" class="hidden">
-      <div class="alert alert-info"> Dealer access requires verification. Use your registered dealer email.</div>
-      <div class="form-group"><label class="form-label">Dealer License Number</label><input class="form-input" placeholder="IL-12345678"></div>
-      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="dealer-email-input" type="email" placeholder="dealer@automotivegroup.com"></div>
+      <div class="alert alert-info">Dealer access requires verification. Enter your license number and email.</div>
+      <div class="form-group"><label class="form-label">Dealer License Number</label><input class="form-input" id="dealer-license-input" placeholder="IL-12345678"></div>
+     <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="dealer-email-input" type="email" placeholder="dealer@automotivegroup.com"></div>
     </div>
     <div id="login-admin-fields" class="hidden">
       <div class="form-group"><label class="form-label">Admin Email</label><input class="form-input" type="email" placeholder="admin@privabuy.com"></div>
@@ -1154,12 +1154,28 @@ async function login() {
     }
 
     if(selectedRole === 'dealer') {
-      const email = document.getElementById('dealer-email-input').value.trim();
-      if(!email) { showToast(' ','Missing Info','Enter your dealer email.'); statusMsg.textContent = 'Enter your details above'; return; }
-      S.dealer_email = email;
-      S.dealer_id = null;
-      showToast('','Dealer Portal','Logged in. Dealer bids require a registered dealer ID.');
-    }
+  const license = document.getElementById('dealer-license-input').value.trim();
+  const email = document.getElementById('dealer-email-input').value.trim();
+  if(!license || !email) {
+    showToast('⚠️','Missing Info','Enter your license number and email.');
+    statusMsg.textContent = 'Enter your details above';
+    return;
+  }
+  const res = await fetch(`${API}/dealers/login`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({license_number: license, email: email})
+  });
+  const data = await res.json();
+  if(!res.ok) {
+    showToast('❌','Access Denied', data.detail || 'Verification failed.');
+    statusMsg.textContent = data.detail || 'Verification failed';
+    return;
+  }
+  S.dealer_id = data.dealer_id;
+  S.dealer_name = data.dealer_name;
+  showToast('✓','Welcome Back', data.dealer_name);
+}
 
     showScreen(`screen-${selectedRole}`);
     if(selectedRole==='seller') initSellerView();
@@ -1711,22 +1727,38 @@ function dealerTab(tab,el) {
   document.querySelectorAll('#dealer-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   if(el) el.classList.add('active');
 }
-function renderDealerAuctions() {
-  const grid=document.getElementById('dealer-auction-grid');
-  grid.innerHTML=DEMO_AUCTIONS.map(a=>{
-    const m=Math.floor(a.timeLeft/60),sec=a.timeLeft%60,urgent=a.timeLeft<120;
-    return `<div class="vehicle-card" onclick="openDealerAuction(${a.id})">
-      <div class="vehicle-card-img">${a.emoji}<div class="badge ${urgent?'badge-pending':'badge-live'}" style="position:absolute;top:12px;left:12px">${urgent?' Ending':'● Live'}</div></div>
-      <div class="vehicle-card-body">
-        <div class="vehicle-card-title">${a.year} ${a.make} ${a.model}</div>
-        <div class="vehicle-card-meta"><span class="meta-tag"> ${a.city}</span><span class="meta-tag"> ${a.mileage} mi</span><span class="meta-tag">${a.trim}</span></div>
-        <div class="vehicle-card-bid">
-          <div><div class="current-bid-label">Top Bid</div><div class="current-bid-amount">$${a.topBid.toLocaleString()}</div></div>
-          <div style="text-align:right"><div class="text-muted text-sm">${a.bids} bids</div><div style="font-family:monospace;font-size:13px;color:${urgent?'#f87171':'#4ade80'}">${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}</div></div>
+async function renderDealerAuctions() {
+  const grid = document.getElementById('dealer-auction-grid');
+  grid.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">Loading auctions...</div>';
+  try {
+    const res = await fetch(`${API}/cars/active`);
+    const cars = await res.json();
+    if(!cars.length) {
+      grid.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">No active auctions in your territory right now.</div>';
+      return;
+    }
+    grid.innerHTML = cars.map(a => `
+      <div class="vehicle-card" onclick="openDealerAuction('${a.car_id}')">
+        <div class="vehicle-card-img" style="background:linear-gradient(135deg,rgba(201,184,255,0.12),var(--g1))">
+          <div class="badge badge-live" style="position:absolute;top:12px;left:12px">● Live</div>
         </div>
-      </div>
-    </div>`;
-  }).join('');
+        <div class="vehicle-card-body">
+          <div class="vehicle-card-title">${a.year} ${a.make} ${a.model}</div>
+          <div class="vehicle-card-meta">
+            <span class="meta-tag">ZIP ${a.zip}</span>
+            <span class="meta-tag">${(a.mileage||0).toLocaleString()} mi</span>
+            <span class="meta-tag">${a.condition||''}</span>
+          </div>
+          <div class="vehicle-card-bid">
+            <div><div class="current-bid-label">Status</div><div class="current-bid-amount" style="font-size:14px;color:var(--accent3)">Open</div></div>
+            <div style="text-align:right"><div class="text-muted text-sm">Place first bid</div></div>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch(err) {
+    grid.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">Could not load auctions. Check your connection.</div>';
+    console.error(err);
+  }
 }
 
 let openAuctionId=null;
