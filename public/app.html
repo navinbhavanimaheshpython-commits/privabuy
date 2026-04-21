@@ -1235,8 +1235,8 @@ function wizardGo(step) {
 }
 async function decodeVIN() {
   const vin = document.getElementById('vin-input').value.trim();
-  if(vin.length < 17) { showToast('â ï¸','Invalid VIN','VIN must be exactly 17 characters.'); return; }
-  showToast('ð','Looking up VIN...','Checking NHTSA database...');
+  if(vin.length < 17) { showToast( 'Invalid VIN','VIN must be exactly 17 characters.'); return; }
+  showToast('Looking up VIN...','Checking NHTSA database...');
   try {
     const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
     const data = await res.json();
@@ -1959,6 +1959,7 @@ async function processDealerPayment() {
   if(!name) { showToast('⚠️','Missing Name','Enter cardholder name.'); return; }
   if(!D_selectedFeeId) { showToast('⚠️','No Vehicle Selected','Please select a vehicle to pay for.'); return; }
   const btn = document.getElementById('dealer-pay-btn');
+  try { sellerCardElement.mount('#dealer-card-element'); } catch(e) {}
   btn.textContent = 'Processing...'; btn.disabled = true;
   try {
     const res = await fetch(`${API}/payments/create-intent`, {
@@ -2065,9 +2066,8 @@ setTimeout(() => {
   };
   sellerCardElement = elements.create('card', cardStyle);
   sellerCardElement.mount('#seller-card-element');
-  dealerCardElement = elements.create('card', cardStyle);
-  dealerCardElement.mount('#dealer-card-element');
-}, 2000);
+  dealerCardElement = sellerCardElement; // reuse same element
+}, 500);
 </script>
 </body>
 </html>
