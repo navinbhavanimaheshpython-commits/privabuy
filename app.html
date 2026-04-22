@@ -891,35 +891,37 @@ body::before {
    </div>
   </div>
 
-   <div id="dealer-tab-payment" class="hidden">
-  <div class="flex-between mb-24">
-    <div><div class="section-title">Outstanding Platform Fees</div><div class="section-sub" style="margin-bottom:0">$500 per vehicle won</div></div>
-    <div class="badge badge-live" style="font-size:13px;padding:8px 16px">Secure Checkout</div>
-  </div>
-  <div id="dealer-pending-fees-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px"></div>
-  <div id="dealer-payment-form-wrap" class="hidden">
-    <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start">
-      <div class="card">
-        <div class="card-header"><div class="card-title">Pay for: <span id="dealer-paying-for" style="color:var(--accent)">—</span></div></div>
-        <div class="card-body">
-          <div class="form-group"><label class="form-label">Cardholder Name</label><input class="form-input" id="dealer-card-name" placeholder="James Kowalski"></div>
-          <div class="form-group"><label class="form-label">Card Details</label><div id="dealer-card-element" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;padding:14px;"></div></div>
-          <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 0"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(201,184,255,0.08);border:1px solid rgba(201,184,255,0.2);border-radius:var(--r);margin-bottom:20px">
-            <span style="font-size:15px;font-weight:600">Total Due</span>
-            <span style="font-size:22px;font-weight:700;color:var(--accent)">$500.00</span>
+    <div id="dealer-tab-payment" class="hidden">
+      <div class="flex-between mb-24">
+        <div><div class="section-title">Outstanding Platform Fees</div><div class="section-sub" style="margin-bottom:0">$500 per vehicle won</div></div>
+        <div class="badge badge-live" style="font-size:13px;padding:8px 16px"> Secure Checkout</div>
+      </div>
+      <div id="dealer-pending-fees-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px"></div>
+      <div id="dealer-payment-form-wrap" class="hidden">
+        <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Pay for: <span id="dealer-paying-for" style="color:var(--accent)"></span></div></div>
+            <div class="card-body">
+              <div class="alert alert-info" style="margin-bottom:20px"> Secure payment. PrivaBuy never stores your card details.</div>
+              <div class="form-group"><label class="form-label">Cardholder Name</label><input class="form-input" id="dealer-card-name" placeholder="James Kowalski"></div>
+              <div class="form-group"><label class="form-label">Card Details</label><div id="dealer-card-element" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;padding:14px;"></div></div>
+              <div class="form-group"><label class="form-label">Billing ZIP Code</label><input class="form-input" id="dealer-card-zip" placeholder="60601" maxlength="5" type="number"></div>
+              <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 0"></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(201,184,255,0.08);border:1px solid rgba(201,184,255,0.2);border-radius:var(--r);margin-bottom:20px">
+                <span style="font-size:15px;font-weight:600">Total Due</span>
+                <span style="font-size:22px;font-weight:700;color:var(--accent)">$500.00</span>
+              </div>
+              <button class="btn btn-primary btn-full btn-lg" id="dealer-pay-btn" onclick="processDealerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $500.00 →</button>
+            </div>
           </div>
-          <button class="btn btn-primary btn-full btn-lg" id="dealer-pay-btn" onclick="processDealerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $500.00 →</button>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="card"><div class="card-header"><div class="card-title">Fee Summary</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:10px"><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Vehicle</span><span style="font-size:13px" id="fee-summary-vehicle"></span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Win price</span><span style="font-size:13px" id="fee-summary-price"></span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Fee type</span><span style="font-size:13px">One-time · Per vehicle</span></div></div></div></div>
+            <div class="card"><div class="card-body"><div style="display:flex;gap:10px"><span style="font-size:20px">?</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Questions?</div><div style="font-size:12px;color:var(--g5)">Email <span style="color:var(--accent)">support@privabuy.com</span></div></div></div></div></div>
+          </div>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <div class="card"><div class="card-header"><div class="card-title">Fee Summary</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:10px"><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Vehicle</span><span style="font-size:13px" id="fee-summary-vehicle">—</span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Win price</span><span style="font-size:13px" id="fee-summary-price">—</span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Fee type</span><span style="font-size:13px">One-time · Per vehicle</span></div></div></div></div>
-        <div class="card"><div class="card-body"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:20px">&#x1F512;</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">256-bit SSL Encryption</div><div style="font-size:12px;color:var(--g5);line-height:1.5">Your card information is encrypted and never stored.</div></div></div></div></div>
-        <div class="card"><div class="card-body"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:20px">?</span><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Questions?</div><div style="font-size:12px;color:var(--g5)">Email <span style="color:var(--accent)">support@privabuy.com</span></div></div></div></div></div>
-      </div>
     </div>
-  </div>
-</div>
+
     <div id="dealer-tab-analytics" class="hidden">
   <div class="flex-between mb-24">
       <div><div class="section-title">Performance Analytics</div><div class="section-sub" style="margin-bottom:0;font-size:13px" id="analytics-subtitle">Loading...</div></div>
