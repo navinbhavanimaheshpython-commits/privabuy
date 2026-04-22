@@ -1954,7 +1954,7 @@ function selectDealerFee(id) {
   renderDealerFeeList();
   document.getElementById('dealer-payment-form-wrap').scrollIntoView({behavior:'smooth',block:'start'});
 // Mount Stripe card element now that the form is visible
-  setTimeout(() => { try { sellerCardElement.mount('#dealer-card-element'); } catch(e) {} }, 100);
+setTimeout(() => mountDealerStripeCard(), 100);
 }
 async function processDealerPayment() {
   const name = document.getElementById('dealer-card-name').value;
@@ -2058,18 +2058,31 @@ if(urlRole === 'dealer') {
 
 // Initialize Stripe card elements
 let sellerCardElement, dealerCardElement;
+let stripeElements;
+
 setTimeout(() => {
-  const elements = stripeClient.elements();
+  stripeElements = stripeClient.elements();
   const cardStyle = {
     style: {
       base: { color: '#ffffff', fontFamily: 'Inter, sans-serif', fontSize: '14px', '::placeholder': { color: 'rgba(255,255,255,0.3)' } },
       invalid: { color: '#f87171' }
     }
   };
-  sellerCardElement = elements.create('card', cardStyle);
+  sellerCardElement = stripeElements.create('card', cardStyle);
   sellerCardElement.mount('#seller-card-element');
-  dealerCardElement = sellerCardElement; // reuse same element
 }, 500);
+
+function mountDealerStripeCard() {
+  if(dealerCardElement) { try { dealerCardElement.destroy(); } catch(e) {} }
+  const cardStyle = {
+    style: {
+      base: { color: '#ffffff', fontFamily: 'Inter, sans-serif', fontSize: '14px', '::placeholder': { color: 'rgba(255,255,255,0.3)' } },
+      invalid: { color: '#f87171' }
+    }
+  };
+  dealerCardElement = stripeElements.create('card', cardStyle);
+  dealerCardElement.mount('#dealer-card-element');
+}
 </script>
 </body>
 </html>
