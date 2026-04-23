@@ -1767,13 +1767,14 @@ async function loadDealerAnalytics() {
 
 
 function dealerTab(tab,el) {
+  if(S._currentDealerTab === 'payment' && tab !== 'payment') restoreSellerCard();
+  S._currentDealerTab = tab;
   ['feed','watchlist','won','payment','analytics'].forEach(t=>document.getElementById(`dealer-tab-${t}`).classList.add('hidden'));
   document.getElementById(`dealer-tab-${tab}`).classList.remove('hidden');
   document.querySelectorAll('#dealer-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   if(el) el.classList.add('active');
   if(tab==='won') loadDealerWon();
   if(tab==='analytics') loadDealerAnalytics();
-  
 }
 async function renderDealerAuctions() {
   const grid = document.getElementById('dealer-auction-grid');
@@ -2058,30 +2059,34 @@ if(urlRole === 'dealer') {
 
 // Initialize Stripe card elements
 let sellerCardElement, dealerCardElement;
-let stripeElements;
+let stripeElements, stripeElementsDealer;
 
 setTimeout(() => {
-  stripeElements = stripeClient.elements();
   const cardStyle = {
     style: {
       base: { color: '#ffffff', fontFamily: 'Inter, sans-serif', fontSize: '14px', '::placeholder': { color: 'rgba(255,255,255,0.3)' } },
       invalid: { color: '#f87171' }
     }
   };
+  stripeElements = stripeClient.elements();
   sellerCardElement = stripeElements.create('card', cardStyle);
   sellerCardElement.mount('#seller-card-element');
+
+  stripeElementsDealer = stripeClient.elements();
+  dealerCardElement = stripeElementsDealer.create('card', cardStyle);
 }, 500);
 
 function mountDealerStripeCard() {
-  if(dealerCardElement) { try { dealerCardElement.destroy(); } catch(e) {} }
-  const cardStyle = {
-    style: {
-      base: { color: '#ffffff', fontFamily: 'Inter, sans-serif', fontSize: '14px', '::placeholder': { color: 'rgba(255,255,255,0.3)' } },
-      invalid: { color: '#f87171' }
-    }
-  };
-  dealerCardElement = stripeElements.create('card', cardStyle);
-  dealerCardElement.mount('#dealer-card-element');
+  try { dealerCardElement.mount('#dealer-card-element'); } catch(e) { console.log(e); }
+}
+
+function restoreSellerCard() {
+  const dealerSlot = document.getElementById('dealer-card-element');
+  const sellerSlot = document.getElementById('seller-card-element');
+  if(!dealerSlot || !sellerSlot) return;
+  while(dealerSlot.firstChild) {
+    sellerSlot.appendChild(dealerSlot.firstChild);
+  }
 }
 </script>
 </body>
