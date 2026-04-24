@@ -1417,7 +1417,21 @@ async function startAuction() {
         zip: d.zip || '',
         condition: (getRadio('overall-condition-group') || 'good').toLowerCase().replace(/ /g,'-'),
         seller_phone: '',
-        seller_email: ''
+        seller_email: '',
+        vin: document.getElementById('vin-input')?.value || '',
+        title_status: getRadio('title-group') || 'Clean',
+        loan_status: getRadio('loan-group') || 'None',
+        trim: d.trim || '',
+        color: d.color || '',
+        transmission: getRadio('transmission-group') || 'Automatic',
+        drivetrain: getRadio('drivetrain-group') || 'FWD',
+        keys: getRadio('keys-group') || 'Yes',
+        accidents: getRadio('accident-group') || 'None',
+        owners: 1,
+        smoked_in: getRadio('smoked-group') === 'Yes',
+        overall_condition: getRadio('overall-condition-group') || '',
+        comments: document.getElementById('f-comments')?.value || '',
+        addons: d.addons || ''
       })
     });
     const data = await res.json();
@@ -1891,16 +1905,39 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
       {label:'Year', value: car.year},
       {label:'Make', value: car.make},
       {label:'Model', value: car.model},
+      {label:'Trim', value: car.trim},
+      {label:'Color', value: car.color},
       {label:'Mileage', value: (car.mileage||0).toLocaleString()+' mi'},
-      {label:'ZIP Code', value: car.zip},
-      {label:'Condition', value: car.condition||'Good'},
+      {label:'Transmission', value: car.transmission},
+      {label:'Drivetrain', value: car.drivetrain},
+      {label:'Add-ons', value: car.addons},
     ]);
 
     // Build docs
-    buildDocs('dam', 'Clean', 'On File', 'IL', '—');
+   buildDocs('dam', car.title_status, 'On File', 'IL', car.vin);
+   
+   const loanEl = document.getElementById('dam-loan-val');
+    if(loanEl) loanEl.textContent = car.loan_status;
 
     // Build carfax placeholder
-    buildCarfax('dam', 1, 0, 0);
+    buildCarfax('dam', car.owners||1, 
+      car.accidents==='None'?0:car.accidents==='One'?1:2, 0);
+
+
+
+    
+    const condPills = [
+      {label: 'Overall: '+(car.overall_condition||car.condition||'Good'), type:'good'}
+    ];
+    if(car.smoked_in) condPills.push({label:'Smoked In', type:'bad'});
+    if(car.accidents && car.accidents!=='None') condPills.push({label:'Accident: '+car.accidents, type:'warn'});
+    else condPills.push({label:'No accidents disclosed', type:'good'});
+    buildCondition('dam', condPills);
+
+    if(car.comments) {
+      document.getElementById('dam-details').innerHTML = 
+        `<strong style="color:var(--white)">Seller Notes:</strong> ${car.comments}`;
+    }
 
     // Build condition
     buildCondition('dam', [
