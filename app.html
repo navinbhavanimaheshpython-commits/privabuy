@@ -1014,7 +1014,7 @@ body::before {
   <div class="modal" style="max-width:900px;width:95vw;">
     <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px;">
       <div><div class="modal-title" id="dam-title"></div><div style="font-size:12px;color:var(--g5);margin-top:3px" id="dam-subtitle">Chicago, IL</div></div>
-      <div style="display:flex;align-items:center;gap:12px;"><div class="badge badge-live">● Live</div><button class="modal-close" onclick="closeModal('dealer-auction-modal')"></button></div>
+      <div style="display:flex;align-items:center;gap:12px;"><div class="badge badge-live">● Live</div><button class="modal-close" onclick="closeModal('dealer-auction-modal')">✕</button>
     </div>
     <div class="modal-body" style="padding-top:20px;">
       <div class="auction-timer-block" style="margin-bottom:20px;padding:16px 20px;">
@@ -1777,8 +1777,26 @@ function clearAuction() { clearInterval(S.timerInterval); S.auctionActive=false;
 function initDealerView() {
   dealerTab('feed', document.querySelector('#screen-dealer .tab-btn'));
   renderDealerAuctions();
-  // Poll for new listings every 10 seconds
   setInterval(renderDealerAuctions, 10000);
+  // Check for notifications
+  if(S.dealer_id) checkDealerNotifications();
+}
+
+async function checkDealerNotifications() {
+  try {
+    const res = await fetch(`${API}/dealers/${S.dealer_id}/notifications`);
+    const data = await res.json();
+    if(data.dealer_notifications && data.dealer_notifications.length > 0) {
+      data.dealer_notifications.forEach(n => {
+        if(n.type === 'NEW_CAR_ASSIGNED') {
+          showToast('🚗','New Listing!','A new vehicle just listed in your territory.');
+        }
+      });
+      renderDealerAuctions();
+    }
+  } catch(e) {}
+  // Check every 30 seconds
+  setTimeout(checkDealerNotifications, 30000);
 }
 async function loadDealerWon() {
   if(!S.dealer_id) return;
@@ -1898,19 +1916,21 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
     const startTime = new Date(car.created_at);
     const elapsed = Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000));
     const m = Math.floor(elapsed/60), s = elapsed%60;
-    document.getElementById('dealer-modal-timer').textContent = `${m}:${String(s).padStart(2,'0')}`;
+    const listedAt = startTime.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + 
+      ' at ' + startTime.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    document.getElementById('dam-bid-summary').textContent = `Listed ${listedAt}`;
 
     // Build specs
     buildSpecs('dam', [
-      {label:'Year', value: car.year},
-      {label:'Make', value: car.make},
-      {label:'Model', value: car.model},
-      {label:'Trim', value: car.trim},
-      {label:'Color', value: car.color},
+      {label:'Year', value: car.year || '—'},
+      {label:'Make', value: car.make || '—'},
+      {label:'Model', value: car.model || '—'},
+      {label:'Trim', value: (car.trim && car.trim !== 'undefined') ? car.trim : '—'},
+      {label:'Color', value: (car.color && car.color !== 'undefined') ? car.color : '—'},
       {label:'Mileage', value: (car.mileage||0).toLocaleString()+' mi'},
-      {label:'Transmission', value: car.transmission},
-      {label:'Drivetrain', value: car.drivetrain},
-      {label:'Add-ons', value: car.addons},
+      {label:'Transmission', value: (car.transmission && car.transmission !== 'undefined') ? car.transmission : '—'},
+      {label:'Drivetrain', value: (car.drivetrain && car.drivetrain !== 'undefined') ? car.drivetrain : '—'},
+      {label:'Add-ons', value: (car.addons && car.addons !== 'undefined') ? car.addons : '—'},
     ]);
 
     // Build docs
