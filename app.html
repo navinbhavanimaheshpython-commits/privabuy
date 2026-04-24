@@ -1442,12 +1442,26 @@ async function startAuction() {
     notifyDealerPortal();
     showToast('','Auction Live!',`${data.connected_dealers} dealers notified. Car ID: ${S.car_id.slice(0,8)}...`);
     startAuctionTimer();
-    setTimeout(()=>startBidSimulation(), 4000);
+    startSellerBidPoll();
 
   } catch(err) {
     showToast('','Failed to Start','Could not create listing: ' + err.message);
     btn.textContent = 'Start My Auction — It\'s Free';
   }
+}
+
+function startAuctionTimer() {
+  clearInterval(S.timerInterval);
+  S.elapsedSeconds = 0;
+  S.timerInterval = setInterval(()=>{
+    S.elapsedSeconds++;
+    const m = Math.floor(S.elapsedSeconds/60), sec = S.elapsedSeconds%60;
+    const str = `${m}:${String(sec).padStart(2,'0')}`;
+    const el = document.getElementById('seller-elapsed');
+    if(el) el.textContent = str;
+    const rc = document.getElementById('rc-timer');
+    if(rc) rc.textContent = str;
+  },1000);
 }
 
 function notifyDealerPortal() {
@@ -1853,8 +1867,7 @@ async function renderDealerAuctions() {
 }
 
 
-let currentRealAuctionId = null;
-let dealerBidPollInterval = null;
+
 
 async function openRealDealerAuction(carId, title, zip, mileage, condition) {
   currentRealAuctionId = carId;
@@ -2169,6 +2182,10 @@ if(urlRole === 'dealer') {
 } else if(urlRole === 'seller') {
   selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
 }
+
+
+let currentRealAuctionId = null;
+let dealerBidPollInterval = null;
 
 // Initialize Stripe card elements
 let sellerCardElement, dealerCardElement;
