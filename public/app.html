@@ -1090,6 +1090,7 @@ const S = {
   dealerModalTimer:null, dealerCardTimerInterval:null,
   radioValues:{},
   seller_id: null, car_id: null, dealer_id: null,
+  auctionStartTime: null,
   latest_offer_id: null, elapsedSeconds: 0
 };
 
@@ -1424,6 +1425,7 @@ async function startAuction() {
     S.car_id = data.car_id;
 
     S.auctionActive = true; S.bids = []; S.elapsedSeconds = 0;
+    S.auctionStartTime = Date.now();
     S.auctionData = {...S.formData};
     resetAnon();
 
@@ -1476,19 +1478,45 @@ function updateStartBtn() {
   else { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed'; }
 }
 
-function startAuctionTimer() {
-  clearInterval(S.timerInterval);
-  S.elapsedSeconds = 0;
-  S.timerInterval = setInterval(()=>{
-    S.elapsedSeconds++;
-    const m = Math.floor(S.elapsedSeconds/60), sec = S.elapsedSeconds%60;
-    const str = `${m}:${String(sec).padStart(2,'0')}`;
-    const el = document.getElementById('seller-elapsed');
-    if(el) el.textContent = str;
-    const rc = document.getElementById('rc-timer');
-    if(rc) rc.textContent = str;
-  },1000);
+function startSellerBidPoll() {
+  if(!S.car_id) return;
+  if(S.bidPollInterval) clearInterval(S.bidPollInterval);
+  S.bidPollInterval = setInterval(async () => {
+    // Stop if auction closed or accepted
+if(!S.auctionActive || !S.car_id) {
+  clearInterval(S.bidPollInterval);
+  return;
 }
+// Stop after 30 days
+const auctionAge = (Date.now() - S.auctionStartTime) / (1000 * 60 * 60 * 24);
+if(auctionAge > 30) {
+  clearInterval(S.bidPollInterval);
+  S.auctionActive = false;
+  showToast('⚠️', 'Auction Expired', 'Your auction has been open for 30 days and has been closed.');
+  document.getElementById('seller-elapsed').textContent = 'EXPIRED';
+  return;
+}
+    try {
+      const res = await fetch(`${API}/offers/car/${S.car_id}/top-bids`);
+      const bids = await res.json();
+      if(!bids.length) return;
+      bids.forEach(b => {
+        const exists = S.bids.find(sb => sb.offer_id === b.offer_id);
+        if(!exists) {
+          S.bids.unshift({dealer: 'Dealer', amount: b.amount, time: 'just now', isReal: true, offer_id: b.offer_id});
+          S.latest_offer_id = b.offer_id;
+          updateBidFeed();
+          const topBtn = document.getElementById('accept-bid-btn');
+          if(topBtn) { topBtn.disabled = false; document.getElementById('top-bid-display').textContent = '$'+b.amount.toLocaleString(); }
+          showToast('💰','New Bid', `$${b.amount.toLocaleString()} received`);
+        }
+      });
+    } catch(e) {}
+  }, 5000);
+}
+
+startAuctionTimer();
+startSellerBidPoll();
 
 function startBidSimulation() {
   const base = S.auctionData?.tradeIn ? S.auctionData.tradeIn : 9000;
@@ -1718,8 +1746,12 @@ async function acceptTopBid() {
 function clearAuction() { clearInterval(S.timerInterval); S.auctionActive=false; S.bids=[]; clearInterval(S.dealerCardTimerInterval); }
 
 //  DEALER 
-function initDealerView() { dealerTab('feed',document.querySelector('#screen-dealer .tab-btn')); renderDealerAuctions(); }
-
+function initDealerView() {
+  dealerTab('feed', document.querySelector('#screen-dealer .tab-btn'));
+  renderDealerAuctions();
+  // Poll for new listings every 10 seconds
+  setInterval(renderDealerAuctions, 10000);
+}
 async function loadDealerWon() {
   if(!S.dealer_id) return;
   const el = document.getElementById('won-vehicles-content');
@@ -1778,17 +1810,17 @@ function dealerTab(tab,el) {
 }
 async function renderDealerAuctions() {
   const grid = document.getElementById('dealer-auction-grid');
-  grid.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">Loading auctions...</div>';
   try {
     const res = await fetch(`${API}/cars/active`);
     const cars = await res.json();
     if(!cars.length) {
-      grid.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">No active auctions in your territory right now.</div>';
+      grid.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px;grid-column:1/-1">No active auctions in your territory right now. Check back soon.</div>';
       return;
     }
     grid.innerHTML = cars.map(a => `
-      <div class="vehicle-card" onclick="openDealerAuction('${a.car_id}')">
+      <div class="vehicle-card" onclick="openRealDealerAuction('${a.car_id}','${a.year} ${a.make} ${a.model}','${a.zip}',${a.mileage},'${a.condition}')">
         <div class="vehicle-card-img" style="background:linear-gradient(135deg,rgba(201,184,255,0.12),var(--g1))">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-4h12l2 4h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/></svg>
           <div class="badge badge-live" style="position:absolute;top:12px;left:12px">● Live</div>
         </div>
         <div class="vehicle-card-body">
@@ -1796,18 +1828,88 @@ async function renderDealerAuctions() {
           <div class="vehicle-card-meta">
             <span class="meta-tag">ZIP ${a.zip}</span>
             <span class="meta-tag">${(a.mileage||0).toLocaleString()} mi</span>
-            <span class="meta-tag">${a.condition||''}</span>
+            <span class="meta-tag">${a.condition||'Good'}</span>
           </div>
           <div class="vehicle-card-bid">
-            <div><div class="current-bid-label">Status</div><div class="current-bid-amount" style="font-size:14px;color:var(--accent3)">Open</div></div>
-            <div style="text-align:right"><div class="text-muted text-sm">Place first bid</div></div>
+            <div><div class="current-bid-label">Status</div><div class="current-bid-amount" style="font-size:14px;color:var(--accent3)">● Open</div></div>
+            <div style="text-align:right"><div class="text-muted text-sm" id="bid-count-${a.car_id}">Loading...</div></div>
           </div>
         </div>
       </div>`).join('');
+
+    // Load bid counts for each car
+    cars.forEach(async a => {
+      try {
+        const bRes = await fetch(`${API}/offers/car/${a.car_id}/top-bids`);
+        const bids = await bRes.json();
+        const el = document.getElementById(`bid-count-${a.car_id}`);
+        if(el) el.textContent = bids.length + ' bid' + (bids.length !== 1 ? 's' : '');
+      } catch(e) {}
+    });
+
   } catch(err) {
-    grid.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">Could not load auctions. Check your connection.</div>';
-    console.error(err);
+    grid.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px;grid-column:1/-1">Could not load auctions.</div>';
   }
+}
+
+
+let currentRealAuctionId = null;
+let dealerBidPollInterval = null;
+
+async function openRealDealerAuction(carId, title, zip, mileage, condition) {
+  currentRealAuctionId = carId;
+  document.getElementById('dam-title').textContent = title;
+  document.getElementById('dam-subtitle').textContent = `ZIP ${zip} · ${(mileage||0).toLocaleString()} mi`;
+  document.getElementById('dealer-bid-input').value = '';
+  
+  // Load bids immediately
+  await refreshRealAuctionBids(carId);
+  
+  // Start polling for new bids every 5 seconds
+  if(dealerBidPollInterval) clearInterval(dealerBidPollInterval);
+  dealerBidPollInterval = setInterval(() => refreshRealAuctionBids(carId), 5000);
+  
+  document.getElementById('dealer-auction-modal').classList.add('open');
+}
+
+async function refreshRealAuctionBids(carId) {
+  try {
+    const res = await fetch(`${API}/offers/car/${carId}/top-bids`);
+    const bids = await res.json();
+    const feed = document.getElementById('dam-bid-feed');
+    if(!bids.length) {
+      feed.innerHTML = '<div class="text-muted text-sm" style="text-align:center;padding:16px">No bids yet — be first!</div>';
+      document.getElementById('dam-bid-summary').textContent = '0 bids so far';
+      return;
+    }
+    const myTopBid = bids.find(b => b.dealer_id === S.dealer_id);
+    const topBid = bids[0];
+    
+    // Update status banner
+    const statusEl = document.getElementById('dam-dealer-status');
+    if(statusEl) {
+      if(myTopBid && myTopBid.amount === topBid.amount) {
+        statusEl.innerHTML = `<div style="background:rgba(22,163,74,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center">You are the top bidder at $${topBid.amount.toLocaleString()}</div>`;
+      } else if(myTopBid) {
+        statusEl.innerHTML = `<div style="background:rgba(217,119,6,0.12);border:1px solid rgba(251,191,36,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#fbbf24;font-weight:600;text-align:center">You've been outbid — your bid: $${myTopBid.amount.toLocaleString()}</div>`;
+      } else {
+        statusEl.innerHTML = `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center">Place a bid to enter this auction</div>`;
+      }
+    }
+
+    feed.innerHTML = bids.map((b, i) => `
+      <div class="bid-item ${i===0?'top':'mid'}">
+        <div><div class="bid-dealer-name" style="${b.dealer_id===S.dealer_id?'color:var(--white);font-weight:600':''}">${b.dealer_id===S.dealer_id?'You':'Dealer '+String.fromCharCode(65+i)}</div></div>
+        <div><span class="bid-amount">$${b.amount.toLocaleString()}</span>${i===0?'<span class="bid-top-label">TOP</span>':''}</div>
+      </div>`).join('');
+    
+    document.getElementById('dam-bid-summary').textContent = `${bids.length} bid${bids.length!==1?'s':''} · top $${topBid.amount.toLocaleString()}`;
+    document.getElementById('dealer-bid-input').value = topBid.amount + 200;
+
+    // Update card in feed
+    const countEl = document.getElementById(`bid-count-${carId}`);
+    if(countEl) countEl.textContent = bids.length + ' bid' + (bids.length !== 1 ? 's' : '');
+  } catch(e) { console.error(e); }
 }
 
 let openAuctionId=null;
@@ -1849,21 +1951,25 @@ function openDealerAuction(id) {
   document.getElementById('dealer-auction-modal').classList.add('open');
 }
 
-function placeDealerBid() {
-  const amount=parseInt(document.getElementById('dealer-bid-input').value)||0;
-  const a=DEMO_AUCTIONS.find(x=>x.id===openAuctionId); if(!a)return;
-  if(amount<=a.topBid){showToast('â ï¸','Bid Too Low',`Must exceed $${a.topBid.toLocaleString()}`);return;}
-  a.topBid=amount; a.bids++; a.myBid=amount; a.iAmTop=true;
-  const otherBids=DEMO_DEALERS.slice(0,Math.max(0,a.bids-1)).map((d,i)=>({label:ANON_LABELS[i],amount:a.topBid-(i+1)*200}));
-  document.getElementById('dam-bid-feed').innerHTML=[
-    `<div class="bid-item top new-bid"><div><div class="bid-dealer-name" style="color:var(--white);font-weight:600"> You</div></div><div><span class="bid-amount">$${amount.toLocaleString()}</span><span class="bid-top-label">TOP</span></div></div>`,
-    ...otherBids.map(b=>`<div class="bid-item mid"><div><div class="bid-dealer-name">${b.label}</div></div><div><span class="bid-amount">$${b.amount.toLocaleString()}</span></div></div>`)
-  ].join('');
-  document.getElementById('dealer-bid-input').value=amount+200;
-  document.getElementById('dam-bid-summary').textContent=`${a.bids} bids  top $${a.topBid.toLocaleString()}`;
-  showDealerWinBanner(amount,false);
-  showToast('','Bid Placed!',`$${amount.toLocaleString()} is currently leading.`);
-  renderDealerAuctions();
+async function placeDealerBid() {
+  if(!S.dealer_id) { showToast('⚠️','Not Authorized','You must be logged in as a dealer to bid.'); return; }
+  if(!currentRealAuctionId) { showToast('⚠️','No Auction','No auction selected.'); return; }
+  const amount = parseInt(document.getElementById('dealer-bid-input').value)||0;
+  if(!amount) { showToast('⚠️','Invalid Amount','Enter a bid amount.'); return; }
+
+  try {
+    const res = await fetch(`${API}/offers/submit`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({dealer_id: S.dealer_id, car_id: currentRealAuctionId, offer_amount: amount})
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.detail || 'Bid failed');
+    showToast('✓','Bid Placed!', `$${amount.toLocaleString()} submitted`);
+    await refreshRealAuctionBids(currentRealAuctionId);
+  } catch(err) {
+    showToast('❌','Bid Failed', err.message);
+  }
 }
 
 function showDealerWinBanner(amount,isWon) {
@@ -1886,7 +1992,14 @@ function adminSection(sec,el) {
 //  MODALS 
 function openCounterModal(){document.getElementById('counter-modal').classList.add('open');}
 function openMessageModal(){document.getElementById('message-modal').classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if(id === 'dealer-auction-modal' && dealerBidPollInterval) {
+    clearInterval(dealerBidPollInterval);
+    dealerBidPollInterval = null;
+    currentRealAuctionId = null;
+  }
+}
 function submitCounter(){const a=document.getElementById('counter-amount').value;closeModal('counter-modal');showToast('','Counter Sent',`$${parseInt(a).toLocaleString()} sent to top bidder.`);}
 function sendMessage(){
   const t=document.getElementById('msg-input').value.trim(); if(!t)return;
