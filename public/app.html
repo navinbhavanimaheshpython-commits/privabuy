@@ -1882,7 +1882,7 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
     
     // Auction start time
     const startTime = new Date(car.created_at);
-    const elapsed = Math.floor((Date.now() - startTime.getTime()) / 1000);
+    const elapsed = Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000));
     const m = Math.floor(elapsed/60), s = elapsed%60;
     document.getElementById('dealer-modal-timer').textContent = `${m}:${String(s).padStart(2,'0')}`;
 
@@ -1917,8 +1917,10 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
     let t = elapsed;
     S.dealerModalTimer = setInterval(() => {
       t++;
+      const mins = Math.floor(t/60);
+      const secs = String(t%60).padStart(2,'0');
       const el = document.getElementById('dealer-modal-timer');
-      if(el) el.textContent = `${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;
+      if(el) el.textContent = `${mins}:${secs}`;
     }, 1000);
 
   } catch(e) {
