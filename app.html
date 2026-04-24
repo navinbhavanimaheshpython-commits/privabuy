@@ -1874,14 +1874,62 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
   document.getElementById('dam-title').textContent = title;
   document.getElementById('dam-subtitle').textContent = `ZIP ${zip} · ${(mileage||0).toLocaleString()} mi`;
   document.getElementById('dealer-bid-input').value = '';
-  
-  // Load bids immediately
+
+  // Fetch full car details
+  try {
+    const res = await fetch(`${API}/cars/${carId}`);
+    const car = await res.json();
+    
+    // Auction start time
+    const startTime = new Date(car.created_at);
+    const elapsed = Math.floor((Date.now() - startTime.getTime()) / 1000);
+    const m = Math.floor(elapsed/60), s = elapsed%60;
+    document.getElementById('dealer-modal-timer').textContent = `${m}:${String(s).padStart(2,'0')}`;
+
+    // Build specs
+    buildSpecs('dam', [
+      {label:'Year', value: car.year},
+      {label:'Make', value: car.make},
+      {label:'Model', value: car.model},
+      {label:'Mileage', value: (car.mileage||0).toLocaleString()+' mi'},
+      {label:'ZIP Code', value: car.zip},
+      {label:'Condition', value: car.condition||'Good'},
+    ]);
+
+    // Build docs
+    buildDocs('dam', 'Clean', 'On File', 'IL', '—');
+
+    // Build carfax placeholder
+    buildCarfax('dam', 1, 0, 0);
+
+    // Build condition
+    buildCondition('dam', [
+      {label: 'Condition: ' + (car.condition||'Good'), type: 'good'},
+      {label: 'No accidents disclosed', type: 'good'},
+    ]);
+
+    // Show auction start time
+    document.getElementById('dam-bid-summary').textContent = 
+      `Live since ${startTime.toLocaleDateString('en-US',{month:'short',day:'numeric'})} at ${startTime.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
+
+    // Start elapsed timer
+    if(S.dealerModalTimer) clearInterval(S.dealerModalTimer);
+    let t = elapsed;
+    S.dealerModalTimer = setInterval(() => {
+      t++;
+      const el = document.getElementById('dealer-modal-timer');
+      if(el) el.textContent = `${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;
+    }, 1000);
+
+  } catch(e) {
+    console.error('Failed to load car details', e);
+  }
+
+  // Load bids and start polling
   await refreshRealAuctionBids(carId);
-  
-  // Start polling for new bids every 5 seconds
   if(dealerBidPollInterval) clearInterval(dealerBidPollInterval);
   dealerBidPollInterval = setInterval(() => refreshRealAuctionBids(carId), 5000);
-  
+
   document.getElementById('dealer-auction-modal').classList.add('open');
 }
 
