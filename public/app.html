@@ -976,7 +976,7 @@ body::before {
 
 <!-- ââ DEALER AUCTION MODAL (Real Seller) ââ -->
 <div class="modal-overlay" id="real-auction-modal">
-  <div class="modal" style="max-width:900px;width:95vw;">
+  <div class="modal" style="max-width:1200px;width:96vw;">
     <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px;">
       <div><div class="modal-title" id="ram-title">Live Auction</div><div style="font-size:12px;color:var(--g5);margin-top:3px">Real Seller Listing  Chicago, IL</div></div>
       <div style="display:flex;align-items:center;gap:12px;"><div class="badge badge-live">● Live  Real Seller</div><button class="modal-close" onclick="closeModal('real-auction-modal')"></button></div>
@@ -986,8 +986,8 @@ body::before {
         <div><div style="font-size:11px;color:var(--accent3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">● Live ● Open Auction</div><div class="timer-digits" id="ram-timer" style="font-size:40px;">0:00</div><div class="timer-label">Elapsed · No time limit</div></div>
         <div style="text-align:right;font-size:13px;color:var(--g5)" id="ram-bid-summary">0 bids so far</div>
       </div>
-      <div class="auction-modal-layout">
-        <div class="auction-modal-left">
+      <div class="auction-modal-layout" style="display:grid;grid-template-columns:1fr 380px;gap:24px;">
+        <div class="auction-modal-left" style="overflow-y:auto;max-height:70vh;padding-right:16px;">
           <div class="modal-section"><div class="modal-section-title">· Photos</div><div class="photo-gallery"><div class="photo-main" id="ram-photo-main" onclick="cyclePhoto('ram')"><span id="ram-photo-emoji"></span><div class="photo-main-label" id="ram-photo-label">Front Exterior</div><div class="photo-main-count" id="ram-photo-count">1 / 6</div></div><div class="photo-thumbs" id="ram-thumbs"></div></div></div>
           <div class="modal-section"><div class="modal-section-title"> Title & Registration</div><div class="docs-row" id="ram-docs"></div></div>
           <div class="modal-section"><div class="modal-section-title"> Vehicle Specs</div><div class="spec-grid" id="ram-specs"></div></div>
