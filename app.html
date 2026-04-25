@@ -1010,12 +1010,18 @@ body::before {
 </div>
 
 <!-- ââ DEALER DEMO AUCTION MODAL ââ -->
-<div class="modal-overlay" id="dealer-auction-modal">
-  <div class="modal" style="max-width:900px;width:95vw;">
+<div class="modal-overlay" id="dealer-auction-modal" style="padding:16px;">
+  <div class="modal" style="max-width:1200px;width:96vw;">
     <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px;">
-      <div><div class="modal-title" id="dam-title"></div><div style="font-size:12px;color:var(--g5);margin-top:3px" id="dam-subtitle">Chicago, IL</div></div>
-      <div style="display:flex;align-items:center;gap:12px;"><div class="badge badge-live">● Live</div><button class="modal-close" onclick="closeModal('dealer-auction-modal')">✕</button>
-    </div>
+  <div>
+    <div class="modal-title" id="dam-title">—</div>
+    <div style="font-size:12px;color:var(--g5);margin-top:3px" id="dam-subtitle">Chicago, IL</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="badge badge-live">● Live</div>
+    <button class="modal-close" onclick="closeModal('dealer-auction-modal')">✕</button>
+  </div>
+</div>
     <div class="modal-body" style="padding-top:20px;">
       <div class="auction-timer-block" style="margin-bottom:20px;padding:16px 20px;">
         <div><div style="font-size:11px;color:var(--accent3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">● Open Auction</div><div class="timer-digits" id="dealer-modal-timer" style="font-size:40px;"></div><div class="timer-label">No time limit · Bid at any time</div></div>
