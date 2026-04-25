@@ -470,7 +470,7 @@ body::before {
             <div id="eligibility-result"></div>
           </div>
         </div>
-        <div class="flex-between"><div></div><button class="btn btn-primary" onclick="checkEligibility()">Check Eligibility & Continue →</button></div>
+        <div class="flex-between"><div></div><button class="btn btn-primary" id="photos-next-btn" onclick="checkPhotosAndContinue()">Continue →</button>
       </div>
 
       <div id="wizard-step-2" class="hidden">
@@ -1240,6 +1240,17 @@ function wizardGo(step) {
   if(step===4) buildValueEstimate();
   if(step===5) populateReview();
 }
+
+
+function checkPhotosAndContinue() {
+  if(requiredFilled < 6) {
+    showToast('⚠️','Photos Required', `Please upload all 6 required photos. You have ${requiredFilled}/6.`);
+    return;
+  }
+  wizardGo(3);
+}
+
+
 async function decodeVIN() {
   const vin = document.getElementById('vin-input').value.trim();
   if(vin.length < 17) { showToast( 'Invalid VIN','VIN must be exactly 17 characters.'); return; }
@@ -1277,32 +1288,92 @@ function checkEligibility() {
   const mileage = parseInt(document.getElementById('f-mileage').value)||0;
   const make = document.getElementById('f-make').value.trim();
   const model = document.getElementById('f-model').value.trim();
-  if(!year||!make||!model){showToast(' ','Missing Info','Fill in year, make, and model first.');return;}
-  const age = 2025-year;
-  const isEligible = age>=5&&age<=10&&mileage>=50000;
+  const trim = document.getElementById('f-trim').value.trim();
+  const color = document.getElementById('f-color').value.trim();
+  const zip = document.getElementById('f-zip').value.trim();
+  const addons = document.getElementById('f-addons').value.trim();
+
+  if(!year) { showToast('⚠️','Missing Field','Please enter the year.'); return; }
+  if(!make) { showToast('⚠️','Missing Field','Please enter the make.'); return; }
+  if(!model) { showToast('⚠️','Missing Field','Please enter the model.'); return; }
+  if(!trim) { showToast('⚠️','Missing Field','Please enter the trim level.'); return; }
+  if(!color) { showToast('⚠️','Missing Field','Please enter the color.'); return; }
+  if(!mileage) { showToast('⚠️','Missing Field','Please enter the mileage.'); return; }
+  if(!zip || zip.length < 5) { showToast('⚠️','Missing Field','Please enter a valid ZIP code.'); return; }
+  if(!addons) { showToast('⚠️','Missing Field','Please enter add-ons or N/A.'); return; }
+
+  const age = 2025 - year;
+  const isEligible = age >= 5 && age <= 10 && mileage >= 50000;
   const el = document.getElementById('eligibility-result');
-  S.formData = {year,make,model,trim:document.getElementById('f-trim').value||'',color:document.getElementById('f-color').value||'',mileage,addons:document.getElementById('f-addons').value||'N/A',zip:document.getElementById('f-zip').value||'',transmission:getRadio('transmission-group')||'Automatic',drivetrain:getRadio('drivetrain-group')||'FWD',title:getRadio('title-group')||'Clean',loan:getRadio('loan-group')||'None',keys:getRadio('keys-group')||'Yes'};
-  if(isEligible){
-    el.innerHTML=`<div class="eligibility-card pass"><div class="eligibility-icon"></div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px">Your vehicle qualifies!</div><div class="text-muted text-sm">A ${year} ${make} ${model} with ${mileage.toLocaleString()} miles is prime dealer inventory.</div></div></div>`;
-    setTimeout(()=>wizardGo(2),500);
+  S.formData = {year, make, model, trim, color, mileage, 
+    addons, zip,
+    transmission: getRadio('transmission-group')||'Automatic',
+    drivetrain: getRadio('drivetrain-group')||'FWD',
+    title: getRadio('title-group')||'Clean',
+    loan: getRadio('loan-group')||'None',
+    keys: getRadio('keys-group')||'Yes'
+  };
+  
+  if(isEligible) {
+    el.innerHTML = `<div class="eligibility-card pass"><div class="eligibility-icon">✅</div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px">Your vehicle qualifies!</div><div class="text-muted text-sm">A ${year} ${make} ${model} with ${mileage.toLocaleString()} miles is prime dealer inventory.</div></div></div>`;
+    setTimeout(()=>wizardGo(2), 500);
   } else {
-    el.innerHTML=`<div class="eligibility-card fail"><div class="eligibility-icon"> </div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px">Outside ideal range</div><div class="text-muted text-sm">${age<5?'Too new (under 5 years).':age>10?'May be too old (over 10 years).':'Under 50k miles  dealers prefer higher mileage inventory.'} We\'ll still list it  dealers can opt in.</div></div></div>`;
-    setTimeout(()=>wizardGo(2),700);
+    el.innerHTML = `<div class="eligibility-card fail"><div class="eligibility-icon">⚠️</div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px">Outside ideal range</div><div class="text-muted text-sm">${age<5?'Too new (under 5 years).':age>10?'May be too old (over 10 years).':'Under 50k miles — dealers prefer higher mileage inventory.'} We\'ll still list it — dealers can opt in.</div></div></div>`;
+    setTimeout(()=>wizardGo(2), 700);
   }
 }
 let photoCount=0, requiredFilled=0;
-function simulatePhoto(el,label,required) {
-  if(el.classList.contains('filled'))return;
-  const emojis=['','','','','','','',''];
-  el.classList.add('filled');
-  const wasReq = required && el.querySelector('.photo-required-badge');
-  if(wasReq){ wasReq.style.background='var(--green)'; wasReq.textContent=''; requiredFilled++; }
-  el.innerHTML = `${wasReq?`<div class="photo-required-badge" style="background:var(--green)"></div>`:''}
-    <div style="font-size:40px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.07)">${emojis[photoCount%emojis.length]}</div>
-    <div class="photo-slot-label" style="position:absolute;bottom:6px;z-index:1;background:rgba(0,0,0,0.6);padding:2px 8px;border-radius:4px;font-size:10px"> ${label}</div>`;
-  photoCount++;
-  document.getElementById('photos-uploaded-count').textContent = `${photoCount} of 8 uploaded  ${requiredFilled}/6 required complete`;
-  showToast('','Photo Added',`${label} uploaded.`);
+async function simulatePhoto(el, label, required) {
+  if(el.classList.contains('filled')) return;
+  
+  // Create file input and trigger it
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    
+    el.innerHTML = `<div style="font-size:12px;color:var(--g5);padding:8px">Uploading...</div>`;
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'privabuy_photos');
+      formData.append('cloud_name', 'dptom0qr7');
+      
+      const res = await fetch(`https://api.cloudinary.com/v1_1/dptom0qr7/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      
+      if(!data.secure_url) throw new Error('Upload failed');
+      
+      // Store URL
+      if(!S.photoUrls) S.photoUrls = [];
+      S.photoUrls.push({label, url: data.secure_url});
+      
+      el.classList.add('filled');
+      const wasReq = required && el.querySelector('.photo-required-badge');
+      if(wasReq) { wasReq.style.background='var(--green)'; wasReq.textContent='✓'; requiredFilled++; }
+      
+      el.innerHTML = `
+        ${wasReq ? `<div class="photo-required-badge" style="background:var(--green)">✓</div>` : ''}
+        <img src="${data.secure_url}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        <div class="photo-slot-label" style="position:absolute;bottom:6px;z-index:1;background:rgba(0,0,0,0.6);padding:2px 8px;border-radius:4px;font-size:10px">✓ ${label}</div>`;
+      
+      photoCount++;
+      document.getElementById('photos-uploaded-count').textContent = 
+        `${photoCount} of 8 uploaded • ${requiredFilled}/6 required complete`;
+      showToast('✓','Photo Uploaded', `${label} saved.`);
+      
+    } catch(err) {
+      el.innerHTML = `<div class="photo-slot-icon">📷</div><div class="photo-slot-label" style="color:var(--red)">Upload failed — try again</div>`;
+      showToast('❌','Upload Failed', err.message);
+    }
+  };
+  input.click();
 }
 function switchDamageTab(tab, el) {
   ['exterior','interior','mechanical'].forEach(t=>document.getElementById(`damage-${t}`).classList.toggle('hidden',t!==tab));
@@ -1421,6 +1492,7 @@ async function startAuction() {
         model: d.model || '',
         mileage: parseInt(d.mileage) || 0,
         zip: d.zip || '',
+        photos: S.photoUrls || [],
         condition: (getRadio('overall-condition-group') || 'good').toLowerCase().replace(/ /g,'-'),
         seller_phone: '',
         seller_email: '',
