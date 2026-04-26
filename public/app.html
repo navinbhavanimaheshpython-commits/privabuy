@@ -1349,19 +1349,19 @@ async function simulatePhoto(el, label, required) {
       
       if(!data.secure_url) throw new Error('Upload failed');
       
+      
       // Store URL
       if(!S.photoUrls) S.photoUrls = [];
       S.photoUrls.push({label, url: data.secure_url});
-      
+
       el.classList.add('filled');
-      const wasReq = required && el.querySelector('.photo-required-badge');
-      if(wasReq) { wasReq.style.background='var(--green)'; wasReq.textContent='✓'; requiredFilled++; }
-      
+      if(required) requiredFilled++;
+
       el.innerHTML = `
-        ${wasReq ? `<div class="photo-required-badge" style="background:var(--green)">✓</div>` : ''}
-        <img src="${data.secure_url}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        ${required ? `<div class="photo-required-badge" style="background:rgba(168,240,224,0.15);color:var(--accent3)">✓</div>` : ''}
+        <img src="${data.secure_url}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:var(--r);">
         <div class="photo-slot-label" style="position:absolute;bottom:6px;z-index:1;background:rgba(0,0,0,0.6);padding:2px 8px;border-radius:4px;font-size:10px">✓ ${label}</div>`;
-      
+
       photoCount++;
       document.getElementById('photos-uploaded-count').textContent = 
         `${photoCount} of 8 uploaded • ${requiredFilled}/6 required complete`;
