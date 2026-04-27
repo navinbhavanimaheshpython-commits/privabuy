@@ -1694,15 +1694,40 @@ function updateRealAuctionFeed() {
 
 const PHOTO_LABELS = ['Front Exterior','Rear Exterior','Driver Side','Passenger Side','Interior / Dash','Odometer','Engine Bay','Damage Area'];
 const PHOTO_EMOJIS = ['','','','','','','',''];
-function buildPhotoGallery(prefix, emoji, count) {
-  count = Math.max(count||0, 1);
+function buildPhotoGallery(prefix, photos) {
   const mainEl = document.getElementById(`${prefix}-photo-main`);
   if(!mainEl) return;
-  document.getElementById(`${prefix}-photo-emoji`).textContent = emoji || '';
-  document.getElementById(`${prefix}-photo-label`).textContent = PHOTO_LABELS[0];
-  document.getElementById(`${prefix}-photo-count`).textContent = `1 / ${count}`;
-  S[`${prefix}PhotoIdx`] = 0; S[`${prefix}PhotoCount`] = count; S[`${prefix}Emoji`] = emoji || '';
-  document.getElementById(`${prefix}-thumbs`).innerHTML = Array.from({length:Math.min(count,6)},(_,i)=>`<div class="photo-thumb${i===0?' active':''}" onclick="selectPhoto('${prefix}',${i})" title="${PHOTO_LABELS[i]||'Photo '+(i+1)}">${PHOTO_EMOJIS[i]||'·'}</div>`).join('');
+  if(!photos || !photos.length) {
+    document.getElementById(`${prefix}-photo-label`).textContent = 'No photos';
+    document.getElementById(`${prefix}-photo-count`).textContent = '0';
+    document.getElementById(`${prefix}-thumbs`).innerHTML = '';
+    return;
+  }
+  S[`${prefix}Photos`] = photos;
+  S[`${prefix}PhotoIdx`] = 0;
+  S[`${prefix}PhotoCount`] = photos.length;
+  mainEl.style.backgroundImage = `url('${photos[0].url}')`;
+  mainEl.style.backgroundSize = 'cover';
+  mainEl.style.backgroundPosition = 'center';
+  document.getElementById(`${prefix}-photo-emoji`).textContent = '';
+  document.getElementById(`${prefix}-photo-label`).textContent = photos[0].label || 'Photo 1';
+  document.getElementById(`${prefix}-photo-count`).textContent = `1 / ${photos.length}`;
+  document.getElementById(`${prefix}-thumbs`).innerHTML = photos.map((p,i)=>`
+    <div class="photo-thumb${i===0?' active':''}" onclick="selectPhoto('${prefix}',${i})" 
+    style="background-image:url('${p.url}');background-size:cover;background-position:center;" title="${p.label||'Photo '+(i+1)}"></div>`).join('');
+}
+function selectPhoto(prefix, idx) {
+  const photos = S[`${prefix}Photos`] || [];
+  if(!photos[idx]) return;
+  S[`${prefix}PhotoIdx`] = idx;
+  const mainEl = document.getElementById(`${prefix}-photo-main`);
+  mainEl.style.backgroundImage = `url('${photos[idx].url}')`;
+  mainEl.style.backgroundSize = 'cover';
+  mainEl.style.backgroundPosition = 'center';
+  document.getElementById(`${prefix}-photo-emoji`).textContent = '';
+  document.getElementById(`${prefix}-photo-label`).textContent = photos[idx].label || `Photo ${idx+1}`;
+  document.getElementById(`${prefix}-photo-count`).textContent = `${idx+1} / ${photos.length}`;
+  document.querySelectorAll(`#${prefix}-thumbs .photo-thumb`).forEach((t,i)=>t.classList.toggle('active',i===idx));
 }
 function selectPhoto(prefix, idx) {
   S[`${prefix}PhotoIdx`] = idx;
@@ -1747,7 +1772,7 @@ function openRealAuction() {
   if(!d){showToast('','No Active Auction','Start a seller auction first.');return;}
   const vin = document.getElementById('vin-input')?.value||'1HGBH41JXMN109186';
   document.getElementById('ram-title').textContent=`${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'} ${d.trim||''}`;
-  buildPhotoGallery('ram','',photoCount||6);
+  buildPhotoGallery('ram', S.photoUrls || []);
   buildDocs('ram',d.title||'Clean','AB-'+Math.floor(10000+Math.random()*90000),'IL',vin);
   const loanEl=document.getElementById('ram-loan-val'); if(loanEl) loanEl.textContent=d.loan||'None';
   buildSpecs('ram',[{label:'Year',value:d.year||2017},{label:'Make',value:d.make||'Honda'},{label:'Model',value:d.model||'CR-V'},{label:'Trim',value:d.trim||'EX'},{label:'Color',value:d.color||''},{label:'Mileage',value:(d.mileage||0).toLocaleString()+' mi'},{label:'Transmission',value:d.transmission||'CVT'},{label:'Drivetrain',value:d.drivetrain||'AWD'},{label:'Add-ons',value:d.addons||'N/A'}]);
@@ -2118,7 +2143,7 @@ function openDealerAuction(id) {
   document.getElementById('dam-subtitle').textContent=`${a.city}, IL  ${a.mileage} mi`;
   const statusBanner=document.getElementById('dam-dealer-status');
   if(statusBanner&&!a.iAmTop) statusBanner.innerHTML=`<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;"> All dealer identities are anonymous  place a bid to enter</div>`;
-  buildPhotoGallery('dam',a.emoji||'',6);
+  buildPhotoGallery('dam', car.photos || []);
   buildDocs('dam','Clean',ex.plate||'AB-12345','IL',ex.vin||'');
   const lv=document.getElementById('dam-loan-val'); if(lv) lv.textContent=ex.loan||'None';
   buildSpecs('dam',[{label:'Year',value:a.year},{label:'Make',value:a.make},{label:'Model',value:a.model},{label:'Trim',value:a.trim},{label:'Color',value:a.color},{label:'Mileage',value:a.mileage+' mi'},{label:'Condition',value:a.condition},{label:'Drivetrain',value:id===1?'AWD':id===2?'4WD':'FWD'},{label:'Transmission',value:id===2?'6-Speed Auto':'CVT'}]);
