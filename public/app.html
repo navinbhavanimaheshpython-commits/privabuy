@@ -1096,7 +1096,8 @@ const S = {
   radioValues:{},
   seller_id: null, car_id: null, dealer_id: null,
   auctionStartTime: null,
-  latest_offer_id: null, elapsedSeconds: 0
+  latest_offer_id: null, elapsedSeconds: 0,
+  photoUrls: [],  
 };
 
 const DEMO_DEALERS = ['Northside Auto Group','Lakeview Motors','Chicago Auto Exchange','Westside Pre-Owned','Lincoln Park Cars'];
@@ -1477,6 +1478,8 @@ function populateReview() {
 async function startAuction() {
   if(!S.seller_id) { showToast(' ','Not Logged In','Please log in as a seller first.'); return; }
   const d = S.formData;
+  console.log('Photos being sent:', JSON.stringify(S.photoUrls));
+  console.log('Photos being sent:', S.photoUrls);
   const btn = document.getElementById('start-auction-btn');
   btn.textContent = ' Submitting...'; btn.disabled = true;
 
