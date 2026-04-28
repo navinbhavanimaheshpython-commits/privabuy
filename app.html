@@ -1765,7 +1765,7 @@ function fsNav(prefix, dir) {
   document.getElementById('fs-photo-img').src = photos[idx].url;
   document.getElementById('fs-photo-label').textContent = `${photos[idx].label||''} · ${idx+1} / ${photos.length}`;
 }
-}
+
 function selectPhoto(prefix, idx) {
   S[`${prefix}PhotoIdx`] = idx;
   document.getElementById(`${prefix}-photo-emoji`).textContent = PHOTO_EMOJIS[idx] || S[`${prefix}Emoji`];
