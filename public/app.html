@@ -1725,14 +1725,46 @@ function selectPhoto(prefix, idx) {
   if(!photos[idx]) return;
   S[`${prefix}PhotoIdx`] = idx;
   const mainEl = document.getElementById(`${prefix}-photo-main`);
-  mainEl.style.backgroundImage = `url('${photos[idx].url}')`;
-  mainEl.style.backgroundSize = 'contain';
-  mainEl.style.backgroundPosition = 'center';
-  mainEl.style.backgroundRepeat = 'no-repeat';
-  document.getElementById(`${prefix}-photo-emoji`).textContent = '';
+  if(mainEl) {
+    mainEl.style.backgroundImage = `url('${photos[idx].url}')`;
+    mainEl.style.backgroundSize = 'contain';
+    mainEl.style.backgroundPosition = 'center';
+    mainEl.style.backgroundRepeat = 'no-repeat';
+  }
   document.getElementById(`${prefix}-photo-label`).textContent = photos[idx].label || `Photo ${idx+1}`;
   document.getElementById(`${prefix}-photo-count`).textContent = `${idx+1} / ${photos.length}`;
   document.querySelectorAll(`#${prefix}-thumbs .photo-thumb`).forEach((t,i)=>t.classList.toggle('active',i===idx));
+}
+
+function openPhotoFullscreen(prefix) {
+  const photos = S[`${prefix}Photos`] || [];
+  const idx = S[`${prefix}PhotoIdx`] || 0;
+  if(!photos[idx]) return;
+  const existing = document.getElementById('photo-fullscreen-overlay');
+  if(existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'photo-fullscreen-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;';
+  overlay.innerHTML = `
+    <img id="fs-photo-img" src="${photos[idx].url}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;">
+    <button onclick="document.getElementById('photo-fullscreen-overlay').remove()" style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;">✕</button>
+    <button onclick="fsNav('${prefix}',-1)" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;width:48px;height:48px;border-radius:50%;font-size:28px;cursor:pointer;">‹</button>
+    <button onclick="fsNav('${prefix}',1)" style="position:absolute;right:80px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;width:48px;height:48px;border-radius:50%;font-size:28px;cursor:pointer;">›</button>
+    <div id="fs-photo-label" style="position:absolute;bottom:20px;color:rgba(255,255,255,0.5);font-size:13px;">${photos[idx].label||''} · ${idx+1} / ${photos.length}</div>`;
+  overlay.onclick = (e) => { if(e.target===overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+  overlay._prefix = prefix;
+}
+
+function fsNav(prefix, dir) {
+  const photos = S[`${prefix}Photos`] || [];
+  let idx = (S[`${prefix}PhotoIdx`] || 0) + dir;
+  if(idx < 0) idx = photos.length - 1;
+  if(idx >= photos.length) idx = 0;
+  selectPhoto(prefix, idx);
+  document.getElementById('fs-photo-img').src = photos[idx].url;
+  document.getElementById('fs-photo-label').textContent = `${photos[idx].label||''} · ${idx+1} / ${photos.length}`;
+}
 }
 function selectPhoto(prefix, idx) {
   S[`${prefix}PhotoIdx`] = idx;
