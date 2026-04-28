@@ -952,24 +952,34 @@ body::before {
     </div>
     <div style="flex:1;overflow-y:auto;padding:24px;">
       <div id="admin-overview">
-        <div class="section-title mb-24">Platform Overview</div>
-        <div class="stats-row">
-          <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Live Auctions</div><div class="stat-change text-green"> Active now</div></div>
-          <div class="stat-card"><div class="stat-value">47</div><div class="stat-label">Dealers (Active)</div><div class="stat-change">+3 this week</div></div>
-          <div class="stat-card"><div class="stat-value">182</div><div class="stat-label">Auctions (30d)</div><div class="stat-change"> 22% vs prior</div></div>
-          <div class="stat-card"><div class="stat-value" style="color:var(--accent)">$28k</div><div class="stat-label">Revenue (30d)</div><div class="stat-change"> 31% vs prior</div></div>
-        </div>
-        <div class="grid-2">
-          <div class="card"><div class="card-header"><div class="card-title">Recent Activity</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:12px;"><div class="flex-between"><span class="text-sm"> 2018 Honda CR-V listed  Chicago, IL</span><span class="text-muted text-sm">2 min ago</span></div><div class="flex-between"><span class="text-sm"> Bid $14,200 placed on 2017 F-150</span><span class="text-muted text-sm">5 min ago</span></div><div class="flex-between"><span class="text-sm"> 2016 Camry auction settled  $11,200</span><span class="text-muted text-sm">18 min ago</span></div><div class="flex-between"><span class="text-sm"> New dealer application: DuPage Motors</span><span class="text-muted text-sm">1 hr ago</span></div></div></div></div>
-          <div class="card"><div class="card-header"><div class="card-title">Platform Health</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:16px;margin-top:4px"><div><div class="flex-between mb-4"><span class="text-sm">Auction fill rate (5 dealers)</span><span class="text-sm text-green">94%</span></div><div class="progress-bar"><div class="progress-fill" style="width:94%"></div></div></div><div><div class="flex-between mb-4"><span class="text-sm">Seller acceptance rate</span><span class="text-sm text-green">71%</span></div><div class="progress-bar"><div class="progress-fill" style="width:71%"></div></div></div><div><div class="flex-between mb-4"><span class="text-sm">Avg bids per auction</span><span class="text-sm">4.2</span></div><div class="progress-bar"><div class="progress-fill" style="width:84%"></div></div></div></div></div></div>
-        </div>
-      </div>
-      <div id="admin-auctions" class="hidden"><div class="section-title mb-24">Live Auctions</div><div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Seller</th><th>Dealers</th><th>Top Bid</th><th>Action</th></tr></thead><tbody><tr><td><strong>2017 Honda CR-V EX</strong><br><span class="text-muted">94,200 mi</span></td><td>Sarah M.</td><td>5/5</td><td class="text-purple" style="font-family:var(--serif)">$12,400</td><td><button class="btn btn-secondary btn-sm" onclick="showToast('â ï¸','Extended','Added 2 minutes.')">Extend</button> <button class="btn btn-danger btn-sm" onclick="showToast('ð','Cancelled','Notifying all parties.')">Cancel</button></td></tr></tbody></table></div></div>
-      <div id="admin-dealers" class="hidden"><div class="section-title mb-24">Dealer Roster</div><div class="card"><table class="data-table"><thead><tr><th>Dealer</th><th>Territory</th><th>Status</th><th>Action</th></tr></thead><tbody><tr><td><strong>Northside Auto Group</strong></td><td>Chicago N. (25mi)</td><td><span class="badge badge-live">Verified</span></td><td><button class="btn btn-secondary btn-sm">Edit</button></td></tr><tr><td><strong>DuPage Motors</strong></td><td>Pending</td><td><span class="badge badge-pending">Pending</span></td><td><button class="btn btn-success btn-sm" onclick="showToast('â','Approved','DuPage Motors is now active.')">Approve</button></td></tr></tbody></table></div></div>
-      <div id="admin-listings" class="hidden"><div class="section-title mb-24">All Listings</div><div class="card"><table class="data-table"><thead><tr><th>Vehicle</th><th>Seller</th><th>Bids</th><th>Outcome</th><th>Status</th></tr></thead><tbody><tr><td><strong>2017 Honda CR-V EX</strong></td><td>Sarah M.</td><td>7</td><td class="text-purple" style="font-family:var(--serif)">$12,400</td><td><span class="badge badge-live">Live</span></td></tr></tbody></table></div></div>
-      <div id="admin-flags" class="hidden"><div class="section-title mb-24">Flagged Listings</div><div class="alert alert-warning">1 item requires review.</div><div class="card"><div class="card-body"><div class="flex-between"><div><div style="font-weight:600;margin-bottom:4px">2016 Chrysler 200  VIN Mismatch</div><div class="text-muted text-sm">Listed by: Robert Q.</div></div><div class="flex-gap"><button class="btn btn-success btn-sm" onclick="showToast('â','Approved','Sent to live queue.')">Approve</button><button class="btn btn-danger btn-sm" onclick="showToast('ð©','Rejected','Seller notified.')">Reject</button></div></div></div></div></div>
-      <div id="admin-revenue" class="hidden"><div class="section-title mb-24">Revenue Dashboard</div><div class="stats-row"><div class="stat-card"><div class="stat-value" style="color:var(--accent)">$28,400</div><div class="stat-label">Revenue (30d)</div></div><div class="stat-card"><div class="stat-value">$156</div><div class="stat-label">Avg Rev / Auction</div></div><div class="stat-card"><div class="stat-value">$14,200</div><div class="stat-label">Subscriptions MRR</div></div><div class="stat-card"><div class="stat-value text-green">$14,200</div><div class="stat-label">Per-bid Fees</div></div></div></div>
-    </div>
+  <div class="section-title mb-24">Platform Overview</div>
+  <div class="stats-row" id="admin-stats-row">
+    <div class="stat-card"><div class="stat-value" id="adm-live">—</div><div class="stat-label">Live Auctions</div></div>
+    <div class="stat-card"><div class="stat-value" id="adm-dealers">—</div><div class="stat-label">Active Dealers</div></div>
+    <div class="stat-card"><div class="stat-value" id="adm-auctions30">—</div><div class="stat-label">Auctions (30d)</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--accent)" id="adm-revenue">—</div><div class="stat-label">Revenue (30d)</div></div>
+  </div>
+</div>
+<div id="admin-auctions" class="hidden">
+  <div class="section-title mb-24">Live Auctions</div>
+  <div class="card"><div class="card-body" id="admin-auctions-content"><div class="text-muted" style="text-align:center;padding:40px">Loading...</div></div></div>
+</div>
+<div id="admin-dealers" class="hidden">
+  <div class="section-title mb-24">Dealer Roster</div>
+  <div class="card"><div class="card-body" id="admin-dealers-content"><div class="text-muted" style="text-align:center;padding:40px">Loading...</div></div></div>
+</div>
+<div id="admin-listings" class="hidden">
+  <div class="section-title mb-24">All Listings</div>
+  <div class="card"><div class="card-body" id="admin-listings-content"><div class="text-muted" style="text-align:center;padding:40px">Loading...</div></div></div>
+</div>
+<div id="admin-flags" class="hidden">
+  <div class="section-title mb-24">Flagged</div>
+  <div class="alert alert-info">No flagged listings.</div>
+</div>
+<div id="admin-revenue" class="hidden">
+  <div class="section-title mb-24">Revenue</div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value" style="color:var(--accent)" id="adm-rev-total">—</div><div class="stat-label">Revenue (30d)</div></div>
   </div>
 </div>
 
@@ -1185,13 +1195,17 @@ async function login() {
     showScreen(`screen-${selectedRole}`);
     if(selectedRole==='seller') initSellerView();
     else if(selectedRole==='dealer') initDealerView();
-    else showToast('','Admin','Dashboard loaded.');
-
+    else if(selectedRole==='admin') initAdminView();
   } catch(err) {
     showToast('','Connection Error','Could not reach the server. Check your internet.');
     statusMsg.textContent = 'Connection failed  try again';
     console.error(err);
   }
+}
+
+function initAdminView() {
+  adminSection('overview', document.querySelector('.admin-nav-item'));
+  loadAdminOverview();
 }
 
 function logout() { clearAuction(); showScreen('screen-login'); }
@@ -2243,12 +2257,90 @@ function showDealerWinBanner(amount,isWon) {
     banner.innerHTML=`<div style="background:rgba(22,163,74,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#4ade80;font-weight:600;text-align:center;"> You are the top bidder at $${amount.toLocaleString()}</div>`;
   }
 }
-
-//  ADMIN 
-function adminSection(sec,el) {
-  ['overview','auctions','dealers','listings','flags','revenue'].forEach(s=>document.getElementById(`admin-${s}`).classList.toggle('hidden',s!==sec));
+//ADMIN
+async function adminSection(sec, el) {
+  ['overview','auctions','dealers','listings','flags','revenue'].forEach(s=>{
+    document.getElementById(`admin-${s}`).classList.add('hidden');
+  });
+  document.getElementById(`admin-${sec}`).classList.remove('hidden');
   document.querySelectorAll('.admin-nav-item').forEach(i=>i.classList.remove('active'));
   if(el) el.classList.add('active');
+  
+  if(sec==='overview') loadAdminOverview();
+  if(sec==='auctions'||sec==='listings') loadAdminListings();
+  if(sec==='dealers') loadAdminDealers();
+  if(sec==='revenue') loadAdminRevenue();
+}
+
+async function loadAdminOverview() {
+  try {
+    const res = await fetch(`${API}/cars/admin/overview`);
+    const d = await res.json();
+    document.getElementById('adm-live').textContent = d.live_auctions;
+    document.getElementById('adm-dealers').textContent = d.active_dealers;
+    document.getElementById('adm-auctions30').textContent = d.auctions_30d;
+    document.getElementById('adm-revenue').textContent = '$'+Math.round(d.revenue_30d).toLocaleString();
+  } catch(e) { console.error(e); }
+}
+
+async function loadAdminListings() {
+  try {
+    const res = await fetch(`${API}/cars/admin/listings`);
+    const cars = await res.json();
+    const html = cars.length ? `<table class="data-table">
+      <thead><tr><th>Vehicle</th><th>Seller</th><th>Bids</th><th>Top Bid</th><th>Status</th><th>Listed</th></tr></thead>
+      <tbody>${cars.map(c=>`<tr>
+        <td><strong>${c.year} ${c.make} ${c.model}</strong><br><span class="text-muted">${(c.mileage||0).toLocaleString()} mi</span></td>
+        <td>${c.seller_email||'—'}</td>
+        <td>${c.bid_count}</td>
+        <td style="color:var(--accent);font-family:var(--serif)">${c.top_bid?'$'+c.top_bid.toLocaleString():'—'}</td>
+        <td><span class="badge badge-${c.status==='open'?'live':'pending'}">${c.status}</span></td>
+        <td class="text-muted">${new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td>
+      </tr>`).join('')}</tbody></table>` 
+      : '<div class="text-muted" style="text-align:center;padding:40px">No listings yet.</div>';
+    document.getElementById('admin-auctions-content').innerHTML = html;
+    document.getElementById('admin-listings-content').innerHTML = html;
+  } catch(e) { console.error(e); }
+}
+
+async function loadAdminDealers() {
+  try {
+    const res = await fetch(`${API}/dealers/admin/all`);
+    const dealers = await res.json();
+    document.getElementById('admin-dealers-content').innerHTML = dealers.length ? `<table class="data-table">
+      <thead><tr><th>Dealer</th><th>License</th><th>Location</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>${dealers.map(d=>`<tr>
+        <td><strong>${d.dealer_name}</strong><br><span class="text-muted">${d.email}</span></td>
+        <td style="font-family:monospace">${d.license_number||'—'}</td>
+        <td>${d.city||'—'}, ${d.state||'—'}</td>
+        <td><span class="badge badge-${d.status==='approved'?'live':'pending'}">${d.status}</span></td>
+        <td style="display:flex;gap:8px;">
+          ${d.status!=='approved'?`<button class="btn btn-secondary btn-sm" onclick="adminApproveDealer('${d.dealer_id}')">Approve</button>`:''}
+          ${d.status!=='rejected'?`<button class="btn btn-danger btn-sm" onclick="adminRejectDealer('${d.dealer_id}')">Reject</button>`:''}
+        </td>
+      </tr>`).join('')}</tbody></table>`
+      : '<div class="text-muted" style="text-align:center;padding:40px">No dealers yet.</div>';
+  } catch(e) { console.error(e); }
+}
+
+async function loadAdminRevenue() {
+  try {
+    const res = await fetch(`${API}/cars/admin/overview`);
+    const d = await res.json();
+    document.getElementById('adm-rev-total').textContent = '$'+Math.round(d.revenue_30d).toLocaleString();
+  } catch(e) { console.error(e); }
+}
+
+async function adminApproveDealer(id) {
+  await fetch(`${API}/dealers/${id}/approve`, {method:'POST'});
+  showToast('✓','Approved','Dealer is now active.');
+  loadAdminDealers();
+}
+
+async function adminRejectDealer(id) {
+  await fetch(`${API}/dealers/${id}/reject`, {method:'POST'});
+  showToast('✓','Rejected','Dealer notified.');
+  loadAdminDealers();
 }
 
 //  MODALS 
