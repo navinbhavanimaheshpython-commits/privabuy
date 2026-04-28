@@ -1710,8 +1710,9 @@ function buildPhotoGallery(prefix, photos) {
   S[`${prefix}PhotoIdx`] = 0;
   S[`${prefix}PhotoCount`] = photos.length;
   mainEl.style.backgroundImage = `url('${photos[0].url}')`;
-  mainEl.style.backgroundSize = 'cover';
+  mainEl.style.backgroundSize = 'contain';
   mainEl.style.backgroundPosition = 'center';
+  mainEl.style.backgroundRepeat = 'no-repeat';
   document.getElementById(`${prefix}-photo-emoji`).textContent = '';
   document.getElementById(`${prefix}-photo-label`).textContent = photos[0].label || 'Photo 1';
   document.getElementById(`${prefix}-photo-count`).textContent = `1 / ${photos.length}`;
@@ -1725,8 +1726,9 @@ function selectPhoto(prefix, idx) {
   S[`${prefix}PhotoIdx`] = idx;
   const mainEl = document.getElementById(`${prefix}-photo-main`);
   mainEl.style.backgroundImage = `url('${photos[idx].url}')`;
-  mainEl.style.backgroundSize = 'cover';
+  mainEl.style.backgroundSize = 'contain';
   mainEl.style.backgroundPosition = 'center';
+  mainEl.style.backgroundRepeat = 'no-repeat';
   document.getElementById(`${prefix}-photo-emoji`).textContent = '';
   document.getElementById(`${prefix}-photo-label`).textContent = photos[idx].label || `Photo ${idx+1}`;
   document.getElementById(`${prefix}-photo-count`).textContent = `${idx+1} / ${photos.length}`;
@@ -2063,6 +2065,9 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
       document.getElementById('dam-details').innerHTML = 
         `<strong style="color:var(--white)">Seller Notes:</strong> ${car.comments}`;
     }
+
+    // Build photo gallery
+    buildPhotoGallery('dam', car.photos || []);
 
     // Build condition
     buildCondition('dam', [
