@@ -354,6 +354,7 @@ body::before {
      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="dealer-email-input" type="email" placeholder="dealer@automotivegroup.com"></div>
     </div>
     <div id="login-admin-fields" class="hidden">
+      <div class="form-group"><label class="form-label">Admin Password</label><input class="form-input" id="admin-password-input" type="password" placeholder="••••••••"></div>
       <div class="form-group"><label class="form-label">Admin Email</label><input class="form-input" type="email" placeholder="admin@privabuy.com"></div>
       <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"></div>
     </div>
@@ -1192,10 +1193,20 @@ async function login() {
   showToast('✓','Welcome Back', data.dealer_name);
 }
 
+
+
     showScreen(`screen-${selectedRole}`);
     if(selectedRole==='seller') initSellerView();
     else if(selectedRole==='dealer') initDealerView();
     else if(selectedRole==='admin') initAdminView();
+    if(selectedRole === 'admin') {
+      const pwd = document.getElementById('admin-password-input')?.value;
+      const adminEmail = document.getElementById('admin-email-input')?.value.trim();
+      if(pwd !== 'Hanuman@1015' || adminEmail !== 'navinbhavanimaheshpython@gmail.com') {
+         showToast('❌','Access Denied','Incorrect admin password.');
+         return;
+  }
+}
   } catch(err) {
     showToast('','Connection Error','Could not reach the server. Check your internet.');
     statusMsg.textContent = 'Connection failed  try again';
