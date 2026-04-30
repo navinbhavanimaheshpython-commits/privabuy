@@ -1198,15 +1198,25 @@ async function login() {
     showScreen(`screen-${selectedRole}`);
     if(selectedRole==='seller') initSellerView();
     else if(selectedRole==='dealer') initDealerView();
-    else if(selectedRole==='admin') initAdminView();
     if(selectedRole === 'admin') {
-      const pwd = document.getElementById('admin-password-input')?.value;
-      const adminEmail = document.getElementById('admin-email-input')?.value.trim();
-      if(pwd !== 'Hanuman@1015' || adminEmail !== 'navinbhavanimaheshpython@gmail.com') {
-         showToast('❌','Access Denied','Incorrect admin password.');
-         return;
+    const adminEmail = document.getElementById('admin-email-input')?.value.trim();
+    const pwd = document.getElementById('admin-password-input')?.value;
+    const adminRes = await fetch(`${API}/admin/login`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: adminEmail, password: pwd})
+    });
+    if(!adminRes.ok) {
+      showToast('❌','Access Denied','Invalid credentials.');
+      statusMsg.textContent = 'Access denied';
+      return;
+    }
+    initAdminView();
   }
-}
+
+  
+
+  
   } catch(err) {
     showToast('','Connection Error','Could not reach the server. Check your internet.');
     statusMsg.textContent = 'Connection failed  try again';
