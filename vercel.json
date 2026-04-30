@@ -1,19 +1,19 @@
 {
-  "buildCommand": "vite build && cp public/app.html dist/app.html",
+  "buildCommand": "vite build && cp public/app.html dist/app.html && cp public/dealer-signup.html dist/dealer-signup.html",
   "outputDirectory": "dist",
   "headers": [
     {
       "source": "/app.html",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/html; charset=utf-8"
-        }
-      ]
+      "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }]
+    },
+    {
+      "source": "/dealer-signup.html",
+      "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }]
     }
   ],
   "rewrites": [
     { "source": "/app", "destination": "/app.html" },
-    { "source": "/((?!app).*)", "destination": "/index.html" }
+    { "source": "/dealer-signup", "destination": "/dealer-signup.html" },
+    { "source": "/((?!app|dealer-signup).*)", "destination": "/index.html" }
   ]
 }
