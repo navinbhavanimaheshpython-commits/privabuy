@@ -1195,24 +1195,32 @@ async function login() {
 
 
 
+    if(selectedRole === 'admin') {
+      const adminEmail = document.getElementById('admin-email-input')?.value.trim();
+      const pwd = document.getElementById('admin-password-input')?.value;
+      try {
+        const adminRes = await fetch(`${API}/admin/login`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email: adminEmail, password: pwd})
+        });
+        if(!adminRes.ok) {
+          showToast('❌','Access Denied','Invalid credentials.');
+          statusMsg.textContent = 'Access denied';
+          return;
+        }
+      } catch(e) {
+        showToast('❌','Error','Could not reach server.');
+        return;
+      }
+      showScreen('screen-admin');
+      initAdminView();
+      return;
+    }
+
     showScreen(`screen-${selectedRole}`);
     if(selectedRole==='seller') initSellerView();
     else if(selectedRole==='dealer') initDealerView();
-    if(selectedRole === 'admin') {
-    const adminEmail = document.getElementById('admin-email-input')?.value.trim();
-    const pwd = document.getElementById('admin-password-input')?.value;
-    const adminRes = await fetch(`${API}/admin/login`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({email: adminEmail, password: pwd})
-    });
-    if(!adminRes.ok) {
-      showToast('❌','Access Denied','Invalid credentials.');
-      statusMsg.textContent = 'Access denied';
-      return;
-    }
-    initAdminView();
-  }
 
   
 
