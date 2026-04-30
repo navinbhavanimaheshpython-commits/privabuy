@@ -297,9 +297,11 @@ function onLicenseInput(input) {
 }
 
 function validateLicenseFormat(val) {
-  const ok = /^[A-Z0-9]{2,4}[-\s]?[0-9A-Z]{4,12}$/i.test(val.trim());
+  // Must be at least 6 chars, contain letters and numbers
+  const ok = val.length >= 6 && /[A-Z]/i.test(val) && /[0-9]/.test(val);
   setLicenseStatus(ok ? 'valid' : 'invalid');
 }
+
 
 async function submitRegistration() {
   const name = document.getElementById('dealer-name').value.trim();
