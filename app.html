@@ -1436,52 +1436,63 @@ function toggleAreaDamage(el, id) {
   else{areaDamage[id]=true;el.classList.add('has-damage');}
 }
 
-function buildValueEstimate() {
+async function buildValueEstimate() {
   const d = S.formData;
-  if(!d.year||!d.make){document.getElementById('value-estimate-content').innerHTML='<div class="alert alert-warning">  Please complete Step 1 first.</div>';return;}
-  const baseValues = {Honda:13500,Toyota:14200,Ford:13000,Chevrolet:11800,Nissan:10800,Hyundai:10000,Subaru:13000,Mazda:12200,BMW:17500,'Mercedes-Benz':19000,Volkswagen:11500,Kia:9800};
-  const base = baseValues[d.make]||11000;
-  const ageDepr = (2025-d.year)*1300;
-  const mileDepr = Math.max(0,(d.mileage-60000)/1000)*90;
-  const driveBonus = d.drivetrain==='AWD'?800:d.drivetrain==='4WD'?1200:0;
-  const titlePenalty = d.title==='Salvage'?-3500:d.title==='Rebuilt'?-2000:0;
-  const accidentPenalty = (getRadio('accident-group')==='One')?-1200:(getRadio('accident-group')==='Two or More')?-2500:0;
-  const conditionMult = {'Like New':1.12,'Pretty Great':1.0,'Just Okay':0.88,'Kind of Rough':0.78,'Major Issues':0.62}[getRadio('overall-condition-group')||'Pretty Great']||1.0;
-  const damagePenalty = Object.keys(damagePins).length*-400+Object.keys(areaDamage).length*-300;
-  const smokedPenalty = getRadio('smoked-group')==='Yes'?-900:0;
-  const tireBonus = parseInt(getRadio('tires-group')||'0')*120;
-  const rawValue = Math.max(3500,(base-ageDepr-mileDepr+driveBonus+titlePenalty+accidentPenalty+damagePenalty+smokedPenalty+tireBonus)*conditionMult);
-  const tradeIn = Math.round(rawValue*0.82/100)*100;
-  const pbExpected = Math.round((tradeIn*1.12)/100)*100;
-  S.formData.tradeIn = tradeIn; S.formData.pbExpected = pbExpected;
-  S.floorPrice = tradeIn;
-  const factors = [];
-  if(d.drivetrain==='AWD'||d.drivetrain==='4WD') factors.push({label:`${d.drivetrain} adds value`,type:'pos'});
-  if(d.mileage<80000) factors.push({label:'Lower mileage for age',type:'pos'});
-  if(d.mileage>110000) factors.push({label:'High mileage',type:'neg'});
-  if(getRadio('accident-group')!=='None') factors.push({label:'Accident history',type:'neg'});
-  if(Object.keys(damagePins).length>0) factors.push({label:`${Object.keys(damagePins).length} damage area(s) noted`,type:'neg'});
-  if(getRadio('smoked-group')==='Yes') factors.push({label:'Smoked in',type:'neg'});
-  if(getRadio('tires-group')!=='0') factors.push({label:'Replaced tires',type:'pos'});
-  if(d.title==='Salvage'||d.title==='Rebuilt') factors.push({label:`${d.title} title`,type:'neg'});
-  if(conditionMult>1) factors.push({label:'Excellent condition',type:'pos'});
-  if(conditionMult<0.85) factors.push({label:'Below average condition',type:'neg'});
-  factors.push({label:'Market demand high for this age/mileage',type:'pos'});
-  document.getElementById('value-estimate-content').innerHTML = `
-    <div class="alert alert-info" style="margin-bottom:20px"> <strong>How we calculate this:</strong> Based on your vehicle's year, mileage, condition, drivetrain, and current dealer demand.</div>
-    <div style="background:linear-gradient(135deg,rgba(201,184,255,0.15) 0%,rgba(201,184,255,0.05) 100%);border:1px solid rgba(201,184,255,0.35);border-radius:var(--r-lg);padding:32px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden">
-      <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(201,184,255,0.7);margin-bottom:10px">Trade-In Value</div>
-      <div style="font-size:52px;font-weight:700;color:var(--accent);line-height:1;margin-bottom:8px">$${tradeIn.toLocaleString()}</div>
-      <div style="font-size:14px;color:rgba(255,255,255,0.55)">What a dealership typically offers</div>
-    </div>
-    <div class="value-factors" style="margin-bottom:20px">${factors.map(f=>`<span class="factor-tag factor-${f.type}">${f.type==='pos'?'':f.type==='neg'?'':''} ${f.label}</span>`).join('')}</div>
-    <div class="floor-price-row">
-      <div style="font-size:16px;font-weight:600;margin-bottom:6px">Set Your Minimum Price</div>
-      <div style="font-size:13px;color:var(--g5);line-height:1.6">This is the <strong style="color:var(--white)">minimum you'll accept</strong>.</div>
-      <div class="floor-price-input-wrap"><span class="floor-currency">$</span><input class="floor-input" id="floor-price-input" type="number" value="${tradeIn}" min="1000" step="100" oninput="updateFloor(this.value)"></div>
-      <div id="floor-feedback" style="font-size:12px;margin-top:8px;color:var(--g5)">Floor set to trade-in value  a reasonable starting point.</div>
-    </div>`;
+  if(!d.year||!d.make){
+    document.getElementById('value-estimate-content').innerHTML='<div class="alert alert-warning">Please complete Step 1 first.</div>';
+    return;
+  }
+  document.getElementById('value-estimate-content').innerHTML='<div class="text-muted" style="text-align:center;padding:40px">Checking real market data...</div>';
+
+  try {
+    const res = await fetch(`${API}/cars/market-value?year=${d.year}&make=${encodeURIComponent(d.make)}&model=${encodeURIComponent(d.model)}&mileage=${d.mileage}`);
+    const market = await res.json();
+
+    let tradeIn, pbExpected, source;
+    if(market.found && market.trade_in > 0) {
+      tradeIn = market.trade_in;
+      pbExpected = Math.round(market.avg_price * 0.95 / 100) * 100;
+      source = `Based on ${market.count} active listings · Market avg $${market.avg_price.toLocaleString()}`;
+    } else {
+      // Fallback to formula
+      const baseValues = {Honda:13500,Toyota:14200,Ford:13000,Chevrolet:11800,Nissan:10800,Hyundai:10000,Subaru:13000,Mazda:12200,BMW:17500,'Mercedes-Benz':19000,Volkswagen:11500,Kia:9800};
+      const base = baseValues[d.make]||11000;
+      const ageDepr = (2026-d.year)*1300;
+      const mileDepr = Math.max(0,(d.mileage-60000)/1000)*90;
+      const rawValue = Math.max(3500, base - ageDepr - mileDepr);
+      tradeIn = Math.round(rawValue*0.82/100)*100;
+      pbExpected = Math.round(rawValue*1.05/100)*100;
+      source = 'Estimated based on vehicle data';
+    }
+
+    S.formData.tradeIn = tradeIn;
+    S.formData.pbExpected = pbExpected;
+    S.floorPrice = tradeIn;
+
+    document.getElementById('value-estimate-content').innerHTML = `
+      <div class="alert alert-info" style="margin-bottom:20px">${source}</div>
+      <div style="background:linear-gradient(135deg,rgba(201,184,255,0.15),rgba(201,184,255,0.05));border:1px solid rgba(201,184,255,0.35);border-radius:var(--r-lg);padding:32px;text-align:center;margin-bottom:20px;">
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(201,184,255,0.7);margin-bottom:10px">Estimated Trade-In Value</div>
+        <div style="font-size:52px;font-weight:700;color:var(--accent);line-height:1;margin-bottom:8px">$${tradeIn.toLocaleString()}</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.55)">What dealers typically offer</div>
+      </div>
+      ${market.found ? `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div class="stat-card"><div style="font-size:11px;color:var(--g5);margin-bottom:8px">Market Low</div><div style="font-size:20px;font-weight:600">$${market.min_price.toLocaleString()}</div></div>
+        <div class="stat-card"><div style="font-size:11px;color:var(--g5);margin-bottom:8px">Market High</div><div style="font-size:20px;font-weight:600">$${market.max_price.toLocaleString()}</div></div>
+      </div>` : ''}
+      <div class="floor-price-row">
+        <div style="font-size:16px;font-weight:600;margin-bottom:6px">Set Your Minimum Price</div>
+        <div style="font-size:13px;color:var(--g5);line-height:1.6">This is the <strong style="color:var(--white)">minimum you'll accept</strong>.</div>
+        <div class="floor-price-input-wrap"><span class="floor-currency">$</span><input class="floor-input" id="floor-price-input" type="number" value="${tradeIn}" min="1000" step="100" oninput="updateFloor(this.value)"></div>
+        <div id="floor-feedback" style="font-size:12px;margin-top:8px;color:var(--g5)">Floor set to estimated trade-in value.</div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('value-estimate-content').innerHTML='<div class="alert alert-warning">Could not load market data. Please try again.</div>';
+    console.error(e);
+  }
 }
+
 function updateFloor(val) {
   S.floorPrice = parseInt(val)||0;
   const pb = S.formData.pbExpected||10000;
