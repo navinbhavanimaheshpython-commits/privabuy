@@ -1445,7 +1445,7 @@ async function buildValueEstimate() {
   document.getElementById('value-estimate-content').innerHTML='<div class="text-muted" style="text-align:center;padding:40px">Checking real market data...</div>';
 
   try {
-    const res = await fetch(`${API}/cars/market-value?year=${d.year}&make=${encodeURIComponent(d.make)}&model=${encodeURIComponent(d.model)}&mileage=${d.mileage}`);
+    const res = await fetch(`${API}/cars/market-value?year=${d.year}&make=${encodeURIComponent(d.make)}&model=${encodeURIComponent(d.model)}&mileage=${d.mileage}&zip=${d.zip||'60601'}`);
     const market = await res.json();
 
     let tradeIn, pbExpected, source;
