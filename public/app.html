@@ -893,7 +893,7 @@ body::before {
 
     <div id="dealer-tab-payment" class="hidden">
       <div class="flex-between mb-24">
-        <div><div class="section-title">Outstanding Platform Fees</div><div class="section-sub" style="margin-bottom:0">$500 per vehicle won</div></div>
+        <div><div class="section-title">Outstanding Platform Fees</div><div class="section-sub" style="margin-bottom:0">$600 per vehicle won</div></div>
         <div class="badge badge-live" style="font-size:13px;padding:8px 16px"> Secure Checkout</div>
       </div>
       <div id="dealer-pending-fees-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px"></div>
@@ -909,9 +909,9 @@ body::before {
               <div style="height:1px;background:rgba(255,255,255,0.07);margin:20px 0"></div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(201,184,255,0.08);border:1px solid rgba(201,184,255,0.2);border-radius:var(--r);margin-bottom:20px">
                 <span style="font-size:15px;font-weight:600">Total Due</span>
-                <span style="font-size:22px;font-weight:700;color:var(--accent)">$500.00</span>
+                <span style="font-size:22px;font-weight:700;color:var(--accent)">$600.00</span>
               </div>
-              <button class="btn btn-primary btn-full btn-lg" id="dealer-pay-btn" onclick="processDealerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $500.00 →</button>
+              <button class="btn btn-primary btn-full btn-lg" id="dealer-pay-btn" onclick="processDealerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $600.00 →</button>
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:16px">
@@ -1926,7 +1926,7 @@ function showRealDealerStatus(amount, isWon) {
         <div style="font-size:13px;color:var(--g5)">Winning bid: <strong style="color:var(--white)">$${amount.toLocaleString()}</strong></div>
       </div>
       <div style="background:rgba(201,184,255,0.07);border:1px solid rgba(201,184,255,0.25);border-radius:var(--r-lg);padding:14px;text-align:center">
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px"> $500 platform fee added to your Pay Fee tab</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px"> $600 platform fee added to your Pay Fee tab</div>
         <div style="font-size:12px;color:var(--g5)">Seller contact will be unlocked after payment.</div>
       </div>`;
   } else {
@@ -2440,11 +2440,11 @@ function renderDealerFeeList() {
       <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
         <div style="display:flex;align-items:center;gap:14px;flex:1">
           <div style="width:44px;height:44px;border-radius:10px;background:rgba(201,184,255,0.1);border:1px solid rgba(201,184,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0"></div>
-          <div><div style="font-size:14px;font-weight:600;margin-bottom:3px">${f.vehicle}</div><div style="font-size:12px;color:var(--g5)">Winning bid: <strong style="color:var(--accent)">$${f.winPrice.toLocaleString()}</strong> · Fee: <strong style="color:#fff">$500</strong></div></div>
+          <div><div style="font-size:14px;font-weight:600;margin-bottom:3px">${f.vehicle}</div><div style="font-size:12px;color:var(--g5)">Winning bid: <strong style="color:var(--accent)">$${f.winPrice.toLocaleString()}</strong> · Fee: <strong style="color:#fff">$600</strong></div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
           <span style="font-size:11px;color:var(--accent2);background:rgba(255,214,160,0.1);border:1px solid rgba(255,214,160,0.2);padding:3px 10px;border-radius:50px">Fee Due</span>
-          <button onclick="selectDealerFee('${f.id}')" style="padding:9px 18px;background:rgba(201,184,255,0.15);color:var(--accent);border:1px solid rgba(201,184,255,0.3);border-radius:50px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Pay $500 →</button>
+          <button onclick="selectDealerFee('${f.id}')" style="padding:9px 18px;background:rgba(201,184,255,0.15);color:var(--accent);border:1px solid rgba(201,184,255,0.3);border-radius:50px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Pay $600 →</button>
         </div>
       </div>
     </div>`).join('');
@@ -2458,7 +2458,7 @@ function selectDealerFee(id) {
   document.getElementById('fee-summary-price').textContent='$'+fee.winPrice.toLocaleString();
   ['dealer-card-name','dealer-card-num','dealer-card-exp','dealer-card-cvv','dealer-card-zip'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const btn=document.getElementById('dealer-pay-btn');
-  if(btn){btn.textContent='Pay $500.00 →';btn.disabled=false;btn.style.cssText='';}
+  if(btn){btn.textContent='Pay $600.00 →';btn.disabled=false;btn.style.cssText='';}
   renderDealerFeeList();
   document.getElementById('dealer-payment-form-wrap').scrollIntoView({behavior:'smooth',block:'start'});
 // Mount Stripe card element now that the form is visible
@@ -2475,7 +2475,7 @@ async function processDealerPayment() {
     const res = await fetch(`${API}/payments/create-intent`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({amount: 50000, description: 'PrivaBuy Dealer Platform Fee'})
+      body: JSON.stringify({amount: 60000, description: 'PrivaBuy Dealer Platform Fee'})
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.detail || 'Failed to create payment');
@@ -2505,9 +2505,9 @@ async function processDealerPayment() {
       }
     }
     updateDealerFeeTab();
-    showToast('✓','Payment Complete','$500 paid. Seller contact unlocked.');
+    showToast('✓','Payment Complete','$600 paid. Seller contact unlocked.');
   } catch(err) {
-    btn.textContent = 'Pay $500.00 →';
+    btn.textContent = 'Pay $600.00 →';
     btn.disabled = false;
     showToast('❌','Payment Failed', err.message);
     console.error(err);
