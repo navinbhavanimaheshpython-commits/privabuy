@@ -351,7 +351,11 @@ body::before {
       </div>
       <div id="seller-name-group" class="hidden"><div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="seller-name-input" placeholder="Sarah Mitchell"></div></div>
       <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="seller-email-input" type="email" placeholder="you@example.com"></div>
-      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="seller-password-input" type="password" placeholder="••••••••"></div>
+      <div class="form-group"><label class="form-label">Password</label><div style="position:relative;"><input class="form-input" id="seller-password-input" type="password" placeholder="••••••••" style="padding-right:40px;"><button onclick="togglePasswordVisibility()" type="button" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--g5);display:flex;align-items:center;" id="pwd-eye">
+  <svg id="pwd-eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+  </svg>
+</button></div></div>
       <div id="seller-phone-group" class="hidden"><div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="seller-phone-input" type="tel" placeholder="+1 (312) 555-0100"></div></div>
     </div>
     <div id="login-dealer-fields" class="hidden">
@@ -790,16 +794,7 @@ body::before {
 
     <div id="seller-tab-history" class="hidden">
       <div class="section-title mb-16">Past Listings</div>
-      <div class="card">
-        <table class="data-table">
-          <thead><tr><th>Vehicle</th><th>Date</th><th>Bids</th><th>Top Offer</th><th>Your Floor</th><th>Outcome</th></tr></thead>
-          <tbody>
-            <tr><td><strong>2016 Toyota Camry SE</strong><br><span class="text-muted">88,400 mi</span></td><td>Mar 14, 2025</td><td>5</td><td class="text-purple" style="font-family:var(--serif);font-size:18px">$11,200</td><td>$10,000</td><td><span class="badge badge-won">Sold</span></td></tr>
-            <tr><td><strong>2018 Ford F-150 XLT</strong><br><span class="text-muted">102,000 mi</span></td><td>Feb 28, 2025</td><td>4</td><td class="text-purple" style="font-family:var(--serif);font-size:18px">$18,500</td><td>$16,000</td><td><span class="badge badge-won">Sold</span></td></tr>
-            <tr><td><strong>2015 Honda Pilot EX</strong><br><span class="text-muted">115,200 mi</span></td><td>Feb 2, 2025</td><td>2</td><td style="font-family:var(--serif);font-size:18px;color:var(--g5)">$9,800</td><td>$11,000</td><td><span class="badge badge-closed">Declined</span></td></tr>
-          </tbody>
-        </table>
-      </div>
+      <div id="seller-history-content"><div class="text-muted" style="text-align:center;padding:40px">Loading...</div></div>
     </div>
 
     <div id="seller-tab-payment" class="hidden">
@@ -1312,19 +1307,75 @@ function setSellerMode(mode) {
   }
 }
 
-function initSellerView() {
-  sellerTab('list',document.querySelector('#screen-seller .tab-btn'));
-  wizardGo(1);
-  S.radioValues = { 'transmission-group':'Automatic','drivetrain-group':'FWD','title-group':'Clean','loan-group':'None','keys-group':'Yes','tires-group':'0','windshield-group':'No Damage','overall-condition-group':'Pretty Great','driveable-group':'Yes','accident-group':'None','moonroof-group':'N/A','smoked-group':'No','truthful-group':'Yes' };
-  document.getElementById('no-auction-msg').classList.toggle('hidden', S.auctionActive);
-  document.getElementById('live-auction-view').classList.toggle('hidden', !S.auctionActive);
+function togglePasswordVisibility() {
+  const input = document.getElementById('seller-password-input');
+  const icon = document.getElementById('pwd-eye-icon');
+  if(input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    input.type = 'password';
+    icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
 }
+  
+function initSellerView() {
+  sellerTab('auction', document.querySelector('#screen-seller .tab-btn[onclick*="auction"]'));
+  loadSellerActiveAuction();
+}
+async function loadSellerActiveAuction() {
+  if(!S.seller_id || S.auctionActive) return;
+  try {
+    const res = await fetch(`${API}/sellers/${S.seller_id}/listings`);
+    const listings = await res.json();
+    const active = listings.find(l => l.status === 'open');
+    if(active) {
+      S.car_id = active.car_id;
+      S.auctionActive = true;
+      S.auctionData = active;
+      document.getElementById('seller-tab-list').classList.add('hidden');
+      document.getElementById('seller-tab-auction').classList.remove('hidden');
+      document.getElementById('rc-title').textContent = `${active.year} ${active.make} ${active.model}`;
+      document.getElementById('rc-meta').innerHTML = `<span class="meta-tag">${(active.mileage||0).toLocaleString()} mi</span>`;
+      document.getElementById('real-seller-auction-card').classList.remove('hidden');
+      startSellerBidPoll();
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function loadSellerHistory() {
+  if(!S.seller_id) return;
+  const el = document.getElementById('seller-history-content');
+  el.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">Loading...</div>';
+  try {
+    const res = await fetch(`${API}/sellers/${S.seller_id}/listings`);
+    const listings = await res.json();
+    if(!listings.length) {
+      el.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:40px"><div style="font-size:16px;font-weight:600;margin-bottom:6px">No listings yet</div><div class="text-muted">Your auction history will appear here.</div></div></div>';
+      return;
+    }
+    el.innerHTML = `<div class="card"><table class="data-table">
+      <thead><tr><th>Vehicle</th><th>Date</th><th>Bids</th><th>Top Offer</th><th>Floor</th><th>Status</th></tr></thead>
+      <tbody>${listings.map(l=>`<tr>
+        <td><strong>${l.year} ${l.make} ${l.model}</strong><br><span class="text-muted">${(l.mileage||0).toLocaleString()} mi</span></td>
+        <td>${new Date(l.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
+        <td>${l.bid_count}</td>
+        <td style="font-family:var(--serif);font-size:18px;color:var(--accent)">${l.top_bid?'$'+l.top_bid.toLocaleString():'—'}</td>
+        <td>${l.floor_price?'$'+l.floor_price.toLocaleString():'—'}</td>
+        <td><span class="badge badge-${l.status==='open'?'live':l.status==='accepted'?'won':'closed'}">${l.status}</span></td>
+      </tr>`).join('')}</tbody></table></div>`;
+  } catch(e) {
+    el.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">Could not load history.</div>';
+  }
+}
+
 function sellerTab(tab, el) {
   ['list','auction','history','payment'].forEach(t=>document.getElementById(`seller-tab-${t}`).classList.add('hidden'));
   document.getElementById(`seller-tab-${tab}`).classList.remove('hidden');
   document.querySelectorAll('#seller-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   if(el) el.classList.add('active');
-  if(tab==='auction'){
+  if(tab==='auction')
+  if(tab==='history') loadSellerHistory();{
     document.getElementById('no-auction-msg').classList.toggle('hidden',S.auctionActive);
     document.getElementById('live-auction-view').classList.toggle('hidden',!S.auctionActive);
   }
