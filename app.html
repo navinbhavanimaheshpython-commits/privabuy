@@ -343,10 +343,16 @@ body::before {
       <div class="role-btn selected" data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">&#x1F464;</div><div class="role-name">Seller</div></div>
       <div class="role-btn" data-role="dealer" onclick="selectRole('dealer',this)"><div class="role-icon">&#x1F3E2;</div><div class="role-name">Dealer</div></div>
       <div class="role-btn" data-role="admin" onclick="selectRole('admin',this)"><div class="role-icon">&#x2699;&#xFE0F;</div><div class="role-name">Admin</div></div>
-   </div>
+  </div>
     <div id="login-seller-fields">
-      <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="seller-phone-input" type="tel" placeholder="+1 (312) 555-0100"></div>
+      <div id="seller-auth-toggle" style="display:flex;gap:8px;margin-bottom:16px;">
+        <button onclick="setSellerMode('login')" id="seller-mode-login" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(201,184,255,0.4);background:rgba(201,184,255,0.15);color:var(--accent);font-family:var(--sans);font-size:13px;cursor:pointer;font-weight:600;">Sign In</button>
+        <button onclick="setSellerMode('register')" id="seller-mode-register" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:var(--g5);font-family:var(--sans);font-size:13px;cursor:pointer;">Create Account</button>
+      </div>
+      <div id="seller-name-group" class="hidden"><div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="seller-name-input" placeholder="Sarah Mitchell"></div></div>
       <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="seller-email-input" type="email" placeholder="you@example.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="seller-password-input" type="password" placeholder="••••••••"></div>
+      <div id="seller-phone-group" class="hidden"><div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="seller-phone-input" type="tel" placeholder="+1 (312) 555-0100"></div></div>
     </div>
     <div id="login-dealer-fields" class="hidden">
       <div class="alert alert-info">Dealer access requires verification. Enter your license number and email.</div>
@@ -1149,24 +1155,54 @@ async function login() {
   statusMsg.textContent = 'Connecting...';
 
   try {
-    if(selectedRole === 'seller') {
-      const phone = document.getElementById('seller-phone-input').value.trim();
+   if(selectedRole === 'seller') {
       const email = document.getElementById('seller-email-input').value.trim();
-      if(!phone || !email) {
-        showToast(' ','Missing Info','Enter your phone and email.');
+      const password = document.getElementById('seller-password-input').value;
+      const mode = document.getElementById('seller-mode-register').style.color === 'var(--accent)' ? 'register' : 'login';
+
+      if(!email || !password) {
+        showToast('⚠️','Missing Info','Enter your email and password.');
         statusMsg.textContent = 'Enter your details above';
         return;
       }
-      const res = await fetch(`${API}/sellers/register`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({phone, email})
-      });
-      const data = await res.json();
-      if(!res.ok) throw new Error(data.detail || 'Registration failed');
-      S.seller_id = data.seller_id;
-      document.getElementById('seller-topbar-user').textContent = `${email.split('@')[0]}  Seller`;
-      showToast('','Account Ready',`Seller ID: ${S.seller_id.slice(0,8)}...`);
+
+      if(mode === 'register') {
+        const name = document.getElementById('seller-name-input').value.trim();
+        const phone = document.getElementById('seller-phone-input').value.trim();
+        if(!name || !phone) {
+          showToast('⚠️','Missing Info','Enter your name and phone number.');
+          return;
+        }
+        const res = await fetch(`${API}/sellers/register`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email, password, name, phone})
+        });
+        const data = await res.json();
+        if(!res.ok) {
+          showToast('❌','Registration Failed', data.detail || 'Could not create account.');
+          statusMsg.textContent = data.detail || 'Registration failed';
+          return;
+        }
+        S.seller_id = data.seller_id;
+        S.seller_name = data.name || email;
+        showToast('✓','Account Created', 'Welcome to PrivaBuy!');
+      } else {
+        const res = await fetch(`${API}/sellers/login`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email, password})
+        });
+        const data = await res.json();
+        if(!res.ok) {
+          showToast('❌','Login Failed', data.detail || 'Invalid credentials.');
+          statusMsg.textContent = data.detail || 'Login failed';
+          return;
+        }
+        S.seller_id = data.seller_id;
+        S.seller_name = data.name || email;
+        showToast('✓','Welcome Back', data.name || email);
+      }
     }
 
     if(selectedRole === 'dealer') {
@@ -1251,9 +1287,31 @@ function selectRadio(groupId, el, value) {
 function togglePill(el) { el.classList.toggle('selected'); }
 function getRadio(groupId) { return S.radioValues[groupId] || null; }
 
+
+
+
 // 
 //  SELLER FLOW
 // 
+
+function setSellerMode(mode) {
+  const loginBtn = document.getElementById('seller-mode-login');
+  const registerBtn = document.getElementById('seller-mode-register');
+  const nameGroup = document.getElementById('seller-name-group');
+  const phoneGroup = document.getElementById('seller-phone-group');
+  if(mode === 'register') {
+    registerBtn.style.cssText = 'flex:1;padding:8px;border-radius:8px;border:1px solid rgba(201,184,255,0.4);background:rgba(201,184,255,0.15);color:var(--accent);font-family:var(--sans);font-size:13px;cursor:pointer;font-weight:600;';
+    loginBtn.style.cssText = 'flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:var(--g5);font-family:var(--sans);font-size:13px;cursor:pointer;';
+    nameGroup.classList.remove('hidden');
+    phoneGroup.classList.remove('hidden');
+  } else {
+    loginBtn.style.cssText = 'flex:1;padding:8px;border-radius:8px;border:1px solid rgba(201,184,255,0.4);background:rgba(201,184,255,0.15);color:var(--accent);font-family:var(--sans);font-size:13px;cursor:pointer;font-weight:600;';
+    registerBtn.style.cssText = 'flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:var(--g5);font-family:var(--sans);font-size:13px;cursor:pointer;';
+    nameGroup.classList.add('hidden');
+    phoneGroup.classList.add('hidden');
+  }
+}
+
 function initSellerView() {
   sellerTab('list',document.querySelector('#screen-seller .tab-btn'));
   wizardGo(1);
