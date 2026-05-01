@@ -1329,15 +1329,24 @@ async function loadSellerActiveAuction() {
     const res = await fetch(`${API}/sellers/${S.seller_id}/listings`);
     const listings = await res.json();
     const active = listings.find(l => l.status === 'open');
-    if(active) {
+     if(active) {
       S.car_id = active.car_id;
       S.auctionActive = true;
       S.auctionData = active;
+      // Calculate real elapsed seconds from created_at
+      S.auctionStartTime = new Date(active.created_at).getTime();
+      S.elapsedSeconds = Math.floor((Date.now() - S.auctionStartTime) / 1000);
       document.getElementById('seller-tab-list').classList.add('hidden');
-      document.getElementById('seller-tab-auction').classList.remove('hidden');
+      document.getElementById('real-seller-auction-card').classList.remove('hidden');
       document.getElementById('rc-title').textContent = `${active.year} ${active.make} ${active.model}`;
       document.getElementById('rc-meta').innerHTML = `<span class="meta-tag">${(active.mileage||0).toLocaleString()} mi</span>`;
-      document.getElementById('real-seller-auction-card').classList.remove('hidden');
+      // Build vehicle summary
+      document.getElementById('auction-vehicle-summary').innerHTML = `
+        <div style="font-family:var(--serif);font-size:20px;margin-bottom:8px">${active.year} ${active.make} ${active.model}</div>
+        <div class="vehicle-card-meta"><span class="meta-tag">${(active.mileage||0).toLocaleString()} mi</span><span class="meta-tag">${active.title_status||'Clean'}</span><span class="meta-tag">ZIP ${active.zip||''}</span></div>
+        <div class="text-muted mt-16 text-sm">Car ID: <strong style="color:var(--accent);font-family:monospace;font-size:11px">${active.car_id.slice(0,8)}...</strong></div>
+        <div class="text-muted mt-8 text-sm">Floor: <strong style="color:var(--accent)">$${(active.floor_price||0).toLocaleString()}</strong></div>`;
+      startAuctionTimer();
       startSellerBidPoll();
     }
   } catch(e) { console.error(e); }
@@ -1374,11 +1383,11 @@ function sellerTab(tab, el) {
   document.getElementById(`seller-tab-${tab}`).classList.remove('hidden');
   document.querySelectorAll('#seller-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   if(el) el.classList.add('active');
-  if(tab==='auction')
-  if(tab==='history') loadSellerHistory();{
-    document.getElementById('no-auction-msg').classList.toggle('hidden',S.auctionActive);
-    document.getElementById('live-auction-view').classList.toggle('hidden',!S.auctionActive);
+  if(tab==='auction') {
+    document.getElementById('no-auction-msg').classList.toggle('hidden', S.auctionActive);
+    document.getElementById('live-auction-view').classList.toggle('hidden', !S.auctionActive);
   }
+  if(tab==='history') loadSellerHistory();
 }
 function wizardGo(step) {
   S.wizardStep = step;
@@ -1697,6 +1706,9 @@ async function startAuction() {
       <div class="text-muted mt-8 text-sm">Floor: <strong style="color:var(--accent)">$${(S.floorPrice||0).toLocaleString()}</strong></div>`;
 
     notifyDealerPortal();
+    btn.textContent = '✓ Auction Live!';
+    btn.disabled = false;
+    btn.style.opacity = '1';
     showToast('','Auction Live!',`${data.connected_dealers} dealers notified. Car ID: ${S.car_id.slice(0,8)}...`);
     startAuctionTimer();
     startSellerBidPoll();
@@ -1785,9 +1797,6 @@ if(auctionAge > 30) {
     } catch(e) {}
   }, 5000);
 }
-
-startAuctionTimer();
-startSellerBidPoll();
 
 function startBidSimulation() {
   const base = S.auctionData?.tradeIn ? S.auctionData.tradeIn : 9000;
