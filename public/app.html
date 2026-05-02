@@ -2180,7 +2180,7 @@ async function renderDealerAuctions() {
     grid.innerHTML = cars.map(a => `
       <div class="vehicle-card" onclick="openRealDealerAuction('${a.car_id}','${a.year} ${a.make} ${a.model}','${a.zip}',${a.mileage},'${a.condition}')">
         <div class="vehicle-card-img" style="background:linear-gradient(135deg,rgba(201,184,255,0.12),var(--g1))">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-4h12l2 4h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/></svg>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none">
           <div class="badge badge-live" style="position:absolute;top:12px;left:12px">● Live</div>
         </div>
         <div class="vehicle-card-body">
