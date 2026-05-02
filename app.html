@@ -1334,7 +1334,10 @@ async function loadSellerActiveAuction() {
       S.auctionActive = true;
       S.auctionData = active;
       // Calculate real elapsed seconds from created_at
-      S.auctionStartTime = new Date(active.created_at).getTime();
+    const rawTs = active.created_at;
+    const normalized = rawTs.endsWith('Z') || rawTs.includes('+') ? rawTs : rawTs + 'Z';
+    S.auctionStartTime = new Date(normalized).getTime();
+    S.elapsedSeconds = Math.max(0, Math.floor((Date.now() - S.auctionStartTime) / 1000));
       S.elapsedSeconds = Math.floor((Date.now() - S.auctionStartTime) / 1000);
       document.getElementById('seller-tab-list').classList.add('hidden');
       document.getElementById('real-seller-auction-card').classList.remove('hidden');
@@ -1721,7 +1724,7 @@ async function startAuction() {
 
 function startAuctionTimer() {
   clearInterval(S.timerInterval);
-  if(!S.elapsedSeconds) S.elapsedSeconds = 0;
+  if(S.elapsedSeconds === undefined || S.elapsedSeconds === null) S.elapsedSeconds = 0;
   S.timerInterval = setInterval(()=>{
     S.elapsedSeconds++;
     const m = Math.floor(S.elapsedSeconds/60), sec = S.elapsedSeconds%60;
@@ -2224,8 +2227,9 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
     const car = await res.json();
     
     // Auction start time
-    const startTime = new Date(car.created_at);
-    const elapsed = Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000));
+    const rawTs = car.created_at;
+    const normalized = rawTs.endsWith('Z') || rawTs.includes('+') ? rawTs : rawTs + 'Z';
+    const startTime = new Date(normalized);
     const m = Math.floor(elapsed/60), s = elapsed%60;
     const listedAt = startTime.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + 
       ' at ' + startTime.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
