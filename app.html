@@ -1721,7 +1721,7 @@ async function startAuction() {
 
 function startAuctionTimer() {
   clearInterval(S.timerInterval);
-  S.elapsedSeconds = 0;
+  if(!S.elapsedSeconds) S.elapsedSeconds = 0;
   S.timerInterval = setInterval(()=>{
     S.elapsedSeconds++;
     const m = Math.floor(S.elapsedSeconds/60), sec = S.elapsedSeconds%60;
