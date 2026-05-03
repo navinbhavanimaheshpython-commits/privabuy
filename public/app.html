@@ -2722,6 +2722,12 @@ function restoreSellerCard() {
     sellerSlot.appendChild(dealerSlot.firstChild);
   }
 }
+
+const dealerModal = document.getElementById('dealer-auction-modal');
+if(dealerModal && dealerModal.parentElement !== document.body) {
+  document.body.appendChild(dealerModal);
+}
+
 </script>
 </body>
 </html>
