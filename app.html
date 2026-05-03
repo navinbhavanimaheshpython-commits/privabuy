@@ -2230,6 +2230,7 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
     const rawTs = car.created_at;
     const normalized = rawTs.endsWith('Z') || rawTs.includes('+') ? rawTs : rawTs + 'Z';
     const startTime = new Date(normalized);
+    const elapsed = Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000));
     const m = Math.floor(elapsed/60), s = elapsed%60;
     const listedAt = startTime.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + 
       ' at ' + startTime.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
