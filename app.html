@@ -129,7 +129,7 @@ body::before {
 /* FORMS */
 .form-group{margin-bottom:18px;}
 .form-label{display:block;font-size:11px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--g5);margin-bottom:7px;}
-.form-input,.form-select,.form-textarea{width:100%;background:#f8f8f8;border:1px solid rgba(0,0,0,0.20);border-radius:var(--r-sm);padding:12px 14px;font-family:var(--sans);font-size:14px;font-weight:300;color:#1a1814;outline:none;transition:border-color 0.2s;}
+.form-input,.form-select,.form-textarea{width:100%;background:#ffffff;border:1px solid rgba(0,0,0,0.22);border-radius:var(--r-sm);padding:12px 14px;font-family:var(--sans);font-size:14px;font-weight:300;color:#1a1814;outline:none;transition:border-color 0.2s;}
 .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(124,92,191,0.5);background:#ffffff;box-shadow:0 0 0 3px rgba(124,92,191,0.08);}
 .form-input::placeholder,.form-textarea::placeholder{color:rgba(0,0,0,0.28);}
 .form-select option{background:#ffffff;color:#1a1814;}
@@ -139,14 +139,14 @@ body::before {
 
 /* PILLS */
 .check-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
-.check-pill{display:flex;align-items:center;gap:6px;background:#f5f5f5;border:1px solid rgba(0,0,0,0.18);border-radius:50px;padding:7px 14px;cursor:pointer;transition:all 0.2s;font-size:13px;font-weight:300;user-select:none;color:#1a1814;}
-.check-pill:hover{border-color:rgba(124,92,191,0.35);background:rgba(124,92,191,0.06);}
-.check-pill.selected{border-color:rgba(124,92,191,0.45);background:rgba(124,92,191,0.10);color:#1a1814;}
+.check-pill{display:flex;align-items:center;gap:6px;background:#ffffff;border:1px solid rgba(0,0,0,0.22);border-radius:50px;padding:7px 14px;cursor:pointer;transition:all 0.2s;font-size:13px;font-weight:300;user-select:none;color:#1a1814;}
+.check-pill:hover{border-color:rgba(124,92,191,0.45);background:rgba(124,92,191,0.06);}
+.check-pill.selected{border-color:rgba(124,92,191,0.55);background:rgba(124,92,191,0.10);color:#1a1814;}
 .check-pill input{display:none;}
 .radio-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
-.radio-pill{display:flex;align-items:center;gap:6px;background:#f5f5f5;border:1px solid rgba(0,0,0,0.18);border-radius:50px;padding:7px 16px;cursor:pointer;transition:all 0.2s;font-size:13px;font-weight:300;user-select:none;color:#1a1814;}
-.radio-pill:hover{border-color:rgba(124,92,191,0.35);}
-.radio-pill.selected{border-color:rgba(124,92,191,0.45);background:rgba(124,92,191,0.10);color:#1a1814;}
+.radio-pill{display:flex;align-items:center;gap:6px;background:#ffffff;border:1px solid rgba(0,0,0,0.22);border-radius:50px;padding:7px 16px;cursor:pointer;transition:all 0.2s;font-size:13px;font-weight:300;user-select:none;color:#1a1814;}
+.radio-pill:hover{border-color:rgba(124,92,191,0.45);}
+.radio-pill.selected{border-color:rgba(124,92,191,0.55);background:rgba(124,92,191,0.10);color:#1a1814;}
 
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:50px;border:none;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:400;transition:all 0.2s;text-decoration:none;}
@@ -179,7 +179,7 @@ body::before {
 
 /* PHOTO GRID */
 .photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.photo-slot{aspect-ratio:4/3;background:#f5f5f5;border:1.5px dashed rgba(0,0,0,0.28);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.photo-slot{aspect-ratio:4/3;background:#ffffff;border:1.5px dashed rgba(0,0,0,0.30);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
 .photo-slot:hover{border-color:rgba(124,92,191,0.4);background:rgba(124,92,191,0.05);}
 .photo-slot.filled{border-style:solid;border-color:rgba(0,0,0,0.20);}
 .photo-slot-label{font-size:11px;color:var(--g5);margin-top:6px;text-align:center;padding:0 4px;font-weight:300;}
@@ -209,7 +209,7 @@ body::before {
 
 /* VALUE CARD */
 .value-card{background:linear-gradient(135deg,rgba(124,92,191,0.08) 0%,rgba(124,92,191,0.02) 100%);border:1px solid rgba(124,92,191,0.15);border-radius:var(--r-lg);padding:24px;}
-.floor-price-row{background:#f5f5f5;border:1px solid rgba(0,0,0,0.16);border-radius:var(--r);padding:16px;margin-top:16px;}
+.floor-price-row{background:#efefef;border:1px solid rgba(0,0,0,0.20);border-radius:var(--r);padding:16px;margin-top:16px;}
 .floor-price-input-wrap{position:relative;margin-top:10px;}
 .floor-currency{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:var(--serif);font-size:20px;color:var(--g5);}
 .floor-input{width:100%;background:#ffffff;border:1px solid rgba(124,92,191,0.30);border-radius:var(--r-sm);padding:12px 14px 12px 32px;font-family:var(--serif);font-size:24px;color:#1a1814;outline:none;transition:border-color 0.2s;}
