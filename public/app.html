@@ -932,17 +932,66 @@ body::before {
     </div>
 
     <div id="dealer-tab-analytics" class="hidden">
-  <div class="flex-between mb-24">
-      <div><div class="section-title">Performance Analytics</div><div class="section-sub" style="margin-bottom:0;font-size:13px" id="analytics-subtitle">Loading...</div></div>
+      <div class="flex-between mb-24">
+        <div><div class="section-title">Performance Analytics</div><div class="section-sub" style="margin-bottom:0;font-size:13px" id="analytics-subtitle">Loading...</div></div>
       </div>
+
+      <!-- Top stats row -->
       <div id="analytics-stats-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
         <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Win Rate</div><div class="stat-value" id="stat-win-rate" style="color:var(--accent3)">--</div><div class="stat-label" id="stat-entered">-- auctions entered</div></div>
         <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Vehicles Won</div><div class="stat-value" id="stat-won">--</div><div class="stat-label" id="stat-won-sub">of -- auctions</div></div>
         <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Total Spend</div><div class="stat-value" id="stat-spend" style="color:var(--accent)">--</div><div class="stat-label" id="stat-avg-price">avg --/unit</div></div>
         <div class="stat-card"><div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Avg Per Unit</div><div class="stat-value" id="stat-avg">--</div><div class="stat-label">per vehicle won</div></div>
       </div>
+
+      <!-- Month over month -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <div class="stat-card">
+          <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">This Month Spend</div>
+          <div class="stat-value" id="stat-this-month" style="color:var(--accent)">--</div>
+          <div class="stat-label">current month</div>
+        </div>
+        <div class="stat-card">
+          <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px">Last Month Spend</div>
+          <div class="stat-value" id="stat-last-month">--</div>
+          <div class="stat-label">previous month</div>
+        </div>
+      </div>
+
+      <!-- Bid competitiveness -->
+      <div class="card mb-16" style="margin-bottom:16px">
+        <div class="card-body">
+          <div style="font-size:13px;font-weight:600;margin-bottom:16px">Bid Competitiveness</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div>
+              <div style="font-size:11px;color:var(--g5);margin-bottom:6px">Your Avg Bid (Lost)</div>
+              <div style="font-size:22px;font-weight:600" id="stat-my-avg-bid">--</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--g5);margin-bottom:6px">Avg Winning Bid</div>
+              <div style="font-size:22px;font-weight:600;color:var(--accent)" id="stat-avg-winning">--</div>
+            </div>
+          </div>
+          <div id="bid-gap-msg" style="font-size:12px;color:var(--g5);margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)"></div>
+        </div>
+      </div>
+
+      <!-- Top makes -->
+      <div class="card mb-16" style="margin-bottom:16px">
+        <div class="card-body">
+          <div style="font-size:13px;font-weight:600;margin-bottom:16px">Top Makes Won</div>
+          <div id="top-makes-list"></div>
+        </div>
+      </div>
+
+      <!-- Recent won vehicles -->
+      <div class="card">
+        <div class="card-body">
+          <div style="font-size:13px;font-weight:600;margin-bottom:16px">Recently Won Vehicles</div>
+          <div id="recent-won-list"></div>
+        </div>
+      </div>
     </div>
-  </div>
 </div>
 
 <!-- ââââââââââââââââââ ADMIN ââââââââââââââââââ -->
@@ -2154,20 +2203,61 @@ async function loadDealerWon() {
 }
 
 async function loadDealerAnalytics() {
-  if(!S.dealer_id) return;
   try {
     const res = await fetch(`${API}/offers/dealer/${S.dealer_id}/analytics`);
     const d = await res.json();
-    document.getElementById('analytics-subtitle').textContent = `${S.dealer_name || 'Your Dealership'} · Last 30 days`;
-    document.getElementById('stat-win-rate').textContent = d.win_rate + '%';
-    document.getElementById('stat-entered').textContent = d.total_entered + ' auctions entered';
+    document.getElementById('analytics-subtitle').textContent = `${S.dealer_name || 'Your Dealership'} · All time`;
+
+    document.getElementById('stat-win-rate').textContent = `${d.win_rate}%`;
+    document.getElementById('stat-entered').textContent = `${d.total_entered} auctions entered`;
     document.getElementById('stat-won').textContent = d.total_won;
-    document.getElementById('stat-won-sub').textContent = 'of ' + d.total_entered + ' auctions';
-    document.getElementById('stat-spend').textContent = d.total_spend >= 1000 ? '$' + Math.round(d.total_spend/1000) + 'k' : '$' + d.total_spend;
-    document.getElementById('stat-avg').textContent = d.avg_price_per_unit ? '$' + d.avg_price_per_unit.toLocaleString() : '$0';
-    document.getElementById('stat-avg-price').textContent = 'avg $' + (d.avg_price_per_unit||0).toLocaleString() + '/unit';
-  } catch(err) {
-    console.error('Analytics load failed', err);
+    document.getElementById('stat-won-sub').textContent = `of ${d.total_entered} auctions`;
+    document.getElementById('stat-spend').textContent = `$${Math.round(d.total_spend).toLocaleString()}`;
+    document.getElementById('stat-avg-price').textContent = `avg $${d.avg_price.toLocaleString()}/unit`;
+    document.getElementById('stat-avg').textContent = `$${d.avg_price.toLocaleString()}`;
+    document.getElementById('stat-this-month').textContent = `$${Math.round(d.this_month_spend).toLocaleString()}`;
+    document.getElementById('stat-last-month').textContent = `$${Math.round(d.last_month_spend).toLocaleString()}`;
+
+    // Bid competitiveness
+    document.getElementById('stat-my-avg-bid').textContent = d.my_avg_bid ? `$${d.my_avg_bid.toLocaleString()}` : '--';
+    document.getElementById('stat-avg-winning').textContent = d.avg_winning_bid ? `$${d.avg_winning_bid.toLocaleString()}` : '--';
+    if(d.my_avg_bid && d.avg_winning_bid) {
+      const gap = d.avg_winning_bid - d.my_avg_bid;
+      const pct = Math.round((gap / d.avg_winning_bid) * 100);
+      document.getElementById('bid-gap-msg').textContent = gap > 0 
+        ? `You're bidding $${gap.toLocaleString()} (${pct}%) below the avg winning bid. Consider raising bids to improve win rate.`
+        : `Your bids are competitive — at or above the average winning bid.`;
+    }
+
+    // Top makes
+    const makesList = document.getElementById('top-makes-list');
+    if(d.top_makes && d.top_makes.length) {
+      makesList.innerHTML = d.top_makes.map(m => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <span style="font-size:14px">${m.make}</span>
+          <span style="font-size:14px;color:var(--accent);font-weight:600">${m.count} won</span>
+        </div>`).join('');
+    } else {
+      makesList.innerHTML = '<div style="color:var(--g5);font-size:13px">No vehicles won yet.</div>';
+    }
+
+    // Recent won
+    const recentList = document.getElementById('recent-won-list');
+    if(d.recent_won && d.recent_won.length) {
+      recentList.innerHTML = d.recent_won.map(v => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div>
+            <div style="font-size:14px;font-weight:600">${v.year} ${v.make} ${v.model}</div>
+            <div style="font-size:12px;color:var(--g5)">${(v.mileage||0).toLocaleString()} mi · ${new Date(v.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+          </div>
+          <div style="font-size:18px;font-weight:600;color:var(--accent);font-family:var(--serif)">$${v.amount.toLocaleString()}</div>
+        </div>`).join('');
+    } else {
+      recentList.innerHTML = '<div style="color:var(--g5);font-size:13px">No vehicles won yet.</div>';
+    }
+
+  } catch(e) {
+    console.error(e);
   }
 }
 
