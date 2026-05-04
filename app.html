@@ -1613,7 +1613,7 @@ async function buildValueEstimate() {
       <div class="floor-price-row">
         <div style="font-size:16px;font-weight:600;margin-bottom:6px">Set Your Minimum Price</div>
         <div style="font-size:13px;color:var(--g5);line-height:1.6">This is the <strong style="color:var(--white)">minimum you'll accept</strong>.</div>
-        <div class="floor-price-input-wrap"><span class="floor-currency">$</span><input class="floor-input" id="floor-price-input" type="number" value="${tradeIn}" min="1000" step="100" oninput="updateFloor(this.value)"></div>
+        <div class="floor-price-input-wrap"><span class="floor-currency">$</span><input class="floor-input" id="floor-price-input" type="text" value="${tradeIn}" min="1000" step="100" oninput="updateFloor(this.value)"></div>
         <div id="floor-feedback" style="font-size:12px;margin-top:8px;color:var(--g5)">Floor set to estimated trade-in value.</div>
       </div>`;
   } catch(e) {
