@@ -2203,6 +2203,7 @@ async function loadDealerWon() {
 }
 
 async function loadDealerAnalytics() {
+  await new Promise(r => setTimeout(r, 100));
   try {
     const res = await fetch(`${API}/offers/dealer/${S.dealer_id}/analytics`);
     const d = await res.json();
