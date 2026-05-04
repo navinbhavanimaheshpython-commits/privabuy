@@ -2295,10 +2295,10 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
     if(S.dealerModalTimer) clearInterval(S.dealerModalTimer);
     let t = elapsed;
     S.dealerModalTimer = setInterval(() => {
-      t++;
-      const days = Math.floor(t/86400), hrs = Math.floor((t%86400)/3600), mins = Math.floor((t%3600)/60);
+     t++;
+      const days = Math.floor(t/86400), hrs = Math.floor((t%86400)/3600), mins = Math.floor((t%3600)/60), secs = t%60;
       const el = document.getElementById('dealer-modal-timer');
-      if(el) el.textContent = days > 0 ? `${days}d ${hrs}h` : hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+      if(el) el.textContent = days > 0 ? `${days}d ${hrs}h ${mins}m` : hrs > 0 ? `${hrs}h ${mins}m ${secs}s` : `${mins}m ${secs}s`;
     }, 1000);
 
   } catch(e) {
