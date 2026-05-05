@@ -1685,7 +1685,7 @@ async function buildValueEstimate() {
         <div class="floor-price-input-wrap"><span class="floor-currency">$</span><input class="floor-input" id="floor-price-input" type="text" value="${tradeIn}" min="1000" step="100" oninput="updateFloor(this.value)"></div>
         <div id="floor-feedback" style="font-size:12px;margin-top:8px;color:var(--g5)">Floor set to estimated trade-in value.</div>
       </div>`;
-      document.getElementById('floor-price-input').value = tradeIn;
+      document.getElementById('floor-price-input').value = tradeIn.toLocaleString();
       S.floorPrice = tradeIn;
   } catch(e) {
     document.getElementById('value-estimate-content').innerHTML='<div class="alert alert-warning">Could not load market data. Please try again.</div>';
