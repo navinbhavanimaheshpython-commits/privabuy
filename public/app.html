@@ -2141,11 +2141,26 @@ async function acceptTopBid() {
 
 function clearAuction() { clearInterval(S.timerInterval); S.auctionActive=false; S.bids=[]; clearInterval(S.dealerCardTimerInterval); }
 
-function initDealerView() {
+async function initDealerView() {
   dealerTab('feed', document.querySelector('#screen-dealer .tab-btn'));
   renderDealerAuctions();
   setInterval(renderDealerAuctions, 10000);
-  if(S.dealer_id) checkDealerNotifications();
+  if(S.dealer_id) {
+    checkDealerNotifications();
+    // Check if dealer has any active transactions
+    checkDealerHasTransaction();
+  }
+}
+
+async function checkDealerHasTransaction() {
+  try {
+    const res = await fetch(`${API}/transactions/dealer/${S.dealer_id}`);
+    const list = await res.json();
+    if(list.length > 0) {
+      document.getElementById('dealer-dealflow-tab').style.display = '';
+      showToast('📋', 'Deal In Progress', 'You have an active deal — check the Deal Flow tab.');
+    }
+  } catch(e) {}
 }
 
 async function checkDealerNotifications() {
@@ -2603,6 +2618,10 @@ async function processDealerPayment() {
     }
     updateDealerFeeTab();
     showToast('✓','Payment Complete','$600 paid. Seller contact unlocked.');
+    // Advance transaction status to awaiting_bill_of_sale
+    if(S.currentTxn) {
+    await fetch(`${API}/transactions/${S.currentTxn.transaction_id}/dealer-paid`, {method:'POST'});
+    }
     document.getElementById('dealer-dealflow-tab').style.display = '';
   } catch(err) {
     btn.textContent = 'Pay $600.00 →';
