@@ -1758,6 +1758,7 @@ async function startAuction() {
         smoked_in: getRadio('smoked-group') === 'Yes',
         overall_condition: getRadio('overall-condition-group') || '',
         comments: document.getElementById('f-comments')?.value.trim() || '',
+        floor_price: S.floorPrice || 0,
       })
     });
     const data = await res.json();
@@ -1880,12 +1881,11 @@ function addBid(dealer, amount, isReal=false) {
   const floorWarn = document.getElementById('floor-warning');
   if(floorWarn) floorWarn.classList.toggle('hidden', amount >= S.floorPrice);
   document.getElementById('seller-bid-count').textContent = `${S.bids.length} bid${S.bids.length!==1?'s':''}`;
- 
   showToast('','New Bid',`${getAnon(dealer)} bid $${amount.toLocaleString()}`);
   updateRealAuctionFeed();
 }
 
-function updateBidFeed() {
+function updateBidFeed() {  
   const feed = document.getElementById('seller-bid-feed');
   if(!feed) return;
   feed.innerHTML = S.bids.map((b,i) => `
