@@ -2158,9 +2158,31 @@ async function checkDealerHasTransaction() {
     const list = await res.json();
     if(list.length > 0) {
       document.getElementById('dealer-dealflow-tab').style.display = '';
+      // Auto-populate pending fees from active transactions
+      list.forEach(txn => {
+        if(txn.status === 'awaiting_dealer_payment' && !txn.dealer_fee_paid) {
+          const vehicle = `${txn.year||''} ${txn.make||''} ${txn.model||''}`.trim();
+          // Avoid duplicates
+          const exists = D_pendingFees.find(f => f.transaction_id === txn.transaction_id);
+          if(!exists) {
+            const id = 'fee_' + txn.transaction_id;
+            D_pendingFees.push({
+              id, 
+              transaction_id: txn.transaction_id,
+              vehicle, 
+              winPrice: parseFloat(txn.amount),
+              sellerName: 'Seller',
+              sellerPhone: '',
+              sellerEmail: '',
+              paid: false
+            });
+          }
+        }
+      });
+      updateDealerFeeTab();
       showToast('📋', 'Deal In Progress', 'You have an active deal — check the Deal Flow tab.');
     }
-  } catch(e) {}
+  } catch(e) { console.error(e); }
 }
 
 async function checkDealerNotifications() {
