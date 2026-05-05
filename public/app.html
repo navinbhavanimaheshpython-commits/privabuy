@@ -1797,12 +1797,11 @@ function startAuctionTimer() {
     const days = Math.floor(S.elapsedSeconds/86400);
     const hrs = Math.floor((S.elapsedSeconds%86400)/3600);
     const mins = Math.floor((S.elapsedSeconds%3600)/60);
-    const timeStr = days > 0 ? `${days}d ${hrs}h` : hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
-    const str = `${m}:${String(sec).padStart(2,'0')}`;
+   const timeStr = days > 0 ? `${days}d ${hrs}h` : hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
     const el = document.getElementById('seller-elapsed');
-    if(el) el.textContent = str;
+    if(el) el.textContent = timeStr;
     const rc = document.getElementById('rc-timer');
-    if(rc) rc.textContent = str;
+    if(rc) rc.textContent = timeStr;
   },1000);
 }
 
