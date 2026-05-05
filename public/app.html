@@ -1806,10 +1806,9 @@ function startAuctionTimer() {
 }
 
 function notifyDealerPortal() {
-  const d = S.auctionData;
+  const d = S.auctionData || S.formData;
+  if(!d) return;
   document.getElementById('real-seller-auction-card').classList.remove('hidden');
-  document.getElementById('rc-title').textContent = `${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'} ${d.trim||''}`;
-  document.getElementById('rc-meta').innerHTML = `<span class="meta-tag">ZIP ${d.zip||'60601'}</span><span class="meta-tag">${(d.mileage||0).toLocaleString()} mi</span><span class="meta-tag">${d.drivetrain||'FWD'}</span>`;
 }
 
 function sellerConfirmReceivedPayment() {
@@ -1881,8 +1880,7 @@ function addBid(dealer, amount, isReal=false) {
   const floorWarn = document.getElementById('floor-warning');
   if(floorWarn) floorWarn.classList.toggle('hidden', amount >= S.floorPrice);
   document.getElementById('seller-bid-count').textContent = `${S.bids.length} bid${S.bids.length!==1?'s':''}`;
-  document.getElementById('rc-top-bid').textContent = '$'+amount.toLocaleString();
-  document.getElementById('rc-bid-count').textContent = `${S.bids.length} bids`;
+ 
   showToast('','New Bid',`${getAnon(dealer)} bid $${amount.toLocaleString()}`);
   updateRealAuctionFeed();
 }
