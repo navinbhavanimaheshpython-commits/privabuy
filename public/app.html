@@ -2775,11 +2775,12 @@ function dealFlowStepsHTML(status) {
 
 function dealFlowActionHTML(txn, role) {
   const status = txn.status;
+  const txnId = txn.transaction_id;
   const amount = parseFloat(txn.amount).toLocaleString();
   const deadline = txn.dealer_payment_deadline ? new Date(txn.dealer_payment_deadline).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
 
-  if(status === 'forfeited') return `<div class="alert alert-warning">⚠️ This deal was forfeited. The dealer did not pay within 24 hours.</div>`;
-  if(status === 'dispute_flagged') return `<div class="alert" style="background:rgba(217,48,37,0.07);border:1px solid rgba(217,48,37,0.2);color:var(--red);">⚠️ A discrepancy was flagged at pickup. PrivaBuy support will reach out within 24 hours.</div>`;
+  if(status === 'forfeited') return `<div class="alert alert-warning">⚠️ This deal was forfeited.</div>`;
+  if(status === 'dispute_flagged') return `<div class="alert" style="background:rgba(217,48,37,0.07);border:1px solid rgba(217,48,37,0.2);color:var(--red);">⚠️ A discrepancy was flagged. PrivaBuy support will reach out within 24 hours.</div>`;
   if(status === 'completed') return `<div class="alert alert-success">🎉 Deal complete! Thank you for using PrivaBuy.</div>`;
 
   if(role === 'dealer') {
@@ -2792,26 +2793,26 @@ function dealFlowActionHTML(txn, role) {
       </div>`;
     if(status === 'awaiting_bill_of_sale') return txn.bill_of_sale_dealer_acked ? `
       <div class="alert alert-info">✓ You've signed the Bill of Sale. Waiting for seller to acknowledge.</div>` : `
-      <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
+      <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:12px;">Bill of Sale</div>
         <div style="font-size:13px;color:var(--g5);line-height:1.7;margin-bottom:16px;">
-          This confirms the purchase of <strong style="color:#1a1814">${txn.year||''} ${txn.make||''} ${txn.model||''}</strong> for <strong style="color:var(--accent)">$${amount}</strong>.<br>
-          The vehicle is sold as-is. Buyer assumes all responsibility after pickup.
+          This confirms the purchase of <strong>${txn.year||''} ${txn.make||''} ${txn.model||''}</strong> for <strong style="color:var(--accent)">$${amount}</strong>.<br>
+          The vehicle is sold as-is.
         </div>
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:16px;">
-          <input type="checkbox" id="dealer-bos-check" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
+          <input type="checkbox" id="dealer-bos-check-${txnId}" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
           <span style="font-size:13px;color:#1a1814;">I acknowledge and agree to the Bill of Sale terms above.</span>
         </label>
-        <button class="btn btn-primary btn-full" onclick="ackBillOfSale('dealer')">Sign Bill of Sale →</button>
+        <button class="btn btn-primary btn-full" onclick="ackBillOfSale('dealer','${txnId}')">Sign Bill of Sale →</button>
       </div>`;
     if(status === 'awaiting_pickup_schedule') return `
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Propose Pickup Times</div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Offer 3 available time slots within 5 business days.</div>
-        <div class="form-group"><label class="form-label">Option 1</label><input class="form-input" type="datetime-local" id="slot-1"></div>
-        <div class="form-group"><label class="form-label">Option 2</label><input class="form-input" type="datetime-local" id="slot-2"></div>
-        <div class="form-group"><label class="form-label">Option 3</label><input class="form-input" type="datetime-local" id="slot-3"></div>
-        <button class="btn btn-primary btn-full" onclick="proposeSlots()">Send Pickup Options →</button>
+        <div class="form-group"><label class="form-label">Option 1</label><input class="form-input" type="datetime-local" id="slot-1-${txnId}"></div>
+        <div class="form-group"><label class="form-label">Option 2</label><input class="form-input" type="datetime-local" id="slot-2-${txnId}"></div>
+        <div class="form-group"><label class="form-label">Option 3</label><input class="form-input" type="datetime-local" id="slot-3-${txnId}"></div>
+        <button class="btn btn-primary btn-full" onclick="proposeSlots('${txnId}')">Send Pickup Options →</button>
       </div>`;
     if(status === 'awaiting_slot_confirmation') return `<div class="alert alert-info">📅 Pickup options sent. Waiting for seller to confirm a time.</div>`;
     if(status === 'pickup_scheduled') return `
@@ -2819,10 +2820,10 @@ function dealFlowActionHTML(txn, role) {
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;">After Pickup</div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you've picked up the vehicle, confirm its condition below.</div>
-        <button class="btn btn-success btn-full mb-16" onclick="confirmPickup(true)">✓ Vehicle As Described</button>
-        <button class="btn btn-danger btn-full" onclick="confirmPickup(false)">⚠️ Flag a Discrepancy</button>
+        <button class="btn btn-success btn-full mb-16" onclick="confirmPickup(true,'${txnId}')">✓ Vehicle As Described</button>
+        <button class="btn btn-danger btn-full" onclick="confirmPickup(false,'${txnId}')">⚠️ Flag a Discrepancy</button>
       </div>`;
-    if(status === 'awaiting_seller_payment_confirm') return `<div class="alert alert-info">💰 Pay the seller now for the vehicle. Once they confirm receipt, the deal will complete.</div>`;
+    if(status === 'awaiting_seller_payment_confirm') return `<div class="alert alert-info">💰 Pay the seller now. Once they confirm receipt, the deal will complete.</div>`;
     if(status === 'awaiting_seller_fee') return `<div class="alert alert-success">✓ Seller confirmed payment received. Deal is wrapping up!</div>`;
   }
 
@@ -2831,35 +2832,35 @@ function dealFlowActionHTML(txn, role) {
       <div class="alert alert-warning">⏰ Waiting for dealer to pay the $600 platform fee. Deadline: <strong>${deadline}</strong>. If they don't pay, the next highest bidder will be offered the vehicle.</div>`;
     if(status === 'awaiting_bill_of_sale') return txn.bill_of_sale_seller_acked ? `
       <div class="alert alert-info">✓ You've signed the Bill of Sale. Waiting for dealer to acknowledge.</div>` : `
-      <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
+      <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:12px;">Bill of Sale</div>
         <div style="font-size:13px;color:var(--g5);line-height:1.7;margin-bottom:16px;">
-          This confirms the sale of your <strong style="color:#1a1814">${txn.year||''} ${txn.make||''} ${txn.model||''}</strong> for <strong style="color:var(--accent)">$${amount}</strong>.<br>
-          The vehicle is sold as-is. All information you provided is accurate and complete.
+          This confirms the sale of your <strong>${txn.year||''} ${txn.make||''} ${txn.model||''}</strong> for <strong style="color:var(--accent)">$${amount}</strong>.<br>
+          The vehicle is sold as-is.
         </div>
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:16px;">
-          <input type="checkbox" id="seller-bos-check" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
+          <input type="checkbox" id="seller-bos-check-${txnId}" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
           <span style="font-size:13px;color:#1a1814;">I acknowledge and agree to the Bill of Sale terms above.</span>
         </label>
-        <button class="btn btn-primary btn-full" onclick="ackBillOfSale('seller')">Sign Bill of Sale →</button>
+        <button class="btn btn-primary btn-full" onclick="ackBillOfSale('seller','${txnId}')">Sign Bill of Sale →</button>
       </div>`;
     if(status === 'awaiting_pickup_schedule') return `<div class="alert alert-info">📅 Waiting for dealer to propose pickup times.</div>`;
     if(status === 'awaiting_slot_confirmation') return `
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Choose a Pickup Time</div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">The dealer proposed these times. Pick one that works for you.</div>
-        ${[txn.pickup_slot_1, txn.pickup_slot_2, txn.pickup_slot_3].filter(Boolean).map((slot, i) => `
+        ${[txn.pickup_slot_1, txn.pickup_slot_2, txn.pickup_slot_3].filter(Boolean).map(slot => `
           <div style="background:#fff;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r);padding:14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
             <span style="font-size:13px;color:#1a1814;">${new Date(slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>
-            <button class="btn btn-primary btn-sm" onclick="confirmSlot('${slot}')">Choose This →</button>
+            <button class="btn btn-primary btn-sm" onclick="confirmSlot('${slot}','${txnId}')">Choose This →</button>
           </div>`).join('')}
       </div>`;
     if(status === 'pickup_scheduled') return `<div class="alert alert-success">✅ Pickup confirmed for <strong>${txn.confirmed_pickup_slot ? new Date(txn.confirmed_pickup_slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'TBD'}</strong>. Have the title ready.</div>`;
     if(status === 'awaiting_seller_payment_confirm') return `
       <div style="background:rgba(194,124,42,0.06);border:1px solid rgba(194,124,42,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;color:var(--accent2);margin-bottom:4px;">Confirm You Received Payment</div>
-        <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you have the dealer's payment in hand, confirm below. Your $250 PrivaBuy fee will then be due.</div>
-        <button class="btn btn-full" onclick="sellerConfirmDealPayment()" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">I Received Payment from the Dealer ✓</button>
+        <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you have the dealer's payment in hand, confirm below.</div>
+        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">I Received Payment from the Dealer ✓</button>
       </div>`;
     if(status === 'awaiting_seller_fee') return `
       <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
@@ -2878,54 +2879,54 @@ async function loadDealFlow(role) {
   el.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">Loading...</div>';
 
   try {
-    let txn = null;
     if(role === 'seller' && S.car_id) {
       const res = await fetch(`${API}/transactions/car/${S.car_id}`);
-      if(res.ok) txn = await res.json();
+      if(!res.ok) throw new Error();
+      const txn = await res.json();
+      if(!txn) {
+        el.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:40px"><div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#1a1814">No active deals</div><div class="text-muted">Deal progress will appear here once a bid is accepted.</div></div></div>';
+        return;
+      }
+      S.currentTxn = txn;
+      el.innerHTML = `<div class="card mb-16"><div class="card-header"><div class="card-title">${txn.year||''} ${txn.make||''} ${txn.model||''}</div><div style="font-size:13px;color:var(--g5)">Agreed price: <strong style="color:var(--accent)">$${parseFloat(txn.amount).toLocaleString()}</strong></div></div><div class="card-body">${dealFlowStepsHTML(txn.status)}<div id="seller-dealflow-action">${dealFlowActionHTML(txn,'seller')}</div></div></div>`;
+
     } else if(role === 'dealer' && S.dealer_id) {
       const res = await fetch(`${API}/transactions/dealer/${S.dealer_id}`);
-      if(res.ok) {
-        const list = await res.json();
-        if(list.length) txn = list[0];
+      if(!res.ok) throw new Error();
+      const list = await res.json();
+      if(!list.length) {
+        el.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:40px"><div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#1a1814">No active deals</div><div class="text-muted">Deal progress will appear here once a bid is accepted.</div></div></div>';
+        return;
       }
-    }
-
-    if(!txn) {
-      el.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:40px"><div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#1a1814">No active deals</div><div class="text-muted">Deal progress will appear here once a bid is accepted.</div></div></div>';
-      return;
-    }
-
-    S.currentTxn = txn;
-
-    el.innerHTML = `
-      <div class="card mb-16">
-        <div class="card-header">
-          <div class="card-title">${txn.year||''} ${txn.make||''} ${txn.model||''}</div>
-          <div style="font-size:13px;color:var(--g5)">Agreed price: <strong style="color:var(--accent)">$${parseFloat(txn.amount).toLocaleString()}</strong></div>
-        </div>
-        <div class="card-body">
-          ${dealFlowStepsHTML(txn.status)}
-          <div id="${role}-dealflow-action">
-            ${dealFlowActionHTML(txn, role)}
+      S.currentTxn = list[0];
+      S.allTxns = list;
+      el.innerHTML = list.map(txn => `
+        <div class="card mb-16" style="margin-bottom:20px;">
+          <div class="card-header">
+            <div class="card-title">${txn.year||''} ${txn.make||''} ${txn.model||''}</div>
+            <div style="font-size:13px;color:var(--g5)">Agreed price: <strong style="color:var(--accent)">$${parseFloat(txn.amount).toLocaleString()}</strong></div>
           </div>
-        </div>
-      </div>`;
+          <div class="card-body">
+            ${dealFlowStepsHTML(txn.status)}
+            <div id="dealer-dealflow-action-${txn.transaction_id}">
+              ${dealFlowActionHTML(txn,'dealer')}
+            </div>
+          </div>
+        </div>`).join('');
+    }
   } catch(e) {
     el.innerHTML = '<div class="alert alert-warning">Could not load deal status.</div>';
     console.error(e);
   }
 }
-
-async function ackBillOfSale(party) {
-  const checkId = party === 'dealer' ? 'dealer-bos-check' : 'seller-bos-check';
+async function ackBillOfSale(party, txnId) {
+  const checkId = party === 'dealer' ? 'dealer-bos-check-'+txnId : 'seller-bos-check-'+txnId;
   const check = document.getElementById(checkId);
   if(!check || !check.checked) { showToast('⚠️','Required','Please check the box to acknowledge.'); return; }
-  if(!S.currentTxn) return;
   try {
     const res = await fetch(`${API}/transactions/bill-of-sale/acknowledge`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({transaction_id: S.currentTxn.transaction_id, party})
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({transaction_id: txnId, party})
     });
     const data = await res.json();
     showToast('✓','Signed!', data.both_acked ? 'Both parties signed. Moving to pickup scheduling.' : `Waiting for ${data.waiting_on} to sign.`);
@@ -2933,62 +2934,55 @@ async function ackBillOfSale(party) {
   } catch(e) { showToast('❌','Error','Could not submit.'); }
 }
 
-async function proposeSlots() {
-  const s1 = document.getElementById('slot-1')?.value;
-  const s2 = document.getElementById('slot-2')?.value;
-  const s3 = document.getElementById('slot-3')?.value;
+async function proposeSlots(txnId) {
+  const s1 = document.getElementById('slot-1-'+txnId)?.value;
+  const s2 = document.getElementById('slot-2-'+txnId)?.value;
+  const s3 = document.getElementById('slot-3-'+txnId)?.value;
   if(!s1||!s2||!s3) { showToast('⚠️','Missing','Please enter all 3 time slots.'); return; }
-  if(!S.currentTxn || !S.dealer_id) return;
   try {
     await fetch(`${API}/transactions/pickup/propose-slots`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({transaction_id: S.currentTxn.transaction_id, dealer_id: S.dealer_id, slot_1: s1, slot_2: s2, slot_3: s3})
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({transaction_id: txnId, dealer_id: S.dealer_id, slot_1: s1, slot_2: s2, slot_3: s3})
     });
     showToast('✓','Sent!','Pickup options sent to seller.');
     loadDealFlow('dealer');
   } catch(e) { showToast('❌','Error','Could not send slots.'); }
 }
 
-async function confirmSlot(slot) {
-  if(!S.currentTxn || !S.seller_id) return;
+async function confirmSlot(slot, txnId) {
   try {
     await fetch(`${API}/transactions/pickup/confirm-slot`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({transaction_id: S.currentTxn.transaction_id, seller_id: S.seller_id, chosen_slot: slot})
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({transaction_id: txnId, seller_id: S.seller_id, chosen_slot: slot})
     });
     showToast('✓','Confirmed!','Pickup time locked in.');
     loadDealFlow('seller');
   } catch(e) { showToast('❌','Error','Could not confirm slot.'); }
 }
 
-async function confirmPickup(asDescribed) {
-  if(!S.currentTxn || !S.dealer_id) return;
+async function confirmPickup(asDescribed, txnId) {
   const note = asDescribed ? null : prompt('Briefly describe the discrepancy:');
   try {
     await fetch(`${API}/transactions/pickup/confirm`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({transaction_id: S.currentTxn.transaction_id, dealer_id: S.dealer_id, as_described: asDescribed, discrepancy_note: note})
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({transaction_id: txnId, dealer_id: S.dealer_id, as_described: asDescribed, discrepancy_note: note})
     });
     showToast('✓', asDescribed ? 'Pickup confirmed!' : 'Discrepancy flagged.', asDescribed ? 'Now pay the seller.' : 'PrivaBuy support will follow up.');
     loadDealFlow('dealer');
   } catch(e) { showToast('❌','Error','Could not confirm pickup.'); }
 }
 
-async function sellerConfirmDealPayment() {
-  if(!S.currentTxn || !S.seller_id) return;
+async function sellerConfirmDealPayment(txnId) {
   try {
     await fetch(`${API}/transactions/seller/confirm-payment-received`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({transaction_id: S.currentTxn.transaction_id, seller_id: S.seller_id})
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({transaction_id: txnId, seller_id: S.seller_id})
     });
     showToast('✓','Confirmed!','Now pay your $250 PrivaBuy fee to complete.');
     loadDealFlow('seller');
   } catch(e) { showToast('❌','Error','Could not confirm.'); }
 }
+
 </script>
 </body>
 </html>
