@@ -2641,8 +2641,10 @@ async function processDealerPayment() {
     updateDealerFeeTab();
     showToast('✓','Payment Complete','$600 paid. Seller contact unlocked.');
     // Advance transaction status to awaiting_bill_of_sale
-    if(S.currentTxn) {
-    await fetch(`${API}/transactions/${S.currentTxn.transaction_id}/dealer-paid`, {method:'POST'});
+    const paidFee = D_pendingFees.find(f => f.id === D_selectedFeeId) || fee;
+    const txnIdToPay = paidFee?.transaction_id || (S.currentTxn?.transaction_id);
+    if(txnIdToPay) {
+      await fetch(`${API}/transactions/${txnIdToPay}/dealer-paid`, {method:'POST'});
     }
     document.getElementById('dealer-dealflow-tab').style.display = '';
   } catch(err) {
