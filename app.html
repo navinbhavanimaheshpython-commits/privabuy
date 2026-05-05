@@ -1379,6 +1379,32 @@ function setSellerMode(mode) {
   }
 }
 
+function showForgotPassword() {
+  document.getElementById('login-seller-fields').style.display = 'none';
+  document.getElementById('forgot-password-section').style.display = 'block';
+}
+
+function hideForgotPassword() {
+  document.getElementById('forgot-password-section').style.display = 'none';
+  document.getElementById('login-seller-fields').style.display = 'block';
+}
+
+async function submitForgotPassword() {
+  const email = document.getElementById('forgot-email-input').value.trim();
+  if(!email) { showToast('⚠️','Missing Email','Enter your email address.'); return; }
+  try {
+    await fetch(`${API}/sellers/forgot-password`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email})
+    });
+    showToast('✓','Email Sent','Check your inbox for a reset link.');
+    hideForgotPassword();
+  } catch(e) {
+    showToast('❌','Error','Could not send reset email.');
+  }
+}
+
 function togglePasswordVisibility() {
   const input = document.getElementById('seller-password-input');
   const icon = document.getElementById('pwd-eye-icon');
