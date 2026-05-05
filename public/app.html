@@ -1444,6 +1444,8 @@ async function loadSellerActiveAuction() {
     const res = await fetch(`${API}/sellers/${S.seller_id}/listings`);
     const listings = await res.json();
     const active = listings.find(l => l.status === 'open');
+    const accepted = listings.find(l => l.status === 'accepted');
+
     if(active) {
       S.car_id = active.car_id;
       S.auctionActive = true;
@@ -1460,6 +1462,12 @@ async function loadSellerActiveAuction() {
         <div class="text-muted mt-16 text-sm">Floor: <strong style="color:var(--accent)">$${(active.floor_price||0).toLocaleString()}</strong></div>`;
       startAuctionTimer();
       startSellerBidPoll();
+    } else if(accepted) {
+      // Auction was accepted — show Deal Flow tab
+      S.car_id = accepted.car_id;
+      S.auctionData = accepted;
+      document.getElementById('seller-dealflow-tab').style.display = '';
+      sellerTab('dealflow', document.getElementById('seller-dealflow-tab'));
     }
   } catch(e) { console.error(e); }
 }
