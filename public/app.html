@@ -1444,7 +1444,7 @@ async function loadSellerActiveAuction() {
     const res = await fetch(`${API}/sellers/${S.seller_id}/listings`);
     const listings = await res.json();
     const active = listings.find(l => l.status === 'open');
-    const accepted = listings.find(l => l.status === 'accepted');
+    const accepted = listings.find(l => l.status === 'accepted' || l.status === 'accepted_pending_settlement');
 
     if(active) {
       S.car_id = active.car_id;
@@ -1492,7 +1492,7 @@ async function loadSellerHistory() {
         <td>${l.bid_count}</td>
         <td style="font-family:var(--serif);font-size:18px;color:var(--accent)">${l.top_bid?'$'+l.top_bid.toLocaleString():'—'}</td>
         <td>${l.floor_price?'$'+l.floor_price.toLocaleString():'—'}</td>
-        <td><span class="badge badge-${l.status==='open'?'live':l.status==='accepted'?'won':'closed'}">${l.status}</span></td>
+        <td><span class="badge badge-${l.status==='open'?'live':l.status==='accepted'||l.status==='accepted_pending_settlement'?'won':'closed'}">${l.status}</span>
       </tr>`).join('')}</tbody></table></div>`;
   } catch(e) {
     el.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px">Could not load history.</div>';
