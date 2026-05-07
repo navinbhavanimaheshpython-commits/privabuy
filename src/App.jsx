@@ -359,14 +359,14 @@ function Navbar() {
 /* ─── CAR IMAGE MARQUEE ─────────────────────────────────────────────────── */
 // Real Unsplash car photos — sedan, SUV, truck variety
 const MARQUEE_CARS = [
-  { url:"https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=480&q=80", label:"2018 Honda Accord" },
-  { url:"https://images.unsplash.com/photo-1590362891991-f776e747a588?w=480&q=80", label:"2017 Toyota Camry" },
-  { url:"https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=480&q=80", label:"2019 Ford F-150" },
-  { url:"https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=480&q=80", label:"2018 Honda CR-V" },
-  { url:"https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=480&q=80", label:"2017 Toyota RAV4" },
-  { url:"https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=480&q=80", label:"2019 Chevy Equinox" },
-  { url:"https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=480&q=80", label:"2018 Ford Explorer" },
-  { url:"https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=480&q=80", label:"2017 Nissan Rogue" },
+  { url:"https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=480&q=80", label:"2018 Sedan · Chicago, IL" },
+  { url:"https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=480&q=80", label:"2017 Sedan · Evanston, IL" },
+  { url:"https://images.unsplash.com/photo-1590362891991-f776e747a588?w=480&q=80", label:"2019 Pickup · Oak Park, IL" },
+  { url:"https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=480&q=80", label:"2018 SUV · Naperville, IL" },
+  { url:"https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=480&q=80", label:"2017 SUV · Schaumburg, IL" },
+  { url:"https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=480&q=80", label:"2019 Crossover · Joliet, IL" },
+  { url:"https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=480&q=80", label:"2018 SUV · Aurora, IL" },
+  { url:"https://images.unsplash.com/photo-1617469767280-aa8c38a573b8?w=480&q=80", label:"2017 Sedan · Waukegan, IL" },
 ];
 
 function CarMarquee() {
