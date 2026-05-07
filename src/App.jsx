@@ -376,7 +376,7 @@ function CarMarquee() {
     <div style={{ padding:"5rem 0", background:"#edeae4", overflow:"hidden" }}>
       <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
         <span className="section-badge">Real Vehicles. Real Auctions.</span>
-        <h2 className="serif-italic reveal" style={{ fontSize:"clamp(1.8rem,3.5vw,2.5rem)", letterSpacing:"-0.03em", margin:"0.5rem 0 0", fontWeight:400, color:"#1a1814" }}>
+        <h2 className="serif-italic reveal" style={{ fontSize:"clamp(1.8rem,3.5vw,2.5rem)", letterSpacing:"-0.03em", margin:"0.5rem 0 0", fontWeight:400, color:"#ffffff" }}>
           Vehicles like yours, sold every day.
         </h2>
       </div>
@@ -682,7 +682,7 @@ function ForDealers() {
           <div style={{ position:"absolute", inset:0, background:"linear-gradient(to right, rgba(26,24,20,0.85) 0%, rgba(26,24,20,0.60) 50%, rgba(26,24,20,0.20) 100%)" }} />
           <div style={{ position:"absolute", top:"50%", left:"2.5rem", transform:"translateY(-50%)" }}>
             <span className="section-badge" style={{ background:"rgba(255,255,255,0.15)", border:"1px solid rgba(255,255,255,0.3)", color:"#fff" }}>For Dealers</span>
-            <h2 className="serif-italic" style={{ fontSize:"clamp(2rem,4vw,3rem)", lineHeight:0.93, letterSpacing:"-0.04em", margin:"0.5rem 0 0.75rem", fontWeight:400, color:"#ffffff", background:"none", textShadow:"0 2px 12px rgba(255, 255, 255, 0.5)" }}>
+            <h2 className="serif-italic" style={{ fontSize:"clamp(2rem,4vw,3rem)", lineHeight:0.93, letterSpacing:"-0.04em", margin:"0.5rem 0 0.75rem", fontWeight:400, color:"#ffffff", background:"none", textShadow:"0 2px 12px rgba(255, 0, 0, 0.5)" }}>
               The inventory gap,<br />finally closed.
             </h2>
             <p style={{ color:"#ffffff", fontSize:"0.95rem", maxWidth:360, margin:0 }}>
