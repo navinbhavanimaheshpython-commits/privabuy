@@ -682,7 +682,7 @@ function ForDealers() {
           <div style={{ position:"absolute", inset:0, background:"linear-gradient(to right, rgba(26,24,20,0.85) 0%, rgba(26,24,20,0.60) 50%, rgba(26,24,20,0.20) 100%)" }} />
           <div style={{ position:"absolute", top:"50%", left:"2.5rem", transform:"translateY(-50%)" }}>
             <span className="section-badge" style={{ background:"rgba(255,255,255,0.15)", border:"1px solid rgba(255,255,255,0.3)", color:"#fff" }}>For Dealers</span>
-            <h2 className="serif-italic" style={{ fontSize:"clamp(2rem,4vw,3rem)", lineHeight:0.93, letterSpacing:"-0.04em", margin:"0.5rem 0 0.75rem", fontWeight:400, color:"#ffffff", background:"rgba(26,24,20,0.55)", textShadow:"none" }}>
+            <h2 className="serif-italic" style={{ fontSize:"clamp(2rem,4vw,3rem)", lineHeight:0.93, letterSpacing:"-0.04em", margin:"0.5rem 0 0.75rem", fontWeight:400, color:"#ffffff", background:"none", textShadow:"none" }}>
               The inventory gap,<br />finally closed.
             </h2>
             <p style={{ color:"#ffffff", fontSize:"0.95rem", maxWidth:360, margin:0 }}>
