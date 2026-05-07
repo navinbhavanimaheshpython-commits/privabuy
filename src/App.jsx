@@ -678,14 +678,14 @@ function ForDealers() {
 
         {/* Dealer hero image */}
         <div className="reveal" style={{ borderRadius:"1.5rem", overflow:"hidden", height:280, marginBottom:"4rem", position:"relative", border:"1px solid rgba(26,24,20,0.10)", boxShadow:"0 12px 40px rgba(26,24,20,0.14)" }}>
-          <img src="https://images.unsplash.com/photo-1562158074-d99f49e89e27?w=1200&q=80" alt="Dealer lot" style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"center 40%" }} loading="lazy" />
-          <div style={{ position:"absolute", inset:0, background:"linear-gradient(to right, rgba(26,24,20,0.82) 0%, rgba(26,24,20,0.50) 60%, rgba(26,24,20,0.15) 100%)" }} />
+          <img src="https://images.unsplash.com/photo-1562158074-d99f49e89e27?w=1200&q=80" alt="Dealer lot" alt="Dealer lot" alt="Dealer lot" alt="Dealer lot" alt="Dealer lot" style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"center 40%" }} loading="lazy" />
+          <div style={{ position:"absolute", inset:0, background:"linear-gradient(to right, rgba(26,24,20,0.85) 0%, rgba(26,24,20,0.60) 50%, rgba(26,24,20,0.20) 100%)" }} />
           <div style={{ position:"absolute", top:"50%", left:"2.5rem", transform:"translateY(-50%)" }}>
             <span className="section-badge" style={{ background:"rgba(255,255,255,0.15)", border:"1px solid rgba(255,255,255,0.3)", color:"#fff" }}>For Dealers</span>
             <h2 className="serif-italic" style={{ fontSize:"clamp(2rem,4vw,3rem)", lineHeight:0.93, letterSpacing:"-0.04em", margin:"0.5rem 0 0.75rem", fontWeight:400, color:"#fff" }}>
               The inventory gap,<br />finally closed.
             </h2>
-            <p style={{ color:"rgba(255,255,255,0.82)", fontSize:"0.95rem", maxWidth:360, margin:0 }}>
+            <p style={{ color:"#ffffff", fontSize:"0.95rem", maxWidth:360, margin:0 }}>
               The 6–8 year old, higher-mileage segment is your most profitable. PrivaBuy brings it directly to you.
             </p>
           </div>
