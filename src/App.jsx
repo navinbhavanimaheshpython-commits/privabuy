@@ -732,7 +732,7 @@ function About() {
                 <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=300&q=80" alt="Chicago city" loading="lazy" />
               </div>
               <div className="car-img-card">
-                <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=300&q=80" alt="Dealer lot" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=300&q=80" alt="Dealer lot" loading="lazy" />
               </div>
             </div>
           </div>
