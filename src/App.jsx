@@ -30,7 +30,7 @@ const FontLink = () => (
       overflow-x: hidden;
     }
 
-    h1, h2 { color: #1a1814 !important; }
+    h1 { color: #1a1814 !important; }
 
     .lg {
       background: rgba(255,255,255,0.72);
