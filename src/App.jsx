@@ -726,15 +726,15 @@ function About() {
           <div style={{ flex:"1 1 280px" }} className="reveal">
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.75rem", height:320 }}>
               <div className="car-img-card" style={{ gridRow:"1 / 3" }}>
-                <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&q=80" alt="Car auction" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=400&q=80" alt="Honda CR-V" loading="lazy" />
               </div>
               <div className="car-img-card">
-                <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=300&q=80" alt="Dealership" loading="lazy" />
+               <img src="https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=300&q=80" alt="Toyota RAV4" loading="lazy" />
               </div>
               <div className="car-img-card">
-                <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=300&q=80" alt="Vehicle" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1590362891991-f776e747a588?w=300&q=80" alt="Ford F-150" loading="lazy" />
               </div>
-            </div>
+            </div>  
           </div>
 
           {/* Text side */}
