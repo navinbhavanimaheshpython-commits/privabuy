@@ -359,14 +359,14 @@ function Navbar() {
 /* ─── CAR IMAGE MARQUEE ─────────────────────────────────────────────────── */
 // Real Unsplash car photos — sedan, SUV, truck variety
 const MARQUEE_CARS = [
-  { url:"https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=480&q=80", label:"2018 Honda Accord" },
-  { url:"https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=480&q=80", label:"2017 Toyota Camry" },
-  { url:"https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=480&q=80", label:"2019 Ford F-150" },
-  { url:"https://images.unsplash.com/photo-1502877338535-766e1452684a?w=480&q=80", label:"2018 Honda CR-V" },
-  { url:"https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=480&q=80", label:"2017 Toyota RAV4" },
-  { url:"https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=480&q=80", label:"2019 Chevrolet Malibu" },
-  { url:"https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=480&q=80", label:"2018 Ford Explorer" },
-  { url:"https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=480&q=80", label:"2017 Nissan Altima" },
+  { url:"https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=480&q=80", label:"2018 Honda Accord" },
+  { url:"https://images.unsplash.com/photo-1590362891991-f776e747a588?w=480&q=80", label:"2017 Toyota Camry" },
+  { url:"https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=480&q=80", label:"2019 Ford F-150" },
+  { url:"https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=480&q=80", label:"2018 Honda CR-V" },
+  { url:"https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=480&q=80", label:"2017 Toyota RAV4" },
+  { url:"https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=480&q=80", label:"2019 Chevy Equinox" },
+  { url:"https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=480&q=80", label:"2018 Ford Explorer" },
+  { url:"https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=480&q=80", label:"2017 Nissan Rogue" },
 ];
 
 function CarMarquee() {
