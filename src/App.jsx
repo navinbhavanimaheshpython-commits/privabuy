@@ -726,13 +726,13 @@ function About() {
           <div style={{ flex:"1 1 280px" }} className="reveal">
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.75rem", height:320 }}>
               <div className="car-img-card" style={{ gridRow:"1 / 3" }}>
-                <img src="https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400&q=80" alt="Car keys handover" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&q=80" alt="Car auction" loading="lazy" />
               </div>
               <div className="car-img-card">
-                <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=300&q=80" alt="Chicago city" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=300&q=80" alt="Dealership" loading="lazy" />
               </div>
               <div className="car-img-card">
-                <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=300&q=80" alt="Dealer lot" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=300&q=80" alt="Vehicle" loading="lazy" />
               </div>
             </div>
           </div>
