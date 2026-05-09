@@ -612,29 +612,144 @@ body::before {
               <button class="damage-tab" onclick="switchDamageTab('mechanical',this)"> Mechanical</button>
             </div>
             <div id="damage-exterior">
-              <p style="font-size:14px;color:var(--g5);margin-bottom:16px;text-align:center">Click areas to mark damage.</p>
-              <div class="car-diagram" style="position:relative;margin-bottom:8px;">
-                <svg viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="60" y="80" width="280" height="110" rx="18" fill="#f0f0f0" stroke="rgba(0,0,0,0.12)" stroke-width="1.5"/>
-                  <rect x="100" y="50" width="200" height="70" rx="10" fill="#e8f0f5" stroke="rgba(0,0,0,0.15)" stroke-width="1.5"/>
-                  <rect x="90" y="30" width="220" height="55" rx="12" fill="#f5f5f5" stroke="rgba(0,0,0,0.10)" stroke-width="1"/>
-                  <rect x="60" y="125" width="280" height="40" rx="6" fill="#ebebeb" stroke="rgba(0,0,0,0.10)" stroke-width="1"/>
-                  <rect x="55" y="162" width="290" height="24" rx="8" fill="#e8e8e8" stroke="rgba(0,0,0,0.10)" stroke-width="1"/>
-                  <ellipse cx="92" cy="148" rx="20" ry="14" fill="#e0e0e0" stroke="rgba(194,124,42,0.5)" stroke-width="1.5"/>
-                  <ellipse cx="92" cy="148" rx="12" ry="8" fill="rgba(194,124,42,0.10)"/>
-                  <ellipse cx="308" cy="148" rx="20" ry="14" fill="#e0e0e0" stroke="rgba(194,124,42,0.5)" stroke-width="1.5"/>
-                  <ellipse cx="308" cy="148" rx="12" ry="8" fill="rgba(194,124,42,0.10)"/>
-                  <rect x="140" y="157" width="120" height="18" rx="5" fill="#e5e5e5" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>
-                  <circle cx="105" cy="190" r="16" fill="#e0e0e0" stroke="rgba(0,0,0,0.15)" stroke-width="2"/>
-                  <circle cx="105" cy="190" r="8" fill="#d5d5d5" stroke="rgba(0,0,0,0.10)" stroke-width="1"/>
-                  <circle cx="295" cy="190" r="16" fill="#e0e0e0" stroke="rgba(0,0,0,0.15)" stroke-width="2"/>
-                  <circle cx="295" cy="190" r="8" fill="#d5d5d5" stroke="rgba(0,0,0,0.10)" stroke-width="1"/>
-                </svg>
-                <div class="damage-pin" id="pin-hood" style="left:50%;top:54%" onclick="togglePin('hood','Hood')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Hood</div></div>
-                <div class="damage-pin" id="pin-windshield" style="left:50%;top:28%" onclick="togglePin('windshield','Windshield')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Windshield</div></div>
-                <div class="damage-pin" id="pin-bumper" style="left:50%;top:82%" onclick="togglePin('bumper','Front Bumper')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Bumper</div></div>
-                <div class="damage-pin" id="pin-headlight-l" style="left:24%;top:66%" onclick="togglePin('headlight-l','Left Headlight')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">L. Light</div></div>
-                <div class="damage-pin" id="pin-headlight-r" style="left:76%;top:66%" onclick="togglePin('headlight-r','Right Headlight')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">R. Light</div></div>
+<p style="font-size:14px;color:var(--g5);margin-bottom:16px;text-align:center">Click areas to mark damage.</p>
+
+              <div style="display:flex;gap:6px;justify-content:center;margin-bottom:14px;">
+                <button onclick="switchCarView('front',this)" id="cvtab-front" style="padding:6px 18px;border-radius:50px;border:1.5px solid rgba(124,92,191,0.5);background:rgba(124,92,191,0.10);color:#7c5cbf;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Front</button>
+                <button onclick="switchCarView('side',this)" id="cvtab-side" style="padding:6px 18px;border-radius:50px;border:1.5px solid rgba(0,0,0,0.18);background:white;color:rgba(0,0,0,0.5);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;">Side</button>
+                <button onclick="switchCarView('rear',this)" id="cvtab-rear" style="padding:6px 18px;border-radius:50px;border:1.5px solid rgba(0,0,0,0.18);background:white;color:rgba(0,0,0,0.5);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;">Rear</button>
+              </div>
+
+              <div style="background:linear-gradient(160deg,#f8f6ff 0%,#eef2ff 100%);border-radius:16px;border:1.5px solid rgba(124,92,191,0.12);overflow:hidden;margin-bottom:8px;">
+
+                <!-- FRONT -->
+                <div id="cv-front" class="car-diagram" style="position:relative;width:100%;max-width:420px;margin:0 auto;display:block;">
+                  <svg viewBox="0 0 360 240" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+                    <defs>
+                      <radialGradient id="fBG" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#7eb8f7"/><stop offset="100%" stop-color="#3a7bd5"/></radialGradient>
+                      <radialGradient id="fRG" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="#5a9ef0"/><stop offset="100%" stop-color="#2a5db0"/></radialGradient>
+                      <radialGradient id="fGG" cx="40%" cy="30%" r="70%"><stop offset="0%" stop-color="#d0eaff" stop-opacity="0.95"/><stop offset="100%" stop-color="#80b8ee" stop-opacity="0.7"/></radialGradient>
+                      <radialGradient id="fWG" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#666"/><stop offset="100%" stop-color="#111"/></radialGradient>
+                      <radialGradient id="fHG" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#ddd"/><stop offset="100%" stop-color="#888"/></radialGradient>
+                      <radialGradient id="fLG" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#fffde0"/><stop offset="60%" stop-color="#ffe066"/><stop offset="100%" stop-color="#f0b800"/></radialGradient>
+                      <filter id="fS"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#3a7bd5" flood-opacity="0.22"/></filter>
+                    </defs>
+                    <ellipse cx="180" cy="232" rx="140" ry="9" fill="rgba(0,0,0,0.09)"/>
+                    <path d="M30 148 Q28 124 50 116 L310 116 Q332 124 330 148 L328 206 Q328 216 318 218 L42 218 Q32 216 32 206 Z" fill="url(#fBG)" filter="url(#fS)"/>
+                    <path d="M95 116 Q100 68 125 60 L235 60 Q260 68 265 116 Z" fill="url(#fRG)"/>
+                    <path d="M108 114 Q112 72 130 64 L230 64 Q248 72 252 114 Z" fill="url(#fGG)"/>
+                    <path d="M120 109 Q122 80 133 74 L165 74 Q152 84 148 109 Z" fill="rgba(255,255,255,0.32)"/>
+                    <path d="M50 116 L310 116 L300 134 L60 134 Z" fill="#4a8ae8"/>
+                    <path d="M80 116 L280 116 L275 124 L85 124 Z" fill="rgba(255,255,255,0.12)"/>
+                    <path d="M38 194 Q36 208 50 214 L310 214 Q324 208 322 194 L318 182 L42 182 Z" fill="#2a5db0"/>
+                    <rect x="55" y="206" width="250" height="7" rx="3" fill="rgba(0,0,0,0.18)"/>
+                    <path d="M42 138 Q40 128 52 124 L100 124 L105 152 L48 152 Q40 149 42 138 Z" fill="#1a2a3a"/>
+                    <ellipse cx="75" cy="138" rx="22" ry="12" fill="url(#fLG)"/>
+                    <ellipse cx="75" cy="138" rx="16" ry="8" fill="#fffde0" opacity="0.55"/>
+                    <path d="M44 152 L105 152 L104 157 L46 157 Z" fill="#ffe066" opacity="0.8"/>
+                    <path d="M318 138 Q320 128 308 124 L260 124 L255 152 L312 152 Q320 149 318 138 Z" fill="#1a2a3a"/>
+                    <ellipse cx="285" cy="138" rx="22" ry="12" fill="url(#fLG)"/>
+                    <ellipse cx="285" cy="138" rx="16" ry="8" fill="#fffde0" opacity="0.55"/>
+                    <path d="M316 152 L255 152 L256 157 L314 157 Z" fill="#ffe066" opacity="0.8"/>
+                    <path d="M115 162 Q112 154 120 151 L240 151 Q248 154 245 162 L242 180 L118 180 Z" fill="#1a2a3a"/>
+                    <line x1="148" y1="151" x2="145" y2="180" stroke="#3a4a6a" stroke-width="1.5"/>
+                    <line x1="180" y1="151" x2="180" y2="180" stroke="#3a4a6a" stroke-width="1.5"/>
+                    <line x1="212" y1="151" x2="215" y2="180" stroke="#3a4a6a" stroke-width="1.5"/>
+                    <line x1="120" y1="163" x2="242" y2="163" stroke="#3a4a6a" stroke-width="1"/>
+                    <line x1="118" y1="172" x2="242" y2="172" stroke="#3a4a6a" stroke-width="1"/>
+                    <circle cx="180" cy="165" r="9" fill="#2a3a5a" stroke="#4a5a8a" stroke-width="1.5"/>
+                    <circle cx="88" cy="224" r="24" fill="url(#fWG)"/><circle cx="88" cy="224" r="16" fill="#444"/><circle cx="88" cy="224" r="11" fill="url(#fHG)"/><circle cx="88" cy="224" r="4" fill="#aaa"/>
+                    <line x1="88" y1="213" x2="88" y2="235" stroke="#666" stroke-width="2"/><line x1="77" y1="219" x2="99" y2="229" stroke="#666" stroke-width="2"/><line x1="77" y1="229" x2="99" y2="219" stroke="#666" stroke-width="2"/>
+                    <circle cx="272" cy="224" r="24" fill="url(#fWG)"/><circle cx="272" cy="224" r="16" fill="#444"/><circle cx="272" cy="224" r="11" fill="url(#fHG)"/><circle cx="272" cy="224" r="4" fill="#aaa"/>
+                    <line x1="272" y1="213" x2="272" y2="235" stroke="#666" stroke-width="2"/><line x1="261" y1="219" x2="283" y2="229" stroke="#666" stroke-width="2"/><line x1="261" y1="229" x2="283" y2="219" stroke="#666" stroke-width="2"/>
+                  </svg>
+                  <div class="damage-pin" id="pin-windshield" style="left:50%;top:28%" onclick="togglePin('windshield','Windshield')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Windshield</div></div>
+                  <div class="damage-pin" id="pin-hood" style="left:50%;top:50%" onclick="togglePin('hood','Hood')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Hood</div></div>
+                  <div class="damage-pin" id="pin-headlight-l" style="left:22%;top:62%" onclick="togglePin('headlight-l','Left Headlight')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">L. Light</div></div>
+                  <div class="damage-pin" id="pin-headlight-r" style="left:78%;top:62%" onclick="togglePin('headlight-r','Right Headlight')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">R. Light</div></div>
+                  <div class="damage-pin" id="pin-bumper" style="left:50%;top:83%" onclick="togglePin('bumper','Front Bumper')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Bumper</div></div>
+                </div>
+
+                <!-- SIDE -->
+                <div id="cv-side" class="car-diagram" style="position:relative;width:100%;max-width:520px;margin:0 auto;display:none;">
+                  <svg viewBox="0 0 520 240" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+                    <defs>
+                      <radialGradient id="sBG" cx="50%" cy="35%" r="65%"><stop offset="0%" stop-color="#7eb8f7"/><stop offset="100%" stop-color="#3a7bd5"/></radialGradient>
+                      <radialGradient id="sGG" cx="38%" cy="28%" r="70%"><stop offset="0%" stop-color="#c8e8ff" stop-opacity="0.95"/><stop offset="100%" stop-color="#70a8de" stop-opacity="0.7"/></radialGradient>
+                      <filter id="sS"><feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#3a7bd5" flood-opacity="0.20"/></filter>
+                      <radialGradient id="sHG" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#ddd"/><stop offset="100%" stop-color="#888"/></radialGradient>
+                    </defs>
+                    <ellipse cx="260" cy="234" rx="200" ry="9" fill="rgba(0,0,0,0.08)"/>
+                    <path d="M28 164 Q26 142 45 134 L475 134 Q494 142 492 164 L488 210 Q488 220 478 221 L42 221 Q32 220 32 210 Z" fill="url(#sBG)" filter="url(#sS)"/>
+                    <path d="M115 134 Q118 84 140 72 L220 62 L330 62 L370 72 Q392 84 395 134 Z" fill="#2a5db0"/>
+                    <path d="M118 132 Q120 88 142 76 L218 64 L220 132 Z" fill="url(#sGG)"/>
+                    <path d="M125 129 Q127 94 146 82 L180 70 L182 129 Z" fill="rgba(255,255,255,0.26)"/>
+                    <path d="M340 132 L340 64 L368 70 Q388 82 392 132 Z" fill="url(#sGG)"/>
+                    <path d="M115 134 L220 134 L220 206 L115 206 Z" fill="#4a8ae8"/>
+                    <line x1="220" y1="134" x2="220" y2="214" stroke="rgba(0,0,0,0.22)" stroke-width="2.5"/>
+                    <path d="M220 134 L395 134 L395 206 L220 206 Z" fill="#4a8ae8"/>
+                    <rect x="175" y="174" width="28" height="7" rx="3.5" fill="rgba(255,255,255,0.48)"/>
+                    <rect x="300" y="174" width="28" height="7" rx="3.5" fill="rgba(255,255,255,0.48)"/>
+                    <path d="M45 150 L476 150 L476 157 L45 157 Z" fill="rgba(255,255,255,0.11)"/>
+                    <path d="M28 164 Q18 166 16 180 Q16 196 28 200 L44 200 L44 160 Z" fill="#2a5db0"/>
+                    <path d="M492 164 Q502 166 504 180 Q504 196 492 200 L476 200 L476 160 Z" fill="#2a5db0"/>
+                    <rect x="36" y="206" width="448" height="9" rx="4" fill="#2a5db0"/>
+                    <path d="M58 221 Q58 192 88 182 Q118 172 148 182 Q178 192 178 221 Z" fill="#3a6ac0"/>
+                    <circle cx="118" cy="222" r="28" fill="#1a1a1a"/><circle cx="118" cy="222" r="19" fill="#333"/><circle cx="118" cy="222" r="14" fill="url(#sHG)"/><circle cx="118" cy="222" r="5" fill="#999"/>
+                    <line x1="118" y1="208" x2="118" y2="236" stroke="#666" stroke-width="2.5"/><line x1="104" y1="215" x2="132" y2="229" stroke="#666" stroke-width="2.5"/><line x1="104" y1="229" x2="132" y2="215" stroke="#666" stroke-width="2.5"/>
+                    <path d="M342 221 Q342 192 372 182 Q402 172 432 182 Q462 192 462 221 Z" fill="#3a6ac0"/>
+                    <circle cx="402" cy="222" r="28" fill="#1a1a1a"/><circle cx="402" cy="222" r="19" fill="#333"/><circle cx="402" cy="222" r="14" fill="url(#sHG)"/><circle cx="402" cy="222" r="5" fill="#999"/>
+                    <line x1="402" y1="208" x2="402" y2="236" stroke="#666" stroke-width="2.5"/><line x1="388" y1="215" x2="416" y2="229" stroke="#666" stroke-width="2.5"/><line x1="388" y1="229" x2="416" y2="215" stroke="#666" stroke-width="2.5"/>
+                  </svg>
+                  <div class="damage-pin" id="pin-roof" style="left:50%;top:28%" onclick="togglePin('roof','Roof')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Roof</div></div>
+                  <div class="damage-pin" id="pin-front-door" style="left:32%;top:68%" onclick="togglePin('front-door','Front Door')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Front Door</div></div>
+                  <div class="damage-pin" id="pin-rear-door" style="left:60%;top:68%" onclick="togglePin('rear-door','Rear Door')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Rear Door</div></div>
+                  <div class="damage-pin" id="pin-front-qp" style="left:15%;top:60%" onclick="togglePin('front-qp','Front Quarter Panel')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">F. Quarter</div></div>
+                  <div class="damage-pin" id="pin-rear-qp" style="left:85%;top:60%" onclick="togglePin('rear-qp','Rear Quarter Panel')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">R. Quarter</div></div>
+                </div>
+
+                <!-- REAR -->
+                <div id="cv-rear" class="car-diagram" style="position:relative;width:100%;max-width:420px;margin:0 auto;display:none;">
+                  <svg viewBox="0 0 360 240" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+                    <defs>
+                      <radialGradient id="rBG" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#7eb8f7"/><stop offset="100%" stop-color="#3a7bd5"/></radialGradient>
+                      <radialGradient id="rGG" cx="40%" cy="30%" r="70%"><stop offset="0%" stop-color="#c8e8ff" stop-opacity="0.92"/><stop offset="100%" stop-color="#70a8de" stop-opacity="0.65"/></radialGradient>
+                      <filter id="rS"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#3a7bd5" flood-opacity="0.20"/></filter>
+                      <radialGradient id="rTG" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#ff9090"/><stop offset="60%" stop-color="#f04040"/><stop offset="100%" stop-color="#a00000"/></radialGradient>
+                      <radialGradient id="rHG" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#ddd"/><stop offset="100%" stop-color="#888"/></radialGradient>
+                    </defs>
+                    <ellipse cx="180" cy="232" rx="140" ry="9" fill="rgba(0,0,0,0.09)"/>
+                    <path d="M30 148 Q28 124 50 116 L310 116 Q332 124 330 148 L328 210 Q328 220 318 221 L42 221 Q32 220 32 210 Z" fill="url(#rBG)" filter="url(#rS)"/>
+                    <path d="M95 116 Q100 68 125 60 L235 60 Q260 68 265 116 Z" fill="#2a5db0"/>
+                    <path d="M108 114 Q112 72 130 66 L230 66 Q248 72 252 114 Z" fill="url(#rGG)"/>
+                    <path d="M120 110 Q124 82 138 74 L168 72 L166 110 Z" fill="rgba(255,255,255,0.28)"/>
+                    <path d="M55 116 L305 116 L298 136 L62 136 Z" fill="#4a8ae8"/>
+                    <path d="M38 192 Q36 206 50 212 L310 212 Q324 206 322 192 L318 180 L42 180 Z" fill="#2a5db0"/>
+                    <rect x="55" y="206" width="250" height="7" rx="3" fill="rgba(0,0,0,0.18)"/>
+                    <path d="M42 136 Q38 127 50 122 L98 122 L102 156 L48 156 Q38 152 42 136 Z" fill="#1a1020"/>
+                    <ellipse cx="73" cy="138" rx="22" ry="12" fill="url(#rTG)"/>
+                    <ellipse cx="73" cy="149" rx="10" ry="5" fill="rgba(255,255,255,0.65)"/>
+                    <path d="M44 156 L103 156 L102 161 L46 161 Z" fill="#f04040" opacity="0.65"/>
+                    <path d="M318 136 Q322 127 310 122 L262 122 L258 156 L312 156 Q322 152 318 136 Z" fill="#1a1020"/>
+                    <ellipse cx="287" cy="138" rx="22" ry="12" fill="url(#rTG)"/>
+                    <ellipse cx="287" cy="149" rx="10" ry="5" fill="rgba(255,255,255,0.65)"/>
+                    <path d="M316 156 L257 156 L258 161 L314 161 Z" fill="#f04040" opacity="0.65"/>
+                    <rect x="143" y="162" width="74" height="17" rx="3" fill="#e8e8e8" stroke="#ccc" stroke-width="1.5"/>
+                    <rect x="147" y="166" width="66" height="9" rx="2" fill="white"/>
+                    <ellipse cx="110" cy="216" rx="9" ry="4" fill="#1a2030"/>
+                    <ellipse cx="250" cy="216" rx="9" ry="4" fill="#1a2030"/>
+                    <circle cx="88" cy="226" r="24" fill="#1a1a1a"/><circle cx="88" cy="226" r="16" fill="#333"/><circle cx="88" cy="226" r="11" fill="url(#rHG)"/><circle cx="88" cy="226" r="4" fill="#999"/>
+                    <line x1="88" y1="215" x2="88" y2="237" stroke="#666" stroke-width="2.5"/><line x1="77" y1="221" x2="99" y2="231" stroke="#666" stroke-width="2.5"/><line x1="77" y1="231" x2="99" y2="221" stroke="#666" stroke-width="2.5"/>
+                    <circle cx="272" cy="226" r="24" fill="#1a1a1a"/><circle cx="272" cy="226" r="16" fill="#333"/><circle cx="272" cy="226" r="11" fill="url(#rHG)"/><circle cx="272" cy="226" r="4" fill="#999"/>
+                    <line x1="272" y1="215" x2="272" y2="237" stroke="#666" stroke-width="2.5"/><line x1="261" y1="221" x2="283" y2="231" stroke="#666" stroke-width="2.5"/><line x1="261" y1="231" x2="283" y2="221" stroke="#666" stroke-width="2.5"/>
+                  </svg>
+                  <div class="damage-pin" id="pin-rear-window" style="left:50%;top:28%" onclick="togglePin('rear-window','Rear Window')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Rear Window</div></div>
+                  <div class="damage-pin" id="pin-trunk" style="left:50%;top:50%" onclick="togglePin('trunk','Trunk')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Trunk</div></div>
+                  <div class="damage-pin" id="pin-taillight-l" style="left:22%;top:62%" onclick="togglePin('taillight-l','Left Tail Light')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">L. Tail</div></div>
+                  <div class="damage-pin" id="pin-taillight-r" style="left:78%;top:62%" onclick="togglePin('taillight-r','Right Tail Light')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">R. Tail</div></div>
+                  <div class="damage-pin" id="pin-rear-bumper" style="left:50%;top:83%" onclick="togglePin('rear-bumper','Rear Bumper')"><div class="damage-pin-dot">+</div><div class="damage-pin-label">Rear Bumper</div></div>
+                </div>
+
               </div>
               <div class="form-group mt-8">
                 <label class="form-label">Exterior Condition</label>
@@ -1643,6 +1758,21 @@ async function simulatePhoto(el, label, required) {
     }
   };
   input.click();
+}
+
+function switchCarView(view) {
+  ['front','side','rear'].forEach(function(v) {
+    var el = document.getElementById('cv-' + v);
+    if(el) el.style.display = v === view ? 'block' : 'none';
+    var tab = document.getElementById('cvtab-' + v);
+    if(tab) {
+      if(v === view) {
+        tab.style.cssText = "padding:6px 18px;border-radius:50px;border:1.5px solid rgba(124,92,191,0.5);background:rgba(124,92,191,0.10);color:#7c5cbf;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;";
+      } else {
+        tab.style.cssText = "padding:6px 18px;border-radius:50px;border:1.5px solid rgba(0,0,0,0.18);background:white;color:rgba(0,0,0,0.5);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;";
+      }
+    }
+  });
 }
 function switchDamageTab(tab, el) {
   ['exterior','interior','mechanical'].forEach(t=>document.getElementById(`damage-${t}`).classList.toggle('hidden',t!==tab));
