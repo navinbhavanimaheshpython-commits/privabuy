@@ -2042,6 +2042,25 @@ function buildCarfax(prefix, owners, accidents, serviceRecs) {
     <div class="carfax-item"><div class="carfax-num" style="color:${accidents===0?'var(--accent3)':'var(--red)'}">${accidents}</div><div class="carfax-label">Accident${accidents!==1?'s':''}</div></div>
     <div class="carfax-item"><div class="carfax-num" style="color:${serviceRecs>0?'var(--accent3)':'var(--amber)'}">${serviceRecs}</div><div class="carfax-label">Service Records</div></div>`;
 }
+
+async function loadVinAuditHistory(prefix, vin, fallbackOwners, fallbackAccidents) {
+  try {
+    const res = await fetch(`${API}/cars/vehicle-history/${vin}`);
+    const data = await res.json();
+    if(data.found) {
+      buildCarfax(prefix, data.owners, data.accidents, data.title_records);
+      if(data.theft) {
+        showToast('⚠️', 'Theft Alert', 'This vehicle has an active theft record.');
+      }
+      if(!data.clean) {
+        showToast('⚠️', 'Title Issue', 'This vehicle has title brands or salvage records.');
+      }
+    }
+  } catch(e) {
+    console.error('VinAudit error:', e);
+  }
+}
+
 function buildCondition(prefix, conditionPills) {
   const el = document.getElementById(`${prefix}-condition`);
   if(!el) return;
@@ -2370,6 +2389,10 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
     const loanEl = document.getElementById('dam-loan-val');
     if(loanEl) loanEl.textContent = car.loan_status;
     buildCarfax('dam', car.owners||1, car.accidents==='None'?0:car.accidents==='One'?1:2, 0);
+    // Load VinAudit history if VIN available
+    if(car.vin && car.vin.length === 17) {
+      loadVinAuditHistory('dam', car.vin, car.owners||1, car.accidents==='None'?0:1);
+    }
     const condPills = [{label: 'Overall: '+(car.overall_condition||car.condition||'Good'), type:'good'}];
     if(car.smoked_in) condPills.push({label:'Smoked In', type:'bad'});
     if(car.accidents && car.accidents!=='None') condPills.push({label:'Accident: '+car.accidents, type:'warn'});
