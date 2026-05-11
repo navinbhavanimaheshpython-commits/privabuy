@@ -1277,6 +1277,10 @@ body::before {
           <div id="dam-dealer-status"><div style="background:#f5f5f5;border:1px solid rgba(0,0,0,0.16);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--g5);text-align:center;">All dealer identities are anonymous — place a bid to enter</div></div>
           <div class="card" style="flex:1;"><div class="card-body" style="padding:16px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--g5);margin-bottom:6px;">Current Bids</div><div style="font-size:11px;color:var(--g5);margin-bottom:10px;">Your bids show as <strong style="color:#1a1814"> You</strong></div><div class="bid-feed" id="dam-bid-feed"></div></div></div>
           <div class="bid-panel" style="position:static;">
+          <div id="dam-floor-row" style="display:none;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(217,48,37,0.06);border:1px solid rgba(217,48,37,0.18);border-radius:var(--r);margin-bottom:12px;">
+            <span style="font-size:12px;color:var(--red);font-weight:500;">Minimum Bid (Floor)</span>
+            <span style="font-size:16px;font-weight:700;color:var(--red);font-family:var(--serif);" id="dam-floor-display">$0</span>
+          </div>            
             <div style="font-size:13px;color:var(--g5);margin-bottom:8px;">Place Your Bid</div>
             <div class="bid-input-row"><div class="bid-input-wrapper"><span class="bid-currency">$</span><input class="bid-amount-input" id="dealer-bid-input" type="number" placeholder="0" min="0" step="100"></div><button class="btn btn-primary" onclick="placeDealerBid()">Bid Now</button></div>
             <div class="auto-bid-row"><div class="toggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div><div><div style="font-size:12px;font-weight:500;color:#1a1814;">Auto-Bid</div><div class="text-muted" style="font-size:11px;">Bids up to your max automatically</div></div><input class="form-input" placeholder="Max $" style="width:84px;margin-left:auto;padding:8px 10px;" type="number"></div>
@@ -2221,6 +2225,7 @@ function openRealAuction() {
   document.getElementById('real-auction-modal').classList.add('open');
 }
 
+
 async function placeRealBid() {
   const amount = parseInt(document.getElementById('real-bid-input').value)||0;
   if(S.bids.length>0&&amount<=S.bids[0].amount){showToast('⚠️','Bid Too Low',`Must exceed $${S.bids[0].amount.toLocaleString()}`);return;}
@@ -2515,6 +2520,13 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
       {label:'Drivetrain', value: (car.drivetrain && car.drivetrain !== 'undefined') ? car.drivetrain : '—'},
       {label:'Add-ons', value: (car.addons && car.addons !== 'undefined') ? car.addons : '—'},
     ]);
+    
+    if(car.floor_price && car.floor_price > 0) {
+      document.getElementById('dam-floor-display').textContent = '$' + parseFloat(car.floor_price).toLocaleString();
+      document.getElementById('dam-floor-row').style.display = 'flex';
+      document.getElementById('dealer-bid-input').min = car.floor_price;
+      document.getElementById('dealer-bid-input').placeholder = car.floor_price;
+  }
     buildDocs('dam', car.title_status, 'On File', 'IL', car.vin);
     const loanEl = document.getElementById('dam-loan-val');
     if(loanEl) loanEl.textContent = car.loan_status;
@@ -2532,6 +2544,12 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
       document.getElementById('dam-details').innerHTML = `<strong style="color:#1a1814">Seller Notes:</strong> ${car.comments}`;
     }
     buildPhotoGallery('dam', car.photos || []);
+    if(car.floor_price && car.floor_price > 0) {
+    document.getElementById('dam-floor-display').textContent = '$' + parseFloat(car.floor_price).toLocaleString();
+    document.getElementById('dam-floor-row').style.display = 'flex';
+    document.getElementById('dealer-bid-input').min = car.floor_price;
+    document.getElementById('dealer-bid-input').placeholder = car.floor_price;
+}
     document.getElementById('dam-bid-summary').textContent = 
       `Live since ${startTime.toLocaleDateString('en-US',{month:'short',day:'numeric'})} at ${startTime.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
     if(S.dealerModalTimer) clearInterval(S.dealerModalTimer);
@@ -2586,8 +2604,13 @@ async function refreshRealAuctionBids(carId) {
 async function placeDealerBid() {
   if(!S.dealer_id) { showToast('⚠️','Not Authorized','You must be logged in as a dealer to bid.'); return; }
   if(!currentRealAuctionId) { showToast('⚠️','No Auction','No auction selected.'); return; }
-  const amount = parseInt(document.getElementById('dealer-bid-input').value)||0;
-  if(!amount) { showToast('⚠️','Invalid Amount','Enter a bid amount.'); return; }
+const amount = parseInt(document.getElementById('dealer-bid-input').value)||0;
+if(!amount) { showToast('⚠️','Invalid Amount','Enter a bid amount.'); return; }
+const floorPrice = parseFloat(document.getElementById('dam-floor-display')?.textContent?.replace(/[$,]/g,'')) || 0;
+if(floorPrice > 0 && amount < floorPrice) {
+  showToast('⚠️','Below Floor Price', `Minimum bid is $${floorPrice.toLocaleString()}`);
+  return;
+}
   try {
     const res = await fetch(`${API}/offers/submit`, {
       method: 'POST',
