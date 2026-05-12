@@ -2615,7 +2615,7 @@ if(floorPrice > 0 && amount < floorPrice) {
     const res = await fetch(`${API}/offers/submit`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({dealer_id: S.deale  r_id, car_id: currentRealAuctionId, offer_amount: amount})
+      body: JSON.stringify({dealer_id: S.dealer_id, car_id: currentRealAuctionId, offer_amount: amount})
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.detail || 'Bid failed');
