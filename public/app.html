@@ -2460,7 +2460,7 @@ async function renderDealerAuctions() {
       return;
     }
     grid.innerHTML = cars.map(a => `
-      <div class="vehicle-card" onclick="openRealDealerAuction('${a.car_id}','${a.year} ${a.make} ${a.model}','${a.zip}',${a.mileage},'${a.condition}')">
+      <div class="vehicle-card" onclick="openRealDealerAuction('${a.car_id}','${a.year} ${a.make} ${a.model}','${a.zip}',${a.mileage},'${a.condition}',${a.floor_price||0})"condition}',${a.floor_price||0})"condition}',${a.floor_price||0})">
         <div class="vehicle-card-img">
           <div class="badge badge-live" style="position:absolute;top:12px;left:12px">● Live</div>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
@@ -2494,7 +2494,7 @@ async function renderDealerAuctions() {
   }
 }
 
-async function openRealDealerAuction(carId, title, zip, mileage, condition) {
+async function openRealDealerAuction(carId, title, zip, mileage, condition, floorPrice) {
   currentRealAuctionId = carId;
   document.getElementById('dam-title').textContent = title;
   document.getElementById('dam-subtitle').textContent = `ZIP ${zip} · ${(mileage||0).toLocaleString()} mi`;
@@ -2526,7 +2526,7 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition) {
       document.getElementById('dam-floor-row').style.display = 'flex';
       document.getElementById('dealer-bid-input').min = car.floor_price;
       document.getElementById('dealer-bid-input').placeholder = car.floor_price;
-  }
+}
     buildDocs('dam', car.title_status, 'On File', 'IL', car.vin);
     const loanEl = document.getElementById('dam-loan-val');
     if(loanEl) loanEl.textContent = car.loan_status;
@@ -2615,7 +2615,7 @@ if(floorPrice > 0 && amount < floorPrice) {
     const res = await fetch(`${API}/offers/submit`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({dealer_id: S.dealer_id, car_id: currentRealAuctionId, offer_amount: amount})
+      body: JSON.stringify({dealer_id: S.deale  r_id, car_id: currentRealAuctionId, offer_amount: amount})
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.detail || 'Bid failed');
