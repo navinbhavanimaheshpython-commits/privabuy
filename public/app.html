@@ -1924,6 +1924,7 @@ async function startAuction() {
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.detail || 'Failed to list car');
+    if(typeof fbq !== 'undefined') fbq('track', 'Lead');
     S.car_id = data.car_id;
     S.auctionActive = true; S.bids = []; S.elapsedSeconds = 0;
     S.auctionStartTime = Date.now();
