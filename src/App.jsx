@@ -516,7 +516,7 @@ function Hero() {
           <button className="lg-strong" onClick={() => window.location.href='/app?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
             List Your Car ↗
           </button>
-          <button className="lg" onClick={() => window.location.href='/app?role=dealer'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
+          <button className="lg" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
             I'm a Dealer →
           </button>
         </div>
@@ -706,7 +706,7 @@ function ForDealers() {
         </div>
 
         <div className="reveal" style={{ textAlign:"center", marginTop:"2.5rem" }}>
-          <button className="lg-strong" onClick={() => window.location.href='/app?role=dealer'} style={{ borderRadius:"9999px", padding:"0.85rem 2rem", fontSize:"0.9rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500 }}>
+          <button className="lg-strong" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.85rem 2rem", fontSize:"0.9rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500 }}>
             Apply for Dealer Access ↗
           </button>
         </div>
@@ -831,7 +831,7 @@ function CTA() {
             <button className="lg-strong" onClick={() => window.location.href='/app?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"0.95rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500, display:"flex", alignItems:"center", gap:"0.4rem" }}>
               List My Car Free ↗
             </button>
-            <button className="lg" onClick={() => window.location.href='/app?role=dealer'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"0.95rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:300, background:"rgba(255,255,255,0.4)" }}>
+            <button className="lg" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"0.95rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:300, background:"rgba(255,255,255,0.4)" }}>
               Dealer Access →
             </button>
           </div>
