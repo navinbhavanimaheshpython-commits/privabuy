@@ -2905,7 +2905,12 @@ setTimeout(() => {
 }, 500);
 
 function mountDealerStripeCard() {
-  try { dealerCardElement.mount('#dealer-card-element'); } catch(e) { console.log(e); }
+  try {
+    dealerCardElement.unmount();
+  } catch(e) {}
+  try {
+    dealerCardElement.mount('#dealer-card-element');
+  } catch(e) { console.log(e); }
 }
 
 function restoreSellerCard() {
