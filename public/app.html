@@ -2858,12 +2858,26 @@ async function processSellerPayment() {
       payment_method: { card: sellerCardElement, billing_details: { name } }
     });
     if(result.error) throw new Error(result.error.message);
+
+    // ← ADD THIS: mark seller fee paid in the backend
+    if(S.currentTxn?.transaction_id) {
+      await fetch(`${API}/transactions/${S.currentTxn.transaction_id}/seller-fee-paid`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({seller_id: S.seller_id})
+      });
+    }
+
     btn.textContent = '✓ Payment Successful';
     btn.style.background = 'rgba(42,158,124,0.12)';
     btn.style.color = 'var(--accent3)';
     btn.style.borderColor = 'rgba(42,158,124,0.25)';
     const prompt = document.getElementById('seller-fee-prompt');
     if(prompt){ prompt.style.borderColor='rgba(42,158,124,0.25)'; prompt.style.background='rgba(42,158,124,0.05)'; prompt.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">✓</span><div><div style="font-size:13px;font-weight:600;color:var(--accent3)">Payment Complete</div><div style="font-size:12px;color:var(--g5);margin-top:2px">Dealer pickup will be arranged within 1–2 business days.</div></div></div>`; }
+
+    // ← ADD THIS: reload deal flow so the step advances
+    loadDealFlow('seller');
+
     showToast('','Payment Received','$250.00 received. Your auction is fully processed. Thank you!');
   } catch(err) {
     btn.textContent = 'Pay $250.00 →'; btn.disabled = false;
