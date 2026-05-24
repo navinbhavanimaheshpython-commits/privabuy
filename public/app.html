@@ -2981,7 +2981,7 @@ function dealFlowActionHTML(txn, role) {
       <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#1a1814">Platform Fee — $600.00</div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">One-time fee to complete this auction win.</div>
-        <button class="btn btn-primary btn-full" onclick="dealerTab('payment', null)">Pay $600 Now →</button>
+        <button class="btn btn-primary btn-full" onclick="dealFlowPayNow('${txnId}', ${parseFloat(txn.amount)})">Pay $600 Now →</button>
       </div>`;
     if(status === 'awaiting_bill_of_sale') return txn.bill_of_sale_dealer_acked ? `
       <div class="alert alert-info">✓ You've signed the Bill of Sale. Waiting for seller to acknowledge.</div>` : `
@@ -3063,6 +3063,26 @@ function dealFlowActionHTML(txn, role) {
   }
 
   return `<div class="alert alert-info">Status: ${status}</div>`;
+}
+
+function dealFlowPayNow(txnId, winPrice) {
+  // Ensure this transaction is in D_pendingFees
+  const exists = D_pendingFees.find(f => f.transaction_id === txnId);
+  if(!exists) {
+    D_pendingFees.push({
+      id: 'fee_' + txnId,
+      transaction_id: txnId,
+      vehicle: 'Vehicle',
+      winPrice: winPrice,
+      sellerName: 'Seller',
+      sellerPhone: '',
+      sellerEmail: '',
+      paid: false
+    });
+  }
+  const feeId = exists ? exists.id : 'fee_' + txnId;
+  dealerTab('payment', document.getElementById('dealer-pay-fee-tab'));
+  setTimeout(() => selectDealerFee(feeId), 100);
 }
 
 async function loadDealFlow(role) {
