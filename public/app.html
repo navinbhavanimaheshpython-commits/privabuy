@@ -2826,22 +2826,11 @@ async function processDealerPayment() {
     updateDealerFeeTab();
     showToast('✓','Payment Complete','$600 paid. Seller contact unlocked.');
     // Advance transaction status to awaiting_bill_of_sale
-    let txnIdToPay = fee?.transaction_id || S.currentTxn?.transaction_id;
-    if(!txnIdToPay && S.dealer_id) {
-      try {
-        const txnRes = await fetch(`${API}/transactions/dealer/${S.dealer_id}`);
-        const txnList = await txnRes.json();
-        if(txnList?.length) {
-          txnIdToPay = txnList[0].transaction_id;
-          S.currentTxn = txnList[0];
-        }
-      } catch(e) { console.error('Could not fetch transaction:', e); }
-    }
+    const txnIdToPay = fee?.transaction_id || S.currentTxn?.transaction_id;
     if(txnIdToPay) {
       await fetch(`${API}/transactions/${txnIdToPay}/dealer-paid`, {method:'POST'});
     }
     document.getElementById('dealer-dealflow-tab').style.display = '';
-    loadDealFlow('dealer');
   } catch(err) {
     btn.textContent = 'Pay $600.00 →';
     btn.disabled = false;
