@@ -366,7 +366,7 @@ const MARQUEE_CARS = [
   { url:"https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=480&q=80", label:"2017 SUV · Schaumburg, IL" },
   { url:"https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=480&q=80", label:"2019 Crossover · Joliet, IL" },
   { url:"https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=480&q=80", label:"2018 SUV · Aurora, IL" },
-  { url:"https://images.unsplash.com/photo-1617469767280-aa8c38a573b8?w=480&q=80", label:"2017 Sedan · Waukegan, IL" },
+  { url:"https://images.unsplash.com/photo-1555215695-3004980ad54e?w=480&q=80", label:"2017 Sedan · Waukegan, IL" },
 ];
 
 function CarMarquee() {
