@@ -1,3 +1,4 @@
+import PrivaBuyChatbot from './components/PrivaBuyChatbot';
 import { useEffect, useRef, useState, useCallback } from "react";
 
 /* ─── FONTS ─────────────────────────────────────────────────────────────── */
@@ -888,6 +889,8 @@ export default function App() {
       <FAQ />
       <CTA />
       <Footer />
-    </>
+    <PrivaBuyChatbot />
+</>
   );
 }
+
