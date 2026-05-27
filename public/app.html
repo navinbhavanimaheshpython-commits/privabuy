@@ -1307,8 +1307,8 @@ body::before {
         <div class="card"><div class="card-body" id="admin-listings-content"><div class="text-muted" style="text-align:center;padding:40px">Loading...</div></div></div>
       </div>
       <div id="admin-flags" class="hidden">
-        <div class="section-title mb-24">Flagged</div>
-        <div class="alert alert-info">No flagged listings.</div>
+        <div class="section-title mb-24">Disputes</div>
+        <div id="admin-flags-content"><div class="text-muted" style="text-align:center;padding:40px">Loading...</div></div>
       </div>
       <div id="admin-revenue" class="hidden">
         <div class="section-title mb-24">Revenue</div>
@@ -1421,6 +1421,63 @@ body::before {
 </div>
 
 <div id="toast-container"></div>
+
+<!-- DISPUTE MODAL -->
+<div class="modal-overlay" id="dispute-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Report Vehicle Misrepresentation</div>
+      <button class="modal-close" onclick="closeModal('dispute-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="padding-top:20px;">
+      <div class="alert alert-warning">Your $600 platform fee may be refunded if PrivaBuy determines the seller materially misrepresented the vehicle. Frivolous rejections are not eligible for refund.</div>
+      <div class="form-group mt-16">
+        <label class="form-label">Category of Issue *</label>
+        <select class="form-select" id="dispute-category">
+          <option value="">Select a category...</option>
+          <option value="Undisclosed mechanical issue">Undisclosed mechanical issue</option>
+          <option value="Accident damage not disclosed">Accident damage not disclosed</option>
+          <option value="Mileage inconsistency">Mileage inconsistency</option>
+          <option value="Title issue not disclosed">Title issue not disclosed</option>
+          <option value="Vehicle condition materially different from photos">Vehicle condition materially different from photos</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description *</label>
+        <textarea class="form-textarea" id="dispute-description" placeholder="Describe exactly what was misrepresented or not disclosed. Be specific."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Photo Evidence * (minimum 1 photo required)</label>
+        <div id="dispute-photo-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;">
+          <div class="photo-slot" onclick="uploadDisputePhoto(this)" style="aspect-ratio:4/3;">
+            <div class="photo-slot-icon">📷</div>
+            <div class="photo-slot-label">Add Photo</div>
+          </div>
+          <div class="photo-slot" onclick="uploadDisputePhoto(this)" style="aspect-ratio:4/3;">
+            <div class="photo-slot-icon">📷</div>
+            <div class="photo-slot-label">Add Photo</div>
+          </div>
+          <div class="photo-slot" onclick="uploadDisputePhoto(this)" style="aspect-ratio:4/3;">
+            <div class="photo-slot-icon">📷</div>
+            <div class="photo-slot-label">Add Photo</div>
+          </div>
+        </div>
+        <div id="dispute-photo-count" class="text-muted mt-8 text-sm">0 photos uploaded</div>
+      </div>
+      <div style="background:rgba(217,48,37,0.04);border:1px solid rgba(217,48,37,0.18);border-radius:var(--r);padding:14px;margin-top:8px;">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="dispute-confirm-checkbox" style="width:16px;height:16px;margin-top:2px;accent-color:var(--red);flex-shrink:0;">
+          <span style="font-size:12px;color:#1a1814;line-height:1.6;">I confirm that the information above is accurate and that I am rejecting this vehicle due to genuine misrepresentation. I understand that submitting a false dispute may result in account suspension.</span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('dispute-modal')">Cancel</button>
+      <button class="btn btn-danger" onclick="submitDispute()">Submit Dispute →</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ─────────────────────────────────────────────
@@ -2870,6 +2927,7 @@ async function adminSection(sec, el) {
   if(sec==='auctions'||sec==='listings') loadAdminListings();
   if(sec==='dealers') loadAdminDealers();
   if(sec==='revenue') loadAdminRevenue();
+  if(sec==='flags') loadAdminFlags();
 }
 
 async function loadAdminOverview() {
@@ -3445,6 +3503,145 @@ async function sellerConfirmDealPayment(txnId) {
   } catch(e) { showToast('❌','Error','Could not confirm.'); }
 }
 
+// ─────────────────────────────────────────────
+//  DISPUTE / INSPECTION
+// ─────────────────────────────────────────────
+
+let disputeTxnId = null;
+let disputePhotoUrls = [];
+let disputePhotoCount = 0;
+
+async function inspectionAccept(txnId) {
+  try {
+    await fetch(`${API}/transactions/${txnId}/inspection/accept`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({dealer_id: S.dealer_id})
+    });
+    showToast('✓','Vehicle Accepted','Proceeding to payment.');
+    loadDealFlow('dealer');
+  } catch(e) { showToast('❌','Error','Could not confirm.'); }
+}
+
+function inspectionReject(txnId) {
+  disputeTxnId = txnId;
+  disputePhotoUrls = [];
+  disputePhotoCount = 0;
+  document.getElementById('dispute-category').value = '';
+  document.getElementById('dispute-description').value = '';
+  document.getElementById('dispute-confirm-checkbox').checked = false;
+  document.getElementById('dispute-photo-count').textContent = '0 photos uploaded';
+  document.querySelectorAll('#dispute-photo-grid .photo-slot').forEach(s => {
+    s.classList.remove('filled');
+    s.innerHTML = '<div class="photo-slot-icon">📷</div><div class="photo-slot-label">Add Photo</div>';
+  });
+  document.getElementById('dispute-modal').classList.add('open');
+}
+
+async function uploadDisputePhoto(el) {
+  if(el.classList.contains('filled')) return;
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    el.innerHTML = '<div style="font-size:12px;color:var(--g5)">Uploading...</div>';
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'privabuy_photos');
+      formData.append('cloud_name', 'dptom0qr7');
+      const res = await fetch('https://api.cloudinary.com/v1_1/dptom0qr7/image/upload', {method:'POST', body:formData});
+      const data = await res.json();
+      if(!data.secure_url) throw new Error('Upload failed');
+      disputePhotoUrls.push(data.secure_url);
+      disputePhotoCount++;
+      el.classList.add('filled');
+      el.style.position = 'relative';
+      el.innerHTML = `<img src="${data.secure_url}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:var(--r);">`;
+      document.getElementById('dispute-photo-count').textContent = `${disputePhotoCount} photo${disputePhotoCount!==1?'s':''} uploaded`;
+      showToast('✓','Photo Uploaded','Evidence saved.');
+    } catch(err) {
+      el.innerHTML = '<div class="photo-slot-icon">📷</div><div class="photo-slot-label" style="color:var(--red)">Failed — try again</div>';
+    }
+  };
+  input.click();
+}
+
+async function submitDispute() {
+  const category = document.getElementById('dispute-category').value;
+  const description = document.getElementById('dispute-description').value.trim();
+  const confirmed = document.getElementById('dispute-confirm-checkbox').checked;
+  if(!category) { showToast('⚠️','Required','Select a category.'); return; }
+  if(!description) { showToast('⚠️','Required','Describe the issue.'); return; }
+  if(disputePhotoCount < 1) { showToast('⚠️','Required','Upload at least 1 photo as evidence.'); return; }
+  if(!confirmed) { showToast('⚠️','Required','Please check the confirmation box.'); return; }
+  try {
+    await fetch(`${API}/transactions/${disputeTxnId}/inspection/reject`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        dealer_id: S.dealer_id,
+        reason: `${category}: ${description}`,
+        category: category,
+        evidence_urls: disputePhotoUrls
+      })
+    });
+    closeModal('dispute-modal');
+    showToast('⚠️','Dispute Submitted','PrivaBuy support will review within 24 hours. Your $600 refund eligibility will be determined after review.');
+    loadDealFlow('dealer');
+  } catch(e) { showToast('❌','Error','Could not submit dispute.'); }
+}
+
+async function loadAdminFlags() {
+  const el = document.getElementById('admin-flags-content');
+  if(!el) return;
+  try {
+    const res = await fetch(`${API}/transactions/admin/disputes`);
+    const disputes = await res.json();
+    if(!disputes.length) { el.innerHTML = '<div class="alert alert-info">No active disputes.</div>'; return; }
+    el.innerHTML = disputes.map(d => `
+      <div class="card mb-16" style="margin-bottom:16px;">
+        <div class="card-body">
+          <div class="flex-between mb-16">
+            <div>
+              <div style="font-size:15px;font-weight:600;color:#1a1814">${d.year||''} ${d.make||''} ${d.model||''}</div>
+              <div style="font-size:12px;color:var(--g5);margin-top:4px;">Win price: $${parseFloat(d.amount).toLocaleString()} · Dealer fee: $600</div>
+            </div>
+            <span class="badge badge-pending">Dispute Flagged</span>
+          </div>
+          <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
+            <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Category</div>
+            <div style="font-size:13px;color:#1a1814;font-weight:500;">${d.dispute_category||'Not specified'}</div>
+            <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin:12px 0 6px;">Dealer Description</div>
+            <div style="font-size:13px;color:#1a1814;">${d.inspection_reject_reason||'—'}</div>
+          </div>
+          ${d.dispute_evidence_urls && d.dispute_evidence_urls.length ? `
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Evidence Photos</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              ${d.dispute_evidence_urls.map(url => `<img src="${url}" style="width:120px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(0,0,0,0.14);cursor:pointer;" onclick="window.open('${url}','_blank')">`).join('')}
+            </div>
+          </div>` : '<div class="alert alert-warning" style="margin-bottom:16px;">No evidence photos submitted.</div>'}
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-success" onclick="adminResolveDispute('${d.transaction_id}','refund')">✓ Approve — Refund $600 to Dealer</button>
+            <button class="btn btn-danger" onclick="adminResolveDispute('${d.transaction_id}','deny')">✕ Deny — Keep $600</button>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch(e) { el.innerHTML = '<div class="alert alert-warning">Could not load disputes.</div>'; console.error(e); }
+}
+
+async function adminResolveDispute(txnId, decision) {
+  if(!confirm(decision === 'refund' ? 'Refund $600 to dealer and close dispute?' : 'Deny refund and close dispute?')) return;
+  try {
+    await fetch(`${API}/transactions/${txnId}/dispute/resolve`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({decision})
+    });
+    showToast('✓','Resolved', decision === 'refund' ? 'Refund issued to dealer.' : 'Dispute denied.');
+    loadAdminFlags();
+  } catch(e) { showToast('❌','Error','Could not resolve.'); }
+}
 </script>
 </body>
 </html>
