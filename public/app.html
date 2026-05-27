@@ -942,8 +942,8 @@ body::before {
           </div>
         </div>
         <div class="flex-between">
-          <button class="btn btn-secondary" onclick="wizardGo(2)">← Back</button>
-          <button class="btn btn-primary" onclick="wizardGo(4)">Calculate My Value →</button>
+          <button class="btn btn-secondary" onclick="damageTabBack()">← Back</button>
+          <button class="btn btn-primary" onclick="damageTabNext()">Continue →</button>
         </div>
       </div>
 
@@ -1704,6 +1704,7 @@ function sellerTab(tab, el) {
 
 function wizardGo(step) {
   S.wizardStep = step;
+  if(step === 3) currentDamageTab = 'exterior';
   for(let i=1;i<=5;i++){
     document.getElementById(`wizard-step-${i}`).classList.toggle('hidden',i!==step);
     const ws = document.getElementById(`ws-${i}`);
@@ -1946,6 +1947,50 @@ function toggleAreaDamage(el, id) {
   if(areaDamage[id]){delete areaDamage[id];el.classList.remove('has-damage');}
   else{areaDamage[id]=true;el.classList.add('has-damage');}
 }
+
+let currentDamageTab = 'exterior';
+
+function damageTabNext() {
+  if(currentDamageTab === 'exterior') {
+    // Validate exterior
+    const extCond = document.querySelectorAll('#ext-condition-group .check-pill.selected');
+    if(!extCond.length) { showToast('⚠️','Required','Select at least one exterior condition.'); return; }
+    if(!getRadio('tires-group')) { showToast('⚠️','Required','Select tires replaced.'); return; }
+    if(!getRadio('windshield-group')) { showToast('⚠️','Required','Select windshield condition.'); return; }
+    currentDamageTab = 'interior';
+    switchDamageTab('interior', document.querySelector('.damage-tab:nth-child(2)'));
+  } else if(currentDamageTab === 'interior') {
+    // Validate interior
+    if(!getRadio('moonroof-group')) { showToast('⚠️','Required','Select moonroof status.'); return; }
+    if(!getRadio('smoked-group')) { showToast('⚠️','Required','Select smoked in status.'); return; }
+    currentDamageTab = 'mechanical';
+    switchDamageTab('mechanical', document.querySelector('.damage-tab:nth-child(3)'));
+  } else if(currentDamageTab === 'mechanical') {
+    // Validate mechanical
+    const warnLights = document.querySelectorAll('#warning-lights-group .check-pill.selected');
+    if(!warnLights.length) { showToast('⚠️','Required','Select warning lights status.'); return; }
+    const mechIssues = document.querySelectorAll('#mech-issues-group .check-pill.selected');
+    if(!mechIssues.length) { showToast('⚠️','Required','Select mechanical issues status.'); return; }
+    if(!getRadio('driveable-group')) { showToast('⚠️','Required','Is your vehicle driveable?'); return; }
+    if(!getRadio('accident-group')) { showToast('⚠️','Required','Select accident history.'); return; }
+    if(!getRadio('overall-condition-group')) { showToast('⚠️','Required','Select overall condition.'); return; }
+    if(!getRadio('truthful-group')) { showToast('⚠️','Required','Confirm all information is accurate.'); return; }
+    wizardGo(4);
+  }
+}
+
+function damageTabBack() {
+  if(currentDamageTab === 'exterior') {
+    wizardGo(2);
+  } else if(currentDamageTab === 'interior') {
+    currentDamageTab = 'exterior';
+    switchDamageTab('exterior', document.querySelector('.damage-tab:nth-child(1)'));
+  } else if(currentDamageTab === 'mechanical') {
+    currentDamageTab = 'interior';
+    switchDamageTab('interior', document.querySelector('.damage-tab:nth-child(2)'));
+  }
+}
+
 
 async function buildValueEstimate() {
   const d = S.formData;
