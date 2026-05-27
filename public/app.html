@@ -3169,9 +3169,10 @@ if(dealerModal && dealerModal.parentElement !== document.body) {
 const DEAL_STEPS = [
   { key: 'awaiting_dealer_payment',    label: 'Dealer Pays $600',      icon: '💳' },
   { key: 'awaiting_bill_of_sale',      label: 'Bill of Sale',          icon: '📄' },
-  { key: 'awaiting_pickup_schedule',   label: 'Schedule Pickup',       icon: '📅' },
+  { key: 'awaiting_pickup_schedule',   label: 'Schedule Pickup',       icon: '📅' },  
   { key: 'awaiting_slot_confirmation', label: 'Confirm Pickup Time',   icon: '✅' },
   { key: 'pickup_scheduled',           label: 'Pickup Day',            icon: '🚗' },
+  { key: 'inspection_period', label: '24hr Inspection', icon: '🔍' },
   { key: 'awaiting_seller_payment_confirm', label: 'Seller Confirms Payment', icon: '💰' },
   { key: 'awaiting_seller_fee',        label: 'Seller Pays $250 Fee',  icon: '🏁' },
   { key: 'completed',                  label: 'Complete',              icon: '🎉' },
@@ -3209,8 +3210,18 @@ function dealFlowActionHTML(txn, role) {
   if(status === 'forfeited') return `<div class="alert alert-warning">⚠️ This deal was forfeited.</div>`;
   if(status === 'dispute_flagged') return `<div class="alert" style="background:rgba(217,48,37,0.07);border:1px solid rgba(217,48,37,0.2);color:var(--red);">⚠️ A discrepancy was flagged. PrivaBuy support will reach out within 24 hours.</div>`;
   if(status === 'completed') return `<div class="alert alert-success">🎉 Deal complete! Thank you for using PrivaBuy.</div>`;
-
   if(role === 'dealer') {
+  if(status === 'inspection_period') return `
+  <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
+    <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#1a1814">24-Hour Inspection Window</div>
+    <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;">You have <strong style="color:#1a1814">24 hours</strong> from pickup to inspect the vehicle. If anything was misrepresented or not disclosed, you can reject the vehicle and open a dispute. After 24 hours, the sale is final.</div>
+    <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--g5);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.07em;">Inspection Deadline</div>
+      <div style="font-size:18px;font-weight:700;color:var(--red);" id="inspection-countdown">Calculating...</div>
+    </div>
+    <button class="btn btn-success btn-full mb-16" onclick="inspectionAccept('${txnId}')">✓ Vehicle Accepted — Proceed to Payment</button>
+    <button class="btn btn-danger btn-full" onclick="inspectionReject('${txnId}')">⚠️ Reject — Vehicle Misrepresented</button>
+  </div>`;
     if(status === 'awaiting_dealer_payment') return `
       <div class="alert alert-warning" style="margin-bottom:16px;">⏰ You have until <strong>${deadline}</strong> to pay the $600 platform fee or this bid will be forfeited.</div>
       <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
@@ -3255,6 +3266,10 @@ function dealFlowActionHTML(txn, role) {
   }
 
   if(role === 'seller') {
+    if(status === 'inspection_period') return `
+      <div class="alert alert-warning">
+    🔍 The dealer has <strong>24 hours</strong> to inspect the vehicle. Do not spend any funds until the inspection window closes.
+      </div>`;
     if(status === 'awaiting_dealer_payment') return `
       <div class="alert alert-warning">⏰ Waiting for dealer to pay the $600 platform fee. Deadline: <strong>${deadline}</strong>. If they don't pay, the next highest bidder will be offered the vehicle.</div>`;
     if(status === 'awaiting_bill_of_sale') return txn.bill_of_sale_seller_acked ? `
