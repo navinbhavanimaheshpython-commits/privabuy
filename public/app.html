@@ -549,9 +549,80 @@ body::before {
               <div class="form-group">
                 <label class="form-label">Loan or Lease? *</label>
                 <div class="radio-group" id="loan-group">
-                  <div class="radio-pill selected" onclick="selectRadio('loan-group',this,'None')">None</div>
-                  <div class="radio-pill" onclick="selectRadio('loan-group',this,'Loan')">Loan</div>
-                  <div class="radio-pill" onclick="selectRadio('loan-group',this,'Lease')">Lease</div>
+                <div class="radio-pill selected" onclick="selectRadio('loan-group',this,'None');toggleLienSection('None')">None — I own it outright</div>
+                <div class="radio-pill" onclick="selectRadio('loan-group',this,'Loan');toggleLienSection('Loan')">Loan</div>
+                <div class="radio-pill" onclick="selectRadio('loan-group',this,'Lease');toggleLienSection('Lease')">Lease</div>
+                </div>
+              </div>
+
+              <!-- LIEN SECTION — shown when Loan or Lease selected -->
+              <div id="lien-section" class="hidden" style="margin-top:4px;">
+                <div style="background:rgba(217,48,37,0.04);border:1px solid rgba(217,48,37,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:4px;">
+                  
+                  <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(217,48,37,0.12);">
+                    <span style="font-size:20px;flex-shrink:0;">⚠️</span>
+                    <div>
+                      <div style="font-size:13px;font-weight:600;color:#1a1814;margin-bottom:4px;">You have an outstanding balance on this vehicle.</div>
+                      <div style="font-size:12px;color:var(--g5);line-height:1.6;">If the winning bid is less than your payoff amount, <strong style="color:#1a1814;">you are responsible for the difference</strong>. PrivaBuy cannot cover shortfalls. Once your auction goes live, it cannot be cancelled.</div>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Lien Holder (Bank / Finance Co.) *</label>
+                      <input class="form-input" id="lien-holder-input" placeholder="e.g. Chase Auto Finance, Toyota Financial">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">10-Day Payoff Amount *</label>
+                      <div style="position:relative;">
+                        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--g5);">$</span>
+                        <input class="form-input" id="lien-payoff-input" type="number" placeholder="0" min="0" step="100" oninput="updateLienCalc()" style="padding-left:28px;">
+                      </div>
+                      <div style="font-size:11px;color:var(--g5);margin-top:5px;">Call your lender for a 10-day payoff quote. This differs from your remaining balance.</div>
+                    </div>
+                  </div>
+
+                  <!-- Live gap calculator -->
+                  <div id="lien-calc-block" class="hidden" style="background:#ffffff;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:16px;margin-bottom:16px;">
+                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--g5);margin-bottom:12px;">If Top Bid Equals Your Market Value</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
+                      <div>
+                        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">Est. Top Bid</div>
+                        <div id="lien-est-bid" style="font-size:20px;font-weight:700;color:var(--accent);">—</div>
+                      </div>
+                      <div>
+                        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">Your Payoff</div>
+                        <div id="lien-payoff-display" style="font-size:20px;font-weight:700;color:var(--red);">—</div>
+                      </div>
+                      <div>
+                        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">You Walk Away With</div>
+                        <div id="lien-net-display" style="font-size:20px;font-weight:700;">—</div>
+                      </div>
+                    </div>
+                    <div id="lien-gap-warning" class="hidden" style="margin-top:12px;padding:10px 12px;background:rgba(217,48,37,0.06);border:1px solid rgba(217,48,37,0.18);border-radius:var(--r-sm);font-size:12px;color:var(--red);line-height:1.5;"></div>
+                  </div>
+
+                  <!-- Payoff statement upload -->
+                  <div class="form-group">
+                    <label class="form-label">Upload 10-Day Payoff Statement *</label>
+                    <div id="payoff-upload-slot" onclick="uploadPayoffStatement()" style="background:#ffffff;border:1.5px dashed rgba(0,0,0,0.25);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:border-color 0.2s;">
+                      <div style="font-size:24px;margin-bottom:6px;">📄</div>
+                      <div style="font-size:13px;color:var(--g5);">Click to upload your payoff statement</div>
+                      <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">PDF, JPG, or PNG · from your lender</div>
+                    </div>
+                    <div id="payoff-upload-status" style="font-size:12px;color:var(--g5);margin-top:6px;display:none;"></div>
+                  </div>
+
+                  <!-- Hard acknowledgment -->
+                  <div style="background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-top:4px;">
+                    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                      <input type="checkbox" id="lien-ack-checkbox" onchange="checkLienAck()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
+                      <span style="font-size:12px;color:#1a1814;line-height:1.6;">
+                        I understand that if the winning bid does not cover my <strong id="lien-ack-payoff-amount">payoff amount</strong>, I am personally responsible for the difference. I have a valid 10-day payoff statement from <strong id="lien-ack-holder">my lender</strong>. <strong>Once my auction goes live, it cannot be cancelled or withdrawn.</strong>
+                      </span>
+                    </label>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -1722,6 +1793,86 @@ function checkEligibility() {
     el.innerHTML = `<div class="eligibility-card fail"><div class="eligibility-icon">⚠️</div><div><div style="font-family:var(--serif);font-size:18px;margin-bottom:4px;color:#1a1814">Outside ideal range</div><div class="text-muted text-sm">${age<5?'Too new (under 5 years).':age>10?'May be too old (over 10 years).':'Under 50k miles — dealers prefer higher mileage inventory.'} We\'ll still list it — dealers can opt in.</div></div></div>`;
     setTimeout(()=>wizardGo(2), 700);
   }
+}
+
+function toggleLienSection(val) {
+  const section = document.getElementById('lien-section');
+  if(val === 'Loan' || val === 'Lease') {
+    section.classList.remove('hidden');
+  } else {
+    section.classList.add('hidden');
+    S.lienPayoffUrl = null;
+    S.lienPayoffAmount = 0;
+    S.lienHolder = '';
+  }
+}
+
+function updateLienCalc() {
+  const payoff = parseInt(document.getElementById('lien-payoff-input').value) || 0;
+  const holder = document.getElementById('lien-holder-input').value.trim();
+  S.lienPayoffAmount = payoff;
+  S.lienHolder = holder;
+  const ackPayoff = document.getElementById('lien-ack-payoff-amount');
+  const ackHolder = document.getElementById('lien-ack-holder');
+  if(ackPayoff) ackPayoff.textContent = payoff ? '$' + payoff.toLocaleString() : 'payoff amount';
+  if(ackHolder) ackHolder.textContent = holder || 'my lender';
+  if(!payoff) { document.getElementById('lien-calc-block').classList.add('hidden'); return; }
+  const estBid = S.formData?.tradeIn || S.formData?.pbExpected || 0;
+  document.getElementById('lien-calc-block').classList.remove('hidden');
+  document.getElementById('lien-payoff-display').textContent = '$' + payoff.toLocaleString();
+  if(estBid) {
+    document.getElementById('lien-est-bid').textContent = '$' + estBid.toLocaleString();
+    const net = estBid - payoff;
+    const netEl = document.getElementById('lien-net-display');
+    netEl.textContent = (net >= 0 ? '+' : '-') + '$' + Math.abs(net).toLocaleString();
+    netEl.style.color = net >= 0 ? 'var(--accent3)' : 'var(--red)';
+    const warnEl = document.getElementById('lien-gap-warning');
+    if(net < 0) {
+      warnEl.classList.remove('hidden');
+      warnEl.textContent = `Based on estimated market value, you may owe $${Math.abs(net).toLocaleString()} out of pocket to clear the title.`;
+    } else {
+      warnEl.classList.add('hidden');
+    }
+  } else {
+    document.getElementById('lien-est-bid').textContent = 'TBD';
+  }
+}
+
+function checkLienAck() {
+  const checked = document.getElementById('lien-ack-checkbox')?.checked;
+  if(checked) showToast('✓', 'Acknowledged', 'Lien terms accepted.');
+}
+
+async function uploadPayoffStatement() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,.pdf';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const slot = document.getElementById('payoff-upload-slot');
+    slot.innerHTML = '<div style="font-size:13px;color:var(--g5)">Uploading...</div>';
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'privabuy_photos');
+      formData.append('cloud_name', 'dptom0qr7');
+      const res = await fetch('https://api.cloudinary.com/v1_1/dptom0qr7/auto/upload', {
+        method: 'POST', body: formData
+      });
+      const data = await res.json();
+      if(!data.secure_url) throw new Error('Upload failed');
+      S.lienPayoffUrl = data.secure_url;
+      slot.innerHTML = `<div style="font-size:13px;color:var(--accent3);font-weight:600;">✓ ${file.name} uploaded</div><div style="font-size:11px;color:var(--g5);margin-top:4px;">Tap to replace</div>`;
+      slot.style.borderColor = 'rgba(42,158,124,0.4)';
+      slot.style.borderStyle = 'solid';
+      showToast('✓', 'Uploaded', 'Payoff statement saved.');
+    } catch(err) {
+      slot.innerHTML = '<div style="font-size:13px;color:var(--red)">Upload failed — tap to try again</div>';
+      showToast('❌', 'Upload Failed', err.message);
+    }
+  };
+  input.click();
 }
 let photoCount=0, requiredFilled=0;
 async function simulatePhoto(el, label, required) {
