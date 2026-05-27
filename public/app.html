@@ -427,7 +427,7 @@ body::before {
     <div class="login-logo">Priva<span>Buy</span> <span style="font-size:14px;color:var(--g4);font-family:var(--sans);font-weight:400">v2</span></div>
     <div class="login-tagline">The auction platform for serious vehicle inventory.</div>
     <div class="role-select">
-      <div class="role-btn selected" data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">&#x1F464;</div><div class="role-name">Seller</div></div>
+      <div class="role-btn " data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">&#x1F464;</div><div class="role-name">Seller</div></div>
       <div class="role-btn" data-role="dealer" onclick="selectRole('dealer',this)"><div class="role-icon">&#x1F3E2;</div><div class="role-name">Dealer</div></div>
       <div class="role-btn" data-role="admin" onclick="selectRole('admin',this)"><div class="role-icon">&#x2699;&#xFE0F;</div><div class="role-name">Admin</div></div>
   </div>
@@ -520,16 +520,16 @@ body::before {
               <div class="form-group">
                 <label class="form-label">Transmission *</label>
                 <div class="radio-group" id="transmission-group">
-                  <div class="radio-pill selected" onclick="selectRadio('transmission-group',this,'Automatic')">Automatic</div>
+                  <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Automatic')">Automatic</div>
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Manual')">Manual</div>
-                  <div class="radio-pill" onclick="selectRadio('transmission-group',this,'CVT')">CVT</div>
+                  <div class="radio-pill" onclick="selectRadio('transmission-groutedp',this,'CVT')">CVT</div>
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Other')">Other</div>
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label">Drivetrain *</label>
                 <div class="radio-group" id="drivetrain-group">
-                  <div class="radio-pill selected" onclick="selectRadio('drivetrain-group',this,'FWD')">FWD</div>
+                  <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'FWD')">FWD</div>
                   <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'AWD')">AWD</div>
                   <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'RWD')">RWD</div>
                   <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'4WD')">4WD</div>
@@ -540,7 +540,7 @@ body::before {
               <div class="form-group">
                 <label class="form-label">Title Status *</label>
                 <div class="radio-group" id="title-group">
-                  <div class="radio-pill selected" onclick="selectRadio('title-group',this,'Clean')">Clean</div>
+                  <div class="radio-pill" onclick="selectRadio('title-group',this,'Clean')">Clean</div>
                   <div class="radio-pill" onclick="selectRadio('title-group',this,'Salvage')">Salvage</div>
                   <div class="radio-pill" onclick="selectRadio('title-group',this,'Rebuilt')">Rebuilt</div>
                   <div class="radio-pill" onclick="selectRadio('title-group',this,'Lien')">Lien Present</div>
@@ -549,7 +549,7 @@ body::before {
               <div class="form-group">
                 <label class="form-label">Loan or Lease? *</label>
                 <div class="radio-group" id="loan-group">
-                <div class="radio-pill selected" onclick="selectRadio('loan-group',this,'None');toggleLienSection('None')">None — I own it outright</div>
+                <div class="radio-pill" onclick="selectRadio('loan-group',this,'None');toggleLienSection('None')">None — I own it outright</div>
                 <div class="radio-pill" onclick="selectRadio('loan-group',this,'Loan');toggleLienSection('Loan')">Loan</div>
                 <div class="radio-pill" onclick="selectRadio('loan-group',this,'Lease');toggleLienSection('Lease')">Lease</div>
                 </div>
@@ -638,7 +638,7 @@ body::before {
               <div class="form-group">
                 <label class="form-label">Two or More Keys? *</label>
                 <div class="radio-group" id="keys-group">
-                  <div class="radio-pill selected" onclick="selectRadio('keys-group',this,'Yes')">Yes</div>
+                  <div class="radio-pill " onclick="selectRadio('keys-group',this,'Yes')">Yes</div>
                   <div class="radio-pill" onclick="selectRadio('keys-group',this,'No')">No  1 Key</div>
                 </div>
               </div>
@@ -825,7 +825,7 @@ body::before {
               <div class="form-group mt-8">
                 <label class="form-label">Exterior Condition</label>
                 <div class="check-group" id="ext-condition-group">
-                  <div class="check-pill selected" onclick="togglePill(this)"><input type="checkbox" checked>None</div>
+                  <div class="check-pill " onclick="togglePill(this)"><input type="checkbox" checked>None</div>
                   <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Minor Scratches</div>
                   <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Dents &amp; Scrapes</div>
                   <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Faded Paint</div>
@@ -837,7 +837,7 @@ body::before {
                 <div class="form-group">
                   <label class="form-label">Tires Replaced</label>
                   <div class="radio-group" id="tires-group">
-                    <div class="radio-pill selected" onclick="selectRadio('tires-group',this,'0')">0</div>
+                    <div class="radio-pill " onclick="selectRadio('tires-group',this,'0')">0</div>
                     <div class="radio-pill" onclick="selectRadio('tires-group',this,'1')">1</div>
                     <div class="radio-pill" onclick="selectRadio('tires-group',this,'2')">2</div>
                     <div class="radio-pill" onclick="selectRadio('tires-group',this,'3')">3</div>
@@ -847,7 +847,7 @@ body::before {
                 <div class="form-group">
                   <label class="form-label">Windshield Condition</label>
                   <div class="radio-group" id="windshield-group">
-                    <div class="radio-pill selected" onclick="selectRadio('windshield-group',this,'No Damage')">No Damage</div>
+                    <div class="radio-pill " onclick="selectRadio('windshield-group',this,'No Damage')">No Damage</div>
                     <div class="radio-pill" onclick="selectRadio('windshield-group',this,'Minor Chips')">Minor Chips</div>
                     <div class="radio-pill" onclick="selectRadio('windshield-group',this,'Cracks')">Cracks</div>
                   </div>
@@ -864,7 +864,7 @@ body::before {
               <div class="form-group mt-16">
                 <label class="form-label">Moonroof / Sunroof</label>
                 <div class="radio-group" id="moonroof-group">
-                  <div class="radio-pill selected" onclick="selectRadio('moonroof-group',this,'N/A')">N/A</div>
+                  <div class="radio-pill " onclick="selectRadio('moonroof-group',this,'N/A')">N/A</div>
                   <div class="radio-pill" onclick="selectRadio('moonroof-group',this,'Works')">Works Fine</div>
                   <div class="radio-pill" onclick="selectRadio('moonroof-group',this,'Not Working')">Not Working</div>
                 </div>
@@ -872,7 +872,7 @@ body::before {
               <div class="form-group mt-8">
                 <label class="form-label">Smoked In?</label>
                 <div class="radio-group" id="smoked-group">
-                  <div class="radio-pill selected" onclick="selectRadio('smoked-group',this,'No')">No</div>
+                  <div class="radio-pill " onclick="selectRadio('smoked-group',this,'No')">No</div>
                   <div class="radio-pill" onclick="selectRadio('smoked-group',this,'Yes')">Yes</div>
                 </div>
               </div>
@@ -881,7 +881,7 @@ body::before {
               <div class="form-group">
                 <label class="form-label">Warning Lights On Dashboard?</label>
                 <div class="check-group" id="warning-lights-group">
-                  <div class="check-pill selected" onclick="togglePill(this)">None</div>
+                  <div class="check-pill " onclick="togglePill(this)">None</div>
                   <div class="check-pill" onclick="togglePill(this)">Check Engine</div>
                   <div class="check-pill" onclick="togglePill(this)">Airbags</div>
                   <div class="check-pill" onclick="togglePill(this)">Brake Warning</div>
@@ -891,7 +891,7 @@ body::before {
               <div class="form-group mt-16">
                 <label class="form-label">Mechanical Issues</label>
                 <div class="check-group" id="mech-issues-group">
-                  <div class="check-pill selected" onclick="togglePill(this)">No Issues</div>
+                  <div class="check-pill " onclick="togglePill(this)">No Issues</div>
                   <div class="check-pill" onclick="togglePill(this)">Engine Noise</div>
                   <div class="check-pill" onclick="togglePill(this)">Transmission Issues</div>
                   <div class="check-pill" onclick="togglePill(this)">A/C Issues</div>
@@ -903,14 +903,14 @@ body::before {
                 <div class="form-group">
                   <label class="form-label">Is Your Vehicle Driveable?</label>
                   <div class="radio-group" id="driveable-group">
-                    <div class="radio-pill selected" onclick="selectRadio('driveable-group',this,'Yes')">Yes</div>
+                    <div class="radio-pill " onclick="selectRadio('driveable-group',this,'Yes')">Yes</div>
                     <div class="radio-pill" onclick="selectRadio('driveable-group',this,'No')">No</div>
                   </div>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Accident History</label>
                   <div class="radio-group" id="accident-group">
-                    <div class="radio-pill selected" onclick="selectRadio('accident-group',this,'None')">None</div>
+                    <div class="radio-pill " onclick="selectRadio('accident-group',this,'None')">None</div>
                     <div class="radio-pill" onclick="selectRadio('accident-group',this,'One')">One</div>
                     <div class="radio-pill" onclick="selectRadio('accident-group',this,'Two or More')">Two or More</div>
                   </div>
@@ -922,7 +922,7 @@ body::before {
               <label class="form-label">Overall Condition *</label>
               <div class="radio-group" id="overall-condition-group">
                 <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Like New')"> Like New</div>
-                <div class="radio-pill selected" onclick="selectRadio('overall-condition-group',this,'Pretty Great')"> Pretty Great</div>
+                <div class="radio-pill " onclick="selectRadio('overall-condition-group',this,'Pretty Great')"> Pretty Great</div>
                 <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Just Okay')"> Just Okay</div>
                 <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Kind of Rough')">  Kind of Rough</div>
                 <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Major Issues')"> Major Issues</div>
@@ -935,7 +935,7 @@ body::before {
             <div class="form-group">
               <label class="form-label" style="margin-bottom:12px">Is all information above true and accurate? *</label>
               <div class="radio-group" id="truthful-group">
-                <div class="radio-pill selected" onclick="selectRadio('truthful-group',this,'Yes')"> Yes, everything is accurate</div>
+                <div class="radio-pill " onclick="selectRadio('truthful-group',this,'Yes')"> Yes, everything is accurate</div>
                 <div class="radio-pill" onclick="selectRadio('truthful-group',this,'No')">No</div>
               </div>
             </div>
