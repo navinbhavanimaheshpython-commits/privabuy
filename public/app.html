@@ -965,6 +965,38 @@ body::before {
         </div>
         <div class="card mb-24">
           <div class="card-body">
+            <div style="background:rgba(217,48,37,0.04);border:1px solid rgba(217,48,37,0.22);border-radius:var(--r-lg);padding:20px;margin-bottom:20px;">
+  <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(217,48,37,0.12);">
+    <span style="font-size:24px;flex-shrink:0;">⚖️</span>
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#1a1814;margin-bottom:6px;">Legal Commitment — Read Before Submitting</div>
+      <div style="font-size:13px;color:var(--g5);line-height:1.8;">
+        By listing your vehicle on PrivaBuy, you are entering a <strong style="color:#1a1814;">legally binding exclusivity agreement</strong>. Please read the following carefully:
+      </div>
+    </div>
+  </div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid rgba(0,0,0,0.10);border-radius:var(--r);padding:14px;">
+            <span style="color:var(--red);font-weight:700;flex-shrink:0;font-size:15px;">1</span>
+            <div style="font-size:13px;color:#1a1814;line-height:1.7;"><strong>Your car is exclusively PrivaBuy's to sell while the auction is live.</strong> Once you submit, you may not list, advertise, or sell this vehicle on Facebook Marketplace, Craigslist, CarMax, to a private buyer, or through any other channel — for any price — while your auction is active. Dealers are bidding in good faith. Selling elsewhere is a breach of this agreement.</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid rgba(0,0,0,0.10);border-radius:var(--r);padding:14px;">
+            <span style="color:var(--red);font-weight:700;flex-shrink:0;font-size:15px;">2</span>
+            <div style="font-size:13px;color:#1a1814;line-height:1.7;"><strong>If you accept a dealer's bid, you must complete the sale with that dealer.</strong> Accepting a bid is a binding commitment to transfer the vehicle to the winning dealer. You may not change your mind, sell to someone else, or back out after accepting. The vehicle belongs to the winning dealer from the moment you accept.</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid rgba(0,0,0,0.10);border-radius:var(--r);padding:14px;">
+            <span style="color:var(--red);font-weight:700;flex-shrink:0;font-size:15px;">3</span>
+            <div style="font-size:13px;color:#1a1814;line-height:1.7;"><strong>If you accept a bid and fail to deliver the vehicle, you forfeit your $250 platform fee.</strong> The fee is non-refundable in all cases of seller non-performance. PrivaBuy reserves the right to pursue additional damages on behalf of the affected dealer, including recovery of any costs incurred by the dealer in preparation for the transaction.</div>
+          </div>
+        </div>
+
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:rgba(217,48,37,0.04);border:1px solid rgba(217,48,37,0.20);border-radius:var(--r);padding:14px;">
+          <input type="checkbox" id="exclusivity-checkbox" onchange="updateStartBtn()" style="width:18px;height:18px;margin-top:2px;accent-color:var(--red);flex-shrink:0;cursor:pointer;">
+          <span style="font-size:13px;line-height:1.6;color:#1a1814;">
+            <strong>I understand and agree:</strong> This vehicle is exclusively available through PrivaBuy while my auction is active. I will not sell it elsewhere. If I accept a bid, I am legally obligated to complete the sale with the winning dealer. If I fail to do so, I forfeit my $250 PrivaBuy fee and may be held liable for additional damages.
+          </span>
+        </label>
+      </div>
             <div class="alert alert-info"> Once you submit, your auction goes live immediately. 5 local dealers are notified. Your auction stays open with no time limit — accept whenever you're ready.</div>
             <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:20px">
               <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:#1a1814">Terms & Conditions — Seller Agreement</div>
@@ -2183,11 +2215,15 @@ function sellerConfirmReceivedPayment() {
 }
 
 function updateStartBtn() {
-  const cb = document.getElementById('terms-checkbox');
+  const terms = document.getElementById('terms-checkbox');
+  const excl = document.getElementById('exclusivity-checkbox');
   const btn = document.getElementById('start-auction-btn');
   if(!btn) return;
-  if(cb && cb.checked) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
-  else { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed'; }
+  if(terms?.checked && excl?.checked) {
+    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+  } else {
+    btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed';
+  }
 }
 
 function startSellerBidPoll() {
