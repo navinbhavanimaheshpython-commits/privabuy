@@ -480,7 +480,7 @@ body::before {
       <button class="tab-btn active" onclick="sellerTab('list',this)">List Vehicle</button>
       <button class="tab-btn" onclick="sellerTab('auction',this)">My Auction</button>
       <button class="tab-btn" onclick="sellerTab('history',this)">History</button>
-      <button class="tab-btn" onclick="sellerTab('payment',this)"> Pay Fee</button>
+      
       <button class="tab-btn" id="seller-dealflow-tab" onclick="sellerTab('dealflow',this)" style="display:none">📋 Deal Flow</button>
     </div>
 
@@ -1113,7 +1113,7 @@ body::before {
       <div id="seller-history-content"><div class="text-muted" style="text-align:center;padding:40px">Loading...</div></div>
     </div>
 
-    <div id="seller-tab-payment" class="hidden">
+    
       <div class="flex-between mb-24">
         <div><div class="section-title">Platform Fee</div><div class="section-sub" style="margin-bottom:0">One-time fee per successful auction</div></div>
         <div class="badge badge-live" style="font-size:13px;padding:8px 16px">Secure Checkout</div>
@@ -1779,7 +1779,7 @@ async function loadSellerHistory() {
 }
 
 function sellerTab(tab, el) {
-  ['list','auction','history','payment','dealflow'].forEach(t=>document.getElementById(`seller-tab-${t}`).classList.add('hidden'));
+  ['list','auction','history','dealflow'].forEach(t=>document.getElementById(`seller-tab-${t}`).classList.add('hidden'));
   document.getElementById(`seller-tab-${tab}`).classList.remove('hidden');
   document.querySelectorAll('#seller-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   if(el) el.classList.add('active');
@@ -3262,7 +3262,7 @@ const DEAL_STEPS = [
   { key: 'pickup_scheduled',           label: 'Pickup Day',            icon: '🚗' },
   { key: 'inspection_period', label: '24hr Inspection', icon: '🔍' },
   { key: 'awaiting_seller_payment_confirm', label: 'Seller Confirms Payment', icon: '💰' },
-  { key: 'awaiting_seller_fee',        label: 'Seller Pays $250 Fee',  icon: '🏁' },
+  
   { key: 'completed',                  label: 'Complete',              icon: '🎉' },
 ];
 
@@ -3299,25 +3299,37 @@ function dealFlowActionHTML(txn, role) {
   if(status === 'dispute_flagged') return `<div class="alert" style="background:rgba(217,48,37,0.07);border:1px solid rgba(217,48,37,0.2);color:var(--red);">⚠️ A discrepancy was flagged. PrivaBuy support will reach out within 24 hours.</div>`;
   if(status === 'completed') return `<div class="alert alert-success">🎉 Deal complete! Thank you for using PrivaBuy.</div>`;
   if(role === 'dealer') {
-  if(status === 'inspection_period') return `
+  if(status === 'inspection_period') {
+    const hasAccident = txn.accidents && txn.accidents !== 'None';
+    return `
   <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
-    <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#1a1814">24-Hour Inspection Window</div>
-    <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;">You have <strong style="color:#1a1814">24 hours</strong> from pickup to inspect the vehicle. If anything was misrepresented or not disclosed, you can reject the vehicle and open a dispute. After 24 hours, the sale is final.</div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:8px;color:#1a1814">Inspection & Payment</div>
+    ${hasAccident ? `
+    <div style="background:rgba(194,124,42,0.08);border:1px solid rgba(194,124,42,0.25);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:4px;">⚠️ Accident Disclosed</div>
+      <div style="font-size:13px;color:#1a1814;line-height:1.6;">You may take the vehicle to a shop for a thorough inspection. <strong>You must return the vehicle and pay the seller the same day</strong> if you decide to keep it. If the inspection reveals undisclosed issues, you may void the sale — return the car with no payment and your $600 fee is refunded.</div>
+    </div>` : `
+    <div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.20);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--accent3);margin-bottom:4px;">✓ No Accident Disclosed</div>
+      <div style="font-size:13px;color:#1a1814;line-height:1.6;">Inspect the vehicle at pickup. If everything matches the listing, pay the seller on the spot. If you need a more thorough inspection, you may take it to a shop — <strong>must return and pay seller same day</strong>. If anything was misrepresented, void the sale and return the car for a full $600 refund.</div>
+    </div>`}
     <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
-      <div style="font-size:11px;color:var(--g5);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.07em;">Inspection Deadline</div>
-      <div style="font-size:18px;font-weight:700;color:var(--red);" id="inspection-countdown">Calculating...</div>
+      <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">Seller nets from this sale</div>
+      <div style="font-size:22px;font-weight:700;color:var(--accent3);">$${(parseFloat(txn.amount) - 250).toLocaleString()}</div>
+      <div style="font-size:11px;color:var(--g5);margin-top:2px;">$${parseFloat(txn.amount).toLocaleString()} bid − $250 PrivaBuy fee</div>
     </div>
-    <button class="btn btn-success btn-full mb-16" onclick="inspectionAccept('${txnId}')">✓ Vehicle Accepted — Proceed to Payment</button>
-    <button class="btn btn-danger btn-full" onclick="inspectionReject('${txnId}')">⚠️ Reject — Vehicle Misrepresented</button>
-  </div>`;
+    <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;"><strong style="color:#1a1814;">Important:</strong> Seller will not hand over the title until payment is received. Pay the seller the full bid amount of <strong style="color:#1a1814;">$${parseFloat(txn.amount).toLocaleString()}</strong> — PrivaBuy deducts our $250 fee from that automatically.</div>
+    <button class="btn btn-success btn-full mb-16" onclick="inspectionAccept('${txnId}')">✓ Inspected & Paid Seller — Complete</button>
+    <button class="btn btn-danger btn-full" onclick="inspectionReject('${txnId}')">⚠️ Void Sale — Return Vehicle</button>
+  </div>`;}
     if(status === 'awaiting_dealer_payment') return `
       <div class="alert alert-warning" style="margin-bottom:16px;">⏰ You have until <strong>${deadline}</strong> to pay the $600 platform fee or this bid will be forfeited.</div>
       <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#1a1814">Platform Fee — $600.00</div>
         <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
         <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#16a34a;margin-bottom:4px;">🛡️ Buyer Protection Guarantee</div>
-        <div style="font-size:13px;color:#333;line-height:1.6;">If you pick up the vehicle and it was <strong>materially misrepresented</strong> by the seller — undisclosed mechanical issues, hidden accident damage, mileage inconsistency, or condition significantly worse than disclosed — you may file a dispute within <strong>24 hours of pickup</strong> with photo evidence. If PrivaBuy approves the dispute, your <strong>$600 platform fee will be fully refunded</strong>. No questions asked.</div>
-        <div style="font-size:12px;color:#888;margin-top:8px;">Frivolous rejections or buyer's remorse are not eligible. Evidence is required.</div>
+        <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your <strong>$600 platform fee will be fully refunded</strong>. The sale is void, no money changes hands.</div>
+        <div style="font-size:12px;color:#888;margin-top:8px;"><strong>No accident disclosed:</strong> Inspect at pickup, pay seller on the spot. <strong>Accident disclosed:</strong> You may take the vehicle to a shop — must return it and pay seller same day if keeping it.</div>
       </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">One-time fee to complete this auction win.</div>
         <button class="btn btn-primary btn-full" onclick="dealFlowPayNow('${txnId}', ${parseFloat(txn.amount)})">Pay $600 Now →</button>
@@ -3360,11 +3372,16 @@ function dealFlowActionHTML(txn, role) {
 
   if(role === 'seller') {
     if(status === 'inspection_period') return `
-      <div class="alert alert-warning">
-        🔍 The dealer has <strong>24 hours</strong> to inspect the vehicle. Do not spend any funds until the inspection window closes.
+      <div class="alert alert-warning" style="margin-bottom:12px;">
+        🔍 The dealer is inspecting the vehicle. <strong>Do not hand over the title until you receive payment.</strong>
       </div>
-      <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:10px 14px;margin-top:8px;font-size:13px;color:#333;line-height:1.6;">
-        🛡️ If the vehicle was misrepresented, the dealer will file a dispute with evidence. <strong>Your $250 fee is protected</strong> until the inspection window closes.
+      <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:16px;margin-bottom:12px;">
+        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">You will receive</div>
+        <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(parseFloat(txn.amount) - 250).toLocaleString()}</div>
+        <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${parseFloat(txn.amount).toLocaleString()} bid − $250 PrivaBuy fee</div>
+      </div>
+      <div style="font-size:13px;color:#1a1814;line-height:1.6;padding:12px 14px;background:rgba(42,158,124,0.06);border:1px solid rgba(42,158,124,0.18);border-radius:var(--r);">
+        Once the dealer pays you <strong>$${(parseFloat(txn.amount) - 250).toLocaleString()}</strong>, hand over the title. If anything was misrepresented, the dealer may void the sale — no payment, no title transfer.
       </div>`;
     if(status === 'awaiting_dealer_payment') return `
       <div class="alert alert-warning">⏰ Waiting for dealer to pay the $600 platform fee. Deadline: <strong>${deadline}</strong>. If they don't pay, the next highest bidder will be offered the vehicle.</div>`;
@@ -3396,16 +3413,16 @@ function dealFlowActionHTML(txn, role) {
     if(status === 'pickup_scheduled') return `<div class="alert alert-success">✅ Pickup confirmed for <strong>${txn.confirmed_pickup_slot ? new Date(txn.confirmed_pickup_slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'TBD'}</strong>. Have the title ready.</div>`;
     if(status === 'awaiting_seller_payment_confirm') return `
       <div style="background:rgba(194,124,42,0.06);border:1px solid rgba(194,124,42,0.18);border-radius:var(--r-lg);padding:20px;">
-        <div style="font-size:15px;font-weight:600;color:var(--accent2);margin-bottom:4px;">Confirm You Received Payment</div>
-        <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you have the dealer's payment in hand, confirm below.</div>
-        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">I Received Payment from the Dealer ✓</button>
+        <div style="font-size:15px;font-weight:600;color:var(--accent2);margin-bottom:4px;">Confirm Payment Received</div>
+        <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
+          <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">You should have received</div>
+          <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(parseFloat(txn.amount) - 250).toLocaleString()}</div>
+          <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${parseFloat(txn.amount).toLocaleString()} bid − $250 PrivaBuy fee</div>
+        </div>
+        <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you have the funds in hand, confirm below and hand over the title.</div>
+        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Received $${(parseFloat(txn.amount) - 250).toLocaleString()} — Hand Over Title</button>
       </div>`;
-    if(status === 'awaiting_seller_fee') return `
-      <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
-        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Pay Your $250 PrivaBuy Fee</div>
-        <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Last step — pay the platform fee to complete the deal.</div>
-        <button class="btn btn-primary btn-full" onclick="sellerTab('payment', null)">Pay $250 Fee →</button>
-      </div>`;
+    
   }
 
   return `<div class="alert alert-info">Status: ${status}</div>`;
