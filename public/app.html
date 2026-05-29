@@ -3192,10 +3192,6 @@ setTimeout(() => {
       invalid: { color: '#d93025' }
     }
   };
-  stripeElements = stripeClient.elements();
-  sellerCardElement = stripeElements.create('card', cardStyle);
-  sellerCardElement.mount('#seller-card-element');
-
   stripeElementsDealer = stripeClient.elements();
   dealerCardElement = stripeElementsDealer.create('card', cardStyle);
 }, 500);
