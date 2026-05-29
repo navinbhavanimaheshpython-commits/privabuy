@@ -3327,14 +3327,24 @@ function dealFlowActionHTML(txn, role) {
         <button class="btn btn-primary btn-full" onclick="proposeSlots('${txnId}')">Send Pickup Options →</button>
       </div>`;
     if(status === 'awaiting_slot_confirmation') return `<div class="alert alert-info">📅 Pickup options sent. Waiting for seller to confirm a time.</div>`;
-    if(status === 'pickup_scheduled') return `
+    if(status === 'pickup_scheduled') {
+      const hasAccident = txn.has_accident === true;
+      return `
       <div class="alert alert-success" style="margin-bottom:16px;">✅ Pickup confirmed for <strong>${txn.confirmed_pickup_slot ? new Date(txn.confirmed_pickup_slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'TBD'}</strong></div>
+      ${hasAccident ? `
+      <div style="background:rgba(194,124,42,0.12);border:2px solid rgba(194,124,42,0.45);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <span style="font-size:24px;">⚠️</span>
+          <div style="font-size:16px;font-weight:700;color:var(--accent2);">Accident Disclosed — Read Before Pickup</div>
+        </div>
+        <div style="font-size:14px;color:#1a1814;line-height:1.7;">This vehicle has a disclosed accident history. You may take it to a shop for a thorough inspection before completing the purchase. <strong>If you decide to keep it, you must return the vehicle and pay the seller the same day.</strong> If the inspection reveals anything undisclosed, you may void the sale — return the car with no payment and your $600 fee is refunded.</div>
+      </div>` : ''}
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;">After Pickup</div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you've picked up the vehicle, confirm its condition below.</div>
         <button class="btn btn-success btn-full mb-16" onclick="confirmPickup(true,'${txnId}')">✓ Vehicle As Described</button>
         <button class="btn btn-danger btn-full" onclick="confirmPickup(false,'${txnId}')">⚠️ Flag a Discrepancy</button>
-      </div>`;
+      </div>`;}
     if(status === 'awaiting_seller_payment_confirm') return `<div class="alert alert-info">💰 Pay the seller now. Once they confirm receipt, the deal will complete.</div>`;
     if(status === 'awaiting_seller_fee') return `<div class="alert alert-success">✓ Seller confirmed payment received. Deal is wrapping up!</div>`;
   }
