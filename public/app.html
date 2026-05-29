@@ -3300,7 +3300,7 @@ function dealFlowActionHTML(txn, role) {
   if(status === 'completed') return `<div class="alert alert-success">🎉 Deal complete! Thank you for using PrivaBuy.</div>`;
   if(role === 'dealer') {
   if(status === 'inspection_period') {
-    const hasAccident = txn.accidents && txn.accidents !== 'None';
+    const hasAccident = txn.has_accident === true;
     return `
   <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
     <div style="font-size:15px;font-weight:600;margin-bottom:8px;color:#1a1814">Inspection & Payment</div>
