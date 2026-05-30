@@ -1594,7 +1594,12 @@ function initAdminView() {
 }
 
 function logout() { clearAuction(); showScreen('screen-login'); }
-function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  setTimeout(() => { document.getElementById(id).classList.add('active'); }, 300);
+  setTimeout(() => { document.getElementById(id).classList.add('active'); }, 800);
+}
 
 function selectRadio(groupId, el, value) {
   document.querySelectorAll(`#${groupId} .radio-pill`).forEach(p=>p.classList.remove('selected'));
