@@ -3148,6 +3148,12 @@ document.getElementById('screen-login').classList.add('active');
 selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
 
 setTimeout(() => {
+  if(!document.querySelector('.screen.active')) {
+    document.getElementById('screen-login').classList.add('active');
+  }
+}, 500);
+
+setTimeout(() => {
   const urlRole = new URLSearchParams(window.location.search).get('role');
   if(urlRole === 'dealer') {
     selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
