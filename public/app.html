@@ -3146,12 +3146,14 @@ async function processSellerPayment() {
 // INIT
 selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
 
-const urlRole = new URLSearchParams(window.location.search).get('role');
-if(urlRole === 'dealer') {
-  selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
-} else if(urlRole === 'seller') {
-  selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
-}
+setTimeout(() => {
+  const urlRole = new URLSearchParams(window.location.search).get('role');
+  if(urlRole === 'dealer') {
+    selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
+  } else if(urlRole === 'seller') {
+    selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+  }
+}, 0);
 
 let currentRealAuctionId = null;
 let dealerBidPollInterval = null;
