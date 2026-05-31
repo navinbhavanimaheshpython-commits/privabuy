@@ -67,7 +67,7 @@ body::before {
 }
 
 .screen{display:none;min-height:100vh;}
-.screen.active{display:flex;flex-direction:column;}
+.screen.active { display: flex !important; flex-direction: column; min-height: 100vh; }
 .screen[data-active="true"]{display:flex;flex-direction:column;}
 
 /* LOGIN */
@@ -1600,18 +1600,10 @@ function logout() { clearAuction(); showScreen('screen-login'); }
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
-    s.setAttribute('style', 'display:none!important');
+    s.style.display = '';
   });
   const target = document.getElementById(id);
   target.classList.add('active');
-  target.setAttribute('style', 'display:flex!important;flex-direction:column!important;min-height:100vh!important');
-  // Re-apply after short delay to fight injectors that run after JS
-  setTimeout(() => {
-    target.setAttribute('style', 'display:flex!important;flex-direction:column!important;min-height:100vh!important');
-  }, 100);
-  setTimeout(() => {
-    target.setAttribute('style', 'display:flex!important;flex-direction:column!important;min-height:100vh!important');
-  }, 500);
 }
 function selectRadio(groupId, el, value) {
   document.querySelectorAll(`#${groupId} .radio-pill`).forEach(p=>p.classList.remove('selected'));
