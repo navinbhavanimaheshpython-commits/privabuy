@@ -2597,11 +2597,11 @@ async function initDealerView() {
   setInterval(renderDealerAuctions, 10000);
   if(S.dealer_id) {
     checkDealerNotifications();
-    // Check if dealer has any active transactions
     checkDealerHasTransaction();
+    // Always show deal flow tab for logged-in dealers
+    document.getElementById('dealer-dealflow-tab').style.display = '';
   }
 }
-
 async function checkDealerHasTransaction() {
   try {
     const res = await fetch(`${API}/transactions/dealer/${S.dealer_id}`);
