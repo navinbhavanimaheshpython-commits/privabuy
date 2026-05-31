@@ -3404,6 +3404,12 @@ function dealFlowActionHTML(txn, role) {
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you have the funds in hand, confirm below and hand over the title.</div>
         <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Received $${(parseFloat(txn.amount) - 250).toLocaleString()} — Hand Over Title</button>
       </div>`;
+      if(status === 'awaiting_seller_fee') return `
+      <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Pay Your $250 PrivaBuy Fee</div>
+        <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Last step — pay the platform fee to complete the deal.</div>
+        <button class="btn btn-primary btn-full" onclick="sellerTab('payment', null)">Pay $250 Fee →</button>
+      </div>`;
     
   }
 
