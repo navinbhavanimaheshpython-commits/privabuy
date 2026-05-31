@@ -19,6 +19,7 @@
     { "source": "/app", "destination": "/app.html" },
     { "source": "/dealer-signup", "destination": "/dealer-signup.html" },
     { "source": "/reset-password", "destination": "/reset-password.html" },
-    { "source": "/((?!app|dealer-signup|reset-password).*)", "destination": "/index.html" }
+    { "source": "/((?!app|dealer-signup|reset-password).*)", "destination": "/index.html" },
+    { "source": "/portal", "destination": "/portal.html" }
   ]
 }
