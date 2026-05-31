@@ -1704,11 +1704,17 @@ async function loadSellerActiveAuction() {
       startAuctionTimer();
       startSellerBidPoll();
     } else if(accepted) {
-      // Auction was accepted — show Deal Flow tab
       S.car_id = accepted.car_id;
       S.auctionData = accepted;
       document.getElementById('seller-dealflow-tab').style.display = '';
       sellerTab('dealflow', document.getElementById('seller-dealflow-tab'));
+    } else {
+      // Check for any listing with a transaction even if status is unexpected
+      const anyListing = listings[0];
+      if(anyListing) {
+        S.car_id = anyListing.car_id;
+        document.getElementById('seller-dealflow-tab').style.display = '';
+      }
     }
   } catch(e) { console.error(e); }
 }
@@ -2555,7 +2561,7 @@ async function acceptTopBid() {
   document.getElementById('seller-auction-closed').classList.remove('hidden');
   document.getElementById('accepted-amount').textContent='$'+top.amount.toLocaleString();
   const elapsed=document.getElementById('seller-elapsed'); if(elapsed) elapsed.textContent='SOLD';
-  document.getElementById('dealer-contact-reveal').innerHTML=`<strong>Winning Dealer:</strong> ${top.dealer}<br>(312) 555-0192 · dealer@${top.dealer.toLowerCase().replace(/ /g,'')}.com<br><em style="font-size:11px;color:var(--g5)">Contact info revealed only after you accept</em>`;
+  S._accepting = false;
   if(top.isReal) showRealDealerStatus(top.amount,true);
   showToast('','Offer Accepted!',`You accepted $${top.amount.toLocaleString()}.`);
   // Show deal flow tab
