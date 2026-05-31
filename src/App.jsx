@@ -348,7 +348,7 @@ function Navbar() {
         </div>
         {/* CTA */}
         <div style={{ flex:1, display:"flex", justifyContent:"flex-end" }}>
-          <button onClick={() => window.location.href='/app?role=seller'} style={{ background:"#1a1814", color:"#f5f3ef", border:"none", borderRadius:"9999px", padding:"0.4rem 1.1rem", fontSize:"0.82rem", fontWeight:500, cursor:"pointer", display:"flex", alignItems:"center", gap:"0.3rem", fontFamily:"Barlow, sans-serif" }}>
+          <button onClick={() => window.location.href='/portal?role=seller'} style={{ background:"#1a1814", color:"#f5f3ef", border:"none", borderRadius:"9999px", padding:"0.4rem 1.1rem", fontSize:"0.82rem", fontWeight:500, cursor:"pointer", display:"flex", alignItems:"center", gap:"0.3rem", fontFamily:"Barlow, sans-serif" }}>
             List Your Car <span style={{ fontSize:"0.85rem" }}>↗</span>
           </button>
         </div>
@@ -514,7 +514,7 @@ function Hero() {
         </p>
 
         <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"2.75rem" }}>
-          <button className="lg-strong" onClick={() => window.location.href='/app?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
+          <button className="lg-strong" onClick={() => window.location.href='/portal?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
             List Your Car ↗
           </button>
           <button className="lg" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
@@ -829,7 +829,7 @@ function CTA() {
             List in 3 minutes. Watch dealers compete. Walk away with more than you expected.
           </p>
           <div style={{ display:"flex", gap:"0.75rem", justifyContent:"center", flexWrap:"wrap" }}>
-            <button className="lg-strong" onClick={() => window.location.href='/app?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"0.95rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500, display:"flex", alignItems:"center", gap:"0.4rem" }}>
+            <button className="lg-strong" onClick={() => window.location.href='/portal?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"0.95rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500, display:"flex", alignItems:"center", gap:"0.4rem" }}>
               List My Car Free ↗
             </button>
             <button className="lg" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"0.95rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:300, background:"rgba(255,255,255,0.4)" }}>
