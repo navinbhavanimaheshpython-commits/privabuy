@@ -103,7 +103,7 @@
 
 <div class="topbar">
   <a href="/" class="logo">Priva<span>Buy</span></a>
-  <a href="/app?role=dealer" class="topbar-link">Already registered? Sign in →</a>
+  <a href="/portal?role=dealer" class="topbar-link">Already registered? Sign in →</a>
 </div>
 
 <div class="page">
@@ -224,7 +224,7 @@
       <div class="next-step"><div class="step-num">2</div><div>You receive a confirmation email with your login details</div></div>
       <div class="next-step"><div class="step-num">3</div><div>Log in and start bidding on vehicles in your territory</div></div>
     </div>
-    <a href="/app?role=dealer" style="display:inline-flex;align-items:center;gap:6px;background:#1a1814;color:#f5f3ef;padding:13px 28px;border-radius:9999px;font-family:Barlow,sans-serif;font-size:14px;font-weight:500;text-decoration:none;">
+    <a href="/portal?role=dealer" style="display:inline-flex;align-items:center;gap:6px;background:#1a1814;color:#f5f3ef;padding:13px 28px;border-radius:9999px;font-family:Barlow,sans-serif;font-size:14px;font-weight:500;text-decoration:none;">
       Go to Dealer Login →
     </a>
   </div>
@@ -340,7 +340,7 @@ async function submitRegistration() {
     window.scrollTo({top:0, behavior:'smooth'});
   } catch(err) {
     const taken = err.message.toLowerCase().includes('already');
-    showAlert(taken ? 'This license number is already registered. <a href="/app?role=dealer" style="color:var(--accent);font-weight:500">Sign in instead →</a>' : (err.message || 'Something went wrong. Please try again.'), taken ? 'warning' : 'error');
+    showAlert(taken ? 'This license number is already registered. <a href="/portal?role=dealer" style="color:var(--accent);font-weight:500">Sign in instead →</a>' : (err.message || 'Something went wrong. Please try again.'), taken ? 'warning' : 'error');
     btn.textContent = 'Submit Dealer Application →';
     btn.disabled = false;
   }
