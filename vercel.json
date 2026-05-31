@@ -1,23 +1,11 @@
 {
-  "buildCommand": "vite build && cp public/app.html dist/app.html && cp public/portal.html dist/portal.html && cp public/dealer-signup.html dist/dealer-signup.html && cp public/reset-password.html dist/reset-password.html",
+  "buildCommand": "vite build && node -e \"const fs=require('fs');['app','portal','dealer-signup','reset-password'].forEach(f=>{try{fs.copyFileSync('public/'+f+'.html','dist/'+f+'.html')}catch(e){}})\"",
   "outputDirectory": "dist",
   "headers": [
-    {
-      "source": "/app.html",
-      "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }]
-    },
-    {
-      "source": "/portal.html",
-      "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }]
-    },
-    {
-      "source": "/dealer-signup.html",
-      "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }]
-    },
-    {
-      "source": "/reset-password.html",
-      "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }]
-    }
+    { "source": "/app.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
+    { "source": "/portal.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
+    { "source": "/dealer-signup.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
+    { "source": "/reset-password.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] }
   ],
   "rewrites": [
     { "source": "/app", "destination": "/app.html" },
