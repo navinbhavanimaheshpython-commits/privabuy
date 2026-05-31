@@ -1598,26 +1598,17 @@ function initAdminView() {
 function logout() { clearAuction(); showScreen('screen-login'); }
 
 function showScreen(id) {
-  // Remove all active states
-  document.querySelectorAll('.screen').forEach(s=>{
+  document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
-    s.removeAttribute('data-active');
-    s.style.display = '';
+    s.style.removeProperty('display');
   });
-  
-  // Inject a style tag that can't be stripped by the injector
-  const existing = document.getElementById('__screen_style');
-  if(existing) existing.remove();
-  const style = document.createElement('style');
-  style.id = '__screen_style';
-  style.textContent = `#${id} { display: flex !important; flex-direction: column !important; min-height: 100vh !important; }`;
-  document.head.appendChild(style);
-  
-  const el = document.getElementById(id);
-  el.classList.add('active');
-  el.setAttribute('data-active', 'true');
-  el.style.display = 'flex';
-  el.style.flexDirection = 'column';
+  const target = document.getElementById(id);
+  target.classList.add('active');
+  // Force display via style tag — bypasses external CSS injectors
+  const tag = document.getElementById('__screen_override__') || document.createElement('style');
+  tag.id = '__screen_override__';
+  tag.textContent = `#${id} { display: flex !important; flex-direction: column !important; min-height: 100vh !important; }`;
+  document.head.appendChild(tag);
 }
 function selectRadio(groupId, el, value) {
   document.querySelectorAll(`#${groupId} .radio-pill`).forEach(p=>p.classList.remove('selected'));
