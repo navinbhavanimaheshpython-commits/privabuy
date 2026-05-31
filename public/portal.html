@@ -1684,8 +1684,8 @@ async function loadSellerActiveAuction() {
   try {
     const res = await fetch(`${API}/sellers/${S.seller_id}/listings`);
     const listings = await res.json();
-    const active = listings.find(l => l.status === 'open');
     const accepted = listings.find(l => l.status === 'accepted' || l.status === 'accepted_pending_settlement');
+    const active = !accepted && listings.find(l => l.status === 'open');
 
     if(active) {
       S.car_id = active.car_id;
