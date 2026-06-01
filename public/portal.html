@@ -3404,11 +3404,14 @@ function dealFlowActionHTML(txn, role) {
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you have the funds in hand, confirm below and hand over the title.</div>
         <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Received $${(parseFloat(txn.amount) - 250).toLocaleString()} — Hand Over Title</button>
       </div>`;
-      if(status === 'awaiting_seller_fee') return `
-      <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
-        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Pay Your $250 PrivaBuy Fee</div>
-        <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Last step — pay the platform fee to complete the deal.</div>
-        <button class="btn btn-primary btn-full" onclick="sellerTab('payment', null)">Pay $250 Fee →</button>
+    if(status === 'awaiting_seller_fee') return `
+      <div style="background:rgba(42,158,124,0.06);border:1px solid rgba(42,158,124,0.18);border-radius:var(--r-lg);padding:20px;">
+        <div style="font-size:15px;font-weight:600;color:var(--accent3);margin-bottom:4px;">🎉 Deal Almost Done</div>
+        <div style="font-size:13px;color:var(--g5);margin-bottom:8px;line-height:1.6;">
+          The dealer paid you <strong style="color:#1a1814;">$${parseFloat(txn.amount).toLocaleString()}</strong>. 
+          PrivaBuy's $250 fee comes out of that — you net <strong style="color:var(--accent3);">$${(parseFloat(txn.amount) - 250).toLocaleString()}</strong>.
+        </div>
+        <div class="alert alert-success" style="margin:0;">✓ No further action needed. PrivaBuy will mark this deal complete shortly.</div>
       </div>`;
     
   }
