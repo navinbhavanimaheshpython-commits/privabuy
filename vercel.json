@@ -1,5 +1,5 @@
 {
-  "buildCommand": "vite build && node copy-files.cjs",
+  "buildCommand": "vite build && node copy-files.mjs",
   "outputDirectory": "dist",
   "headers": [
     { "source": "/app.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
