@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+﻿import fs from 'fs';
 ['app', 'portal', 'dealer-signup', 'reset-password'].forEach(f => {
   try {
     fs.copyFileSync('public/' + f + '.html', 'dist/' + f + '.html');
