@@ -418,6 +418,18 @@ body::before {
   .photo-thumbs{grid-template-columns:repeat(4,1fr);}
   .spec-grid,.carfax-row,.docs-row{grid-template-columns:1fr 1fr;}
 }
+/* ── NOTIFICATION BELL & PANEL ── */
+.notif-wrapper{position:relative;}
+.notif-bell{width:36px;height:36px;border-radius:50%;background:#f2f2f2;border:1px solid rgba(0,0,0,0.16);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:background 0.2s;position:relative;}
+.notif-bell:hover{background:#e8e8e8;}
+.notif-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center;border:2px solid #fff;font-family:var(--ui);}
+.notif-panel{display:none;position:absolute;top:calc(100% + 10px);right:0;width:320px;max-height:440px;overflow-y:auto;background:#fff;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);box-shadow:0 12px 40px rgba(0,0,0,0.14);z-index:400;}
+.notif-panel-header{padding:14px 16px 10px;border-bottom:1px solid rgba(0,0,0,0.07);font-size:12px;font-weight:700;color:#1a1814;letter-spacing:0.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+.notif-item{padding:13px 16px;border-bottom:1px solid rgba(0,0,0,0.06);}
+.notif-item.unread{background:rgba(124,92,191,0.04);}
+.notif-item-title{font-size:13px;font-weight:600;color:#1a1814;margin-bottom:3px;}
+.notif-item-body{font-size:12px;color:rgba(0,0,0,0.55);line-height:1.5;}
+.notif-item-time{font-size:10px;color:rgba(0,0,0,0.30);margin-top:5px;}
 </style>
 </head>
 <body>
@@ -426,7 +438,7 @@ body::before {
 <div id="screen-login" class="screen active">
   <div class="login-card">
     <div class="login-logo">Priva<span>Buy</span> <span style="font-size:14px;color:var(--g4);font-family:var(--sans);font-weight:400">v2</span></div>
-    <div class="login-tagline">The auction platform for serious vehicle inventory.</div>
+    <div class="login-tagline">***STAGING***The auction platform for serious vehicle inventory.</div>
     <div class="role-select">
       <div class="role-btn " data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">&#x1F464;</div><div class="role-name">Seller</div></div>
       <div class="role-btn" data-role="dealer" onclick="selectRole('dealer',this)"><div class="role-icon">&#x1F3E2;</div><div class="role-name">Dealer</div></div>
@@ -473,6 +485,19 @@ body::before {
     <div class="topbar-logo">Priva<span>Buy</span></div>
     <div class="topbar-right">
       <span class="topbar-user" id="seller-topbar-user">Seller</span>
+      <div class="notif-wrapper">
+        <div class="notif-bell" onclick="toggleNotifPanel('seller')" title="Deal Notifications">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-badge" id="seller-notif-badge">0</span>
+        </div>
+        <div class="notif-panel" id="seller-notif-panel">
+          <div class="notif-panel-header">
+            <span>Deal Notifications</span>
+            <span onclick="clearNotifs('seller')" style="font-size:11px;font-weight:400;color:var(--g5);cursor:pointer;text-transform:none;letter-spacing:0;padding:2px 8px;">Clear</span>
+          </div>
+          <div id="seller-notif-list"><div style="padding:24px;text-align:center;color:rgba(0,0,0,0.38);font-size:13px;">No notifications yet</div></div>
+        </div>
+      </div>
       <button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button>
     </div>
   </div>
@@ -1102,6 +1127,19 @@ body::before {
     <div class="topbar-logo">Priva<span>Buy</span> <span style="font-size:12px;color:var(--g5);font-family:var(--sans);font-weight:400">Dealer Portal</span></div>
     <div class="topbar-right">
      <span class="topbar-user" id="dealer-topbar-user"> Dealer</span>
+      <div class="notif-wrapper">
+        <div class="notif-bell" onclick="toggleNotifPanel('dealer')" title="Deal Notifications">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-badge" id="dealer-notif-badge">0</span>
+        </div>
+        <div class="notif-panel" id="dealer-notif-panel">
+          <div class="notif-panel-header">
+            <span>Deal Notifications</span>
+            <span onclick="clearNotifs('dealer')" style="font-size:11px;font-weight:400;color:var(--g5);cursor:pointer;text-transform:none;letter-spacing:0;padding:2px 8px;">Clear</span>
+          </div>
+          <div id="dealer-notif-list"><div style="padding:24px;text-align:center;color:rgba(0,0,0,0.38);font-size:13px;">No notifications yet</div></div>
+        </div>
+      </div>
       <button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button>
     </div>
   </div>
@@ -1437,7 +1475,7 @@ body::before {
 // ─────────────────────────────────────────────
 //  ALL JAVASCRIPT BELOW IS UNTOUCHED FROM ORIGINAL
 // ─────────────────────────────────────────────
-const API = 'https://privabuy-backend-production.up.railway.app';
+const API = 'https://web-production-534ed.up.railway.app';
 const STRIPE_PK = 'pk_test_51TNGzaLXzhlPcGmdxozAMEP3ek5aec0jPoiV3hY5H20w2eOdnvNWuGEp4rE90Iafil14T9NQnv5azsNRQ7qouDcc00IDByl9kt';
 const stripeClient = Stripe(STRIPE_PK);
 const S = {
@@ -1677,6 +1715,10 @@ function togglePasswordVisibility() {
 function initSellerView() {
   sellerTab('auction', document.querySelector('#screen-seller .tab-btn[onclick*="auction"]'));
   loadSellerActiveAuction();
+  setTimeout(async () => {
+    await seedNotifStatus('seller');
+    startDealFlowNotifPoll('seller');
+  }, 2500);
 }
 async function loadSellerActiveAuction() {
   if(!S.seller_id || S.auctionActive) return;
@@ -2563,6 +2605,7 @@ async function acceptTopBid() {
   S._accepting = false;
   if(top.isReal) showRealDealerStatus(top.amount,true);
   showToast('','Offer Accepted!',`You accepted $${top.amount.toLocaleString()}.`);
+    addNotification('seller', 'awaiting_dealer_payment', '');
   // Show deal flow tab
   document.getElementById('seller-dealflow-tab').style.display = '';
   sellerTab('dealflow', document.getElementById('seller-dealflow-tab'));
@@ -2597,8 +2640,11 @@ async function initDealerView() {
   if(S.dealer_id) {
     checkDealerNotifications();
     checkDealerHasTransaction();
-    // Always show deal flow tab for logged-in dealers
     document.getElementById('dealer-dealflow-tab').style.display = '';
+    setTimeout(async () => {
+      await seedNotifStatus('dealer');
+      startDealFlowNotifPoll('dealer');
+    }, 2500);
   }
 }
 async function checkDealerHasTransaction() {
@@ -3703,6 +3749,168 @@ async function adminResolveDispute(txnId, decision) {
     loadAdminFlags();
   } catch(e) { showToast('❌','Error','Could not resolve.'); }
 }
+// ─────────────────────────────────────────────
+//  DEAL FLOW NOTIFICATION SYSTEM
+// ─────────────────────────────────────────────
+
+const N = {
+  items: [],
+  lastStatus: {},
+  pollInterval: null
+};
+
+const NOTIF_MESSAGES = {
+  seller: {
+    awaiting_dealer_payment: { icon:'⏳', title:'Waiting on Dealer Fee', body:"The dealer has been notified to pay the $600 platform fee. You'll be updated as soon as they do." },
+    awaiting_bill_of_sale: { icon:'📄', title:'Sign the Bill of Sale', body:"The dealer paid their fee — your turn. Review and sign the Bill of Sale in Deal Flow to keep things moving." },
+    awaiting_pickup_schedule: { icon:'📅', title:'Pickup Times Coming', body:"Both parties signed the Bill of Sale. Waiting for the dealer to propose pickup windows." },
+    awaiting_slot_confirmation: { icon:'📅', title:'Choose a Pickup Time', body:"The dealer proposed 3 pickup windows. Head to Deal Flow to pick one." },
+    pickup_scheduled: { icon:'✅', title:'Pickup Confirmed!', body:"Pickup is locked in. Have your title and keys ready. Don't hand over the title until you receive payment." },
+    inspection_period: { icon:'🔍', title:'Dealer is Inspecting', body:"The dealer is inspecting the vehicle. Hold the title — do not transfer it until they pay you." },
+    awaiting_seller_payment_confirm: { icon:'💰', title:'Confirm Payment Received', body:"The dealer says they've paid you. Confirm in Deal Flow and hand over the title." },
+    awaiting_seller_fee: { icon:'🎉', title:'Almost Done!', body:"You confirmed payment received. PrivaBuy will finalize the deal shortly. Thank you!" },
+    completed: { icon:'🎉', title:'Deal Complete!', body:"Your vehicle sale is fully complete. Thanks for using PrivaBuy!" },
+    dispute_flagged: { icon:'⚠️', title:'Dispute Under Review', body:"The dealer flagged a discrepancy. PrivaBuy support will reach out within 24 hours." },
+    forfeited: { icon:'⚠️', title:'Deal Forfeited', body:"The dealer didn't pay in time. We'll offer the vehicle to the next highest bidder." }
+  },
+  dealer: {
+    awaiting_dealer_payment: { icon:'💳', title:'Pay Your Platform Fee', body:"Your bid was accepted! Pay the $600 platform fee before the deadline to lock in this deal." },
+    awaiting_bill_of_sale: { icon:'📄', title:'Sign the Bill of Sale', body:"Fee received. Review and sign the Bill of Sale in Deal Flow to continue." },
+    awaiting_pickup_schedule: { icon:'📅', title:'Propose Pickup Times', body:"Both parties signed the Bill of Sale. Submit 3 available pickup windows in Deal Flow." },
+    awaiting_slot_confirmation: { icon:'⏳', title:'Waiting for Seller', body:"Pickup options sent. The seller is choosing a time — you'll be notified when confirmed." },
+    pickup_scheduled: { icon:'✅', title:'Pickup Scheduled!', body:"The seller confirmed a pickup time. Head to Deal Flow to see the date and prepare." },
+    inspection_period: { icon:'🔍', title:'Pickup Day — Inspect & Pay', body:"Inspect the vehicle carefully. If everything matches the listing, pay the seller on the spot." },
+    awaiting_seller_payment_confirm: { icon:'⏳', title:'Waiting on Seller Confirmation', body:"Payment sent — waiting for the seller to confirm receipt. Almost done!" },
+    awaiting_seller_fee: { icon:'🎉', title:'Seller Confirmed Payment!', body:"The seller confirmed receipt of payment. Deal is wrapping up — congrats!" },
+    completed: { icon:'🎉', title:'Deal Complete!', body:"Vehicle acquisition complete. Check Won Vehicles for full details." },
+    dispute_flagged: { icon:'⚠️', title:'Dispute Under Review', body:"PrivaBuy support is reviewing your flagged discrepancy. Expect a response within 24 hours." },
+    forfeited: { icon:'⚠️', title:'Deal Forfeited', body:"The payment deadline passed. This deal has been forfeited." }
+  }
+};
+
+function addNotification(role, status, txnLabel) {
+  const msg = NOTIF_MESSAGES[role]?.[status];
+  if(!msg) return;
+  const id = 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2,5);
+  const body = txnLabel ? txnLabel + ' — ' + msg.body : msg.body;
+  N.items.unshift({ id, role, icon: msg.icon, title: msg.title, body, status, timestamp: Date.now(), read: false });
+  if(N.items.length > 40) N.items = N.items.slice(0, 40);
+  updateNotifBadge(role);
+  showToast(msg.icon, msg.title, body.length > 75 ? body.slice(0, 75) + '…' : body);
+  const tabId = role === 'seller' ? 'seller-dealflow-tab' : 'dealer-dealflow-tab';
+  const t = document.getElementById(tabId);
+  if(t) { t.style.display = ''; t.style.color = 'var(--accent)'; t.style.fontWeight = '700'; }
+}
+
+function updateNotifBadge(role) {
+  const unread = N.items.filter(n => !n.read && n.role === role).length;
+  const badge = document.getElementById(role + '-notif-badge');
+  if(!badge) return;
+  badge.textContent = unread;
+  badge.style.display = unread > 0 ? 'flex' : 'none';
+}
+
+function toggleNotifPanel(role) {
+  const panel = document.getElementById(role + '-notif-panel');
+  if(!panel) return;
+  const isOpen = panel.style.display === 'block';
+  document.querySelectorAll('.notif-panel').forEach(p => p.style.display = 'none');
+  if(!isOpen) {
+    panel.style.display = 'block';
+    renderNotifPanel(role);
+    N.items.forEach(n => { if(n.role === role) n.read = true; });
+    updateNotifBadge(role);
+    const t = document.getElementById(role === 'seller' ? 'seller-dealflow-tab' : 'dealer-dealflow-tab');
+    if(t) { t.style.color = ''; t.style.fontWeight = ''; }
+  }
+}
+
+document.addEventListener('click', function(e) {
+  if(!e.target.closest('.notif-wrapper')) {
+    document.querySelectorAll('.notif-panel').forEach(p => p.style.display = 'none');
+  }
+}, true);
+
+function renderNotifPanel(role) {
+  const list = document.getElementById(role + '-notif-list');
+  if(!list) return;
+  const mine = N.items.filter(n => n.role === role);
+  if(!mine.length) {
+    list.innerHTML = '<div style="padding:28px 16px;text-align:center;color:rgba(0,0,0,0.38);font-size:13px;line-height:1.6;">No notifications yet.<br><span style="font-size:11px;">Deal flow updates will appear here automatically.</span></div>';
+    return;
+  }
+  list.innerHTML = mine.map(n => `
+    <div class="notif-item${n.read ? '' : ' unread'}">
+      <div class="notif-item-title">${n.icon} ${n.title}</div>
+      <div class="notif-item-body">${n.body}</div>
+      <div class="notif-item-time">${timeAgoNotif(n.timestamp)}</div>
+    </div>`).join('');
+}
+
+function clearNotifs(role) {
+  N.items = N.items.filter(n => n.role !== role);
+  renderNotifPanel(role);
+  updateNotifBadge(role);
+}
+
+function timeAgoNotif(ts) {
+  const d = Math.floor((Date.now() - ts) / 1000);
+  if(d < 60) return 'Just now';
+  if(d < 3600) return Math.floor(d/60) + 'm ago';
+  if(d < 86400) return Math.floor(d/3600) + 'h ago';
+  return Math.floor(d/86400) + 'd ago';
+}
+
+async function seedNotifStatus(role) {
+  try {
+    if(role === 'seller' && S.car_id) {
+      const res = await fetch(API + '/transactions/car/' + S.car_id);
+      if(res.ok) { const txn = await res.json(); if(txn) N.lastStatus[txn.transaction_id] = txn.status; }
+    } else if(role === 'dealer' && S.dealer_id) {
+      const res = await fetch(API + '/transactions/dealer/' + S.dealer_id);
+      if(res.ok) { const list = await res.json(); list.forEach(t => N.lastStatus[t.transaction_id] = t.status); }
+    }
+  } catch(e) {}
+}
+
+function startDealFlowNotifPoll(role) {
+  if(N.pollInterval) clearInterval(N.pollInterval);
+  N.pollInterval = setInterval(async () => {
+    try {
+      if(role === 'seller' && S.car_id) {
+        const res = await fetch(API + '/transactions/car/' + S.car_id);
+        if(!res.ok) return;
+        const txn = await res.json();
+        if(!txn) return;
+        const key = txn.transaction_id;
+        const prev = N.lastStatus[key];
+        if(prev !== undefined && prev !== txn.status) {
+          const label = [txn.year, txn.make, txn.model].filter(Boolean).join(' ');
+          addNotification('seller', txn.status, label);
+          const dfEl = document.getElementById('seller-tab-dealflow');
+          if(dfEl && !dfEl.classList.contains('hidden')) loadDealFlow('seller');
+        }
+        N.lastStatus[key] = txn.status;
+      } else if(role === 'dealer' && S.dealer_id) {
+        const res = await fetch(API + '/transactions/dealer/' + S.dealer_id);
+        if(!res.ok) return;
+        const list = await res.json();
+        list.forEach(txn => {
+          const key = txn.transaction_id;
+          const prev = N.lastStatus[key];
+          if(prev !== undefined && prev !== txn.status) {
+            const label = [txn.year, txn.make, txn.model].filter(Boolean).join(' ');
+            addNotification('dealer', txn.status, label);
+            const dfEl = document.getElementById('dealer-tab-dealflow');
+            if(dfEl && !dfEl.classList.contains('hidden')) loadDealFlow('dealer');
+          }
+          N.lastStatus[key] = txn.status;
+        });
+      }
+    } catch(e) {}
+  }, 10000);
+}
+
 </script>
 </body>
 </html>

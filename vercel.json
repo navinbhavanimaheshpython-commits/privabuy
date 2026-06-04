@@ -1,5 +1,5 @@
 {
-  "buildCommand": "vite build && node -e \"const fs=require('fs');['app','portal','dealer-signup','reset-password'].forEach(f=>{try{fs.copyFileSync('public/'+f+'.html','dist/'+f+'.html')}catch(e){}})\"",
+  "buildCommand": "vite build && node copy-files.js",
   "outputDirectory": "dist",
   "headers": [
     { "source": "/app.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
