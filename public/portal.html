@@ -3084,7 +3084,7 @@ async function processDealerPayment() {
     const res = await fetch(`${API}/payments/create-intent`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({amount: 60000, description: 'PrivaBuy Dealer Platform Fee'})
+      body: JSON.stringify({amount: 100, description: 'PrivaBuy Dealer Platform Fee'})
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.detail || 'Failed to create payment');
