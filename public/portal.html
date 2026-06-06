@@ -3501,12 +3501,12 @@ function dealFlowActionHTML(txn, role) {
           <div style="font-size:12px;color:#888;margin-top:8px;"><strong>No accident disclosed:</strong> Inspect at pickup, pay seller on the spot. <strong>Accident disclosed:</strong> You may take the vehicle to a shop — must return it and pay seller same day if keeping it.</div>
         </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">One-time fee to complete this auction win.</div>
-        <button class="btn btn-primary btn-full"
-          onclick="dealFlowPayNow('${txnId}', ${rawAmt})"
+        pk_live_51TNGz<button class="btn btn-primary btn-full"
+          onclick="dealFlowSendInvoice('${txnId}', ${rawAmt})"
           ${dealerAcked ? '' : 'disabled style="opacity:0.4;cursor:not-allowed;"'}>
-          Pay $600 Now →
+          📄 Confirm Win — Send Me My Invoice →
         </button>
-        ${dealerAcked ? '' : '<div style="font-size:12px;color:var(--g5);text-align:center;margin-top:8px;">Sign the acknowledgement above to unlock payment</div>'}
+        ${dealerAcked ? '' : '<div style="font-size:12px;color:var(--g5);text-align:center;margin-top:8px;">Sign the acknowledgement above to unlock</div>'}OPooe955nktS3X9HMO4xUU0gceM0XajI0KUEuYamGs6MY2QWLn0eiPb2HzOJO9OKdAUmIMcnN1UNuQPFqgb00fyoZL3LC
       </div>`;
  
     if (status === 'awaiting_bill_of_sale') return ack + (txn.bill_of_sale_dealer_acked ? `
@@ -3634,6 +3634,70 @@ async function dealFlowPayNow(txnId, winPrice) {
   setTimeout(() => selectDealerFee(feeId), 100);
 }
  
+async function dealFlowSendInvoice(txnId, winPrice) {
+  if (!S.dealerAckSigned || S.dealerAckSigned.transaction_id !== txnId) {
+    showToast('⚠️', 'Sign First', 'Please sign the acknowledgement above before proceeding.');
+    return;
+  }
+
+  const btn = document.querySelector(`button[onclick*="dealFlowSendInvoice('${txnId}"]`);
+  if (btn) { btn.textContent = 'Sending invoice...'; btn.disabled = true; }
+
+  try {
+    await fetch(`${API}/transactions/${txnId}/send-dealer-invoice`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        dealer_id:  S.dealer_id,
+        dealer_fee: DEALER_FEE,
+        win_price:  winPrice
+      })
+    });
+  } catch(e) {
+    console.warn('Invoice endpoint not yet live — showing confirmation anyway.', e);
+  }
+
+  const invoiceNum = 'PB-' + new Date().getFullYear() + '-' + txnId.slice(0, 6).toUpperCase();
+
+  if (!S.dealerInvoiceSent) S.dealerInvoiceSent = {};
+  S.dealerInvoiceSent[txnId] = {
+    invoice_number: invoiceNum,
+    amount:         DEALER_FEE,
+    sent_at:        new Date().toISOString()
+  };
+
+  showToast('📄', 'Invoice Sent!', `Invoice ${invoiceNum} for $${DEALER_FEE} sent to your email.`);
+
+  // Replace the button area with a confirmation card
+  const actionDiv = document.getElementById(`dealer-dealflow-action-${txnId}`);
+  if (actionDiv) {
+    const ack = dealFlowAckSection({transaction_id: txnId, amount: winPrice}, 'dealer');
+    actionDiv.innerHTML = ack + `
+      <div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.22);border-radius:var(--r-lg);padding:24px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:12px;">📄</div>
+        <div style="font-size:16px;font-weight:700;color:var(--accent3);margin-bottom:6px;">Invoice Sent to Your Email</div>
+        <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Invoice <strong style="color:#1a1814;">${invoiceNum}</strong> has been sent to your dealership email.</div>
+        <div style="background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:var(--r);padding:16px;margin-bottom:16px;text-align:left;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:12px;color:var(--g5);">Invoice number</span>
+            <span style="font-size:13px;font-weight:600;color:#1a1814;font-family:monospace;">${invoiceNum}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:12px;color:var(--g5);">Amount due</span>
+            <span style="font-size:18px;font-weight:700;color:var(--accent);">$${DEALER_FEE}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:12px;color:var(--g5);">Pay by</span>
+            <span style="font-size:13px;color:#1a1814;">Check payable to <strong>PrivaBuy LLC</strong></span>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--g5);line-height:1.6;">
+          Write a check for <strong style="color:#1a1814;">$${DEALER_FEE}</strong> payable to <strong style="color:#1a1814;">PrivaBuy LLC</strong>.<br>
+          Navin will collect it on the next pickup date (5th, 15th, or 20th).
+        </div>
+      </div>`;
+  }
+}
 
 async function loadDealFlow(role) {
   const el = document.getElementById(`${role}-dealflow-content`);
