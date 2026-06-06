@@ -3225,6 +3225,190 @@ if(dealerModal && dealerModal.parentElement !== document.body) {
 // ─────────────────────────────────────────────
 //  DEAL FLOW
 // ─────────────────────────────────────────────
+const SELLER_FEE = 200;
+const DEALER_FEE = 200;
+ 
+function dealFlowAckSection(txn, role) {
+  const bid   = parseFloat(txn.amount);
+  const txnId = txn.transaction_id;
+  const net   = bid - SELLER_FEE;
+ 
+  if (role === 'dealer') {
+    const acked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
+ 
+    if (acked) {
+      const dt = new Date(S.dealerAckSigned.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+      return `
+        <div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.22);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:20px;">✅</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--accent3);">Facilitation Fee Acknowledged</div>
+              <div style="font-size:12px;color:var(--g5);margin-top:2px;">Signed by <strong style="color:#1a1814;">${S.dealerAckSigned.signature}</strong> · ${dt}</div>
+            </div>
+          </div>
+          <div style="text-align:right;font-size:11px;color:var(--g5);line-height:1.7;">
+            Bid $${bid.toLocaleString()} · Seller nets $${net.toLocaleString()}<br>
+            $${SELLER_FEE} seller fee · $${DEALER_FEE} dealer fee (invoiced)
+          </div>
+        </div>`;
+    }
+ 
+    return `
+      <div style="background:rgba(217,48,37,0.03);border:1.5px solid rgba(217,48,37,0.20);border-radius:var(--r-lg);padding:20px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:18px;">✍️</span>
+            <div style="font-size:14px;font-weight:700;color:#1a1814;">Facilitation Acknowledgement</div>
+          </div>
+          <span style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--red);background:rgba(217,48,37,0.08);border:1px solid rgba(217,48,37,0.18);border-radius:50px;padding:3px 10px;">SIGN BEFORE PAYMENT</span>
+        </div>
+ 
+        <div style="background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:var(--r);overflow:hidden;margin-bottom:14px;">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);">
+            <div style="padding:12px 14px;border-right:1px solid rgba(0,0,0,0.08);">
+              <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Your Bid</div>
+              <div style="font-size:18px;font-weight:700;color:var(--accent);">$${bid.toLocaleString()}</div>
+            </div>
+            <div style="padding:12px 14px;border-right:1px solid rgba(0,0,0,0.08);background:rgba(217,48,37,0.03);">
+              <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">PB Seller Fee</div>
+              <div style="font-size:18px;font-weight:700;color:var(--red);">−$${SELLER_FEE}</div>
+            </div>
+            <div style="padding:12px 14px;background:rgba(42,158,124,0.04);">
+              <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Seller Receives</div>
+              <div style="font-size:18px;font-weight:700;color:var(--accent3);">$${net.toLocaleString()}</div>
+            </div>
+          </div>
+          <div style="padding:10px 14px;border-top:1px solid rgba(0,0,0,0.08);background:#f8f8f8;">
+            <div style="font-size:11px;color:var(--g5);">Dealer fee: <strong style="color:#1a1814;">$${DEALER_FEE}</strong> — invoiced bi-monthly per deal won</div>
+          </div>
+        </div>
+ 
+        <div style="background:#fff;border:1px solid rgba(0,0,0,0.14);border-radius:8px;padding:12px 14px;font-family:'Courier New',monospace;font-size:12px;line-height:2.2;color:#1a1814;margin-bottom:14px;">
+          Check to seller: <strong>$${bid.toLocaleString()}</strong><br>
+          <span style="color:var(--red);">Memo: Incl. $${SELLER_FEE} PrivaBuy facilitation fee</span><br>
+          <span style="display:block;border-top:1px solid rgba(0,0,0,0.08);padding-top:4px;">Net to seller: <strong style="color:var(--accent3);">$${net.toLocaleString()}</strong></span>
+        </div>
+ 
+        <div style="font-size:12px;color:#1a1814;line-height:1.75;margin-bottom:14px;padding:12px;background:#f8f8f8;border-radius:var(--r);">
+          By signing I confirm: <strong>PrivaBuy LLC facilitated this sale.</strong>
+          My bid of <strong>$${bid.toLocaleString()}</strong> includes a <strong>$${SELLER_FEE} seller facilitation fee</strong> deducted from the seller's proceeds — seller nets <strong>$${net.toLocaleString()}</strong>.
+          My check to the seller will note the $${SELLER_FEE} deduction.
+          A separate <strong>$${DEALER_FEE} dealer fee</strong> per deal won will be invoiced bi-monthly. This acknowledgement is <strong>legally binding</strong>.
+        </div>
+ 
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">Full Legal Name</label>
+          <input class="form-input" id="df-dack-sig-${txnId}" placeholder="Type to sign…" style="font-style:italic;font-family:Georgia,serif;font-size:15px;">
+        </div>
+ 
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:#fff;border:1px solid rgba(0,0,0,0.16);border-radius:var(--r-sm);padding:12px;margin-bottom:12px;">
+          <input type="checkbox" id="df-dack-cb-${txnId}" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
+          <span style="font-size:12px;color:#1a1814;line-height:1.5;">I acknowledge the $${SELLER_FEE} seller facilitation fee and $${DEALER_FEE} dealer fee arrangement. PrivaBuy facilitated this sale.</span>
+        </label>
+ 
+        <button class="btn btn-primary btn-full" onclick="signDealFlowDealerAck('${txnId}', ${bid})">✍️ Sign Acknowledgement →</button>
+      </div>`;
+  }
+ 
+  if (role === 'seller') {
+    const acked = S.sellerAckSigned && (S.sellerAckSigned.car_id === S.car_id || S.sellerAckSigned.transaction_id === txnId);
+ 
+    if (acked) {
+      const dt = new Date(S.sellerAckSigned.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+      return `
+        <div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.22);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:20px;">✅</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--accent3);">Facilitation Fee Acknowledged</div>
+              <div style="font-size:12px;color:var(--g5);margin-top:2px;">Signed by <strong style="color:#1a1814;">${S.sellerAckSigned.signature}</strong> · ${dt}</div>
+            </div>
+          </div>
+          <div style="text-align:right;font-size:11px;color:var(--g5);line-height:1.7;">
+            Bid $${bid.toLocaleString()} · You net $${net.toLocaleString()}<br>
+            $${SELLER_FEE} to PrivaBuy
+          </div>
+        </div>`;
+    }
+ 
+    return `
+      <div style="background:rgba(217,48,37,0.03);border:1.5px solid rgba(217,48,37,0.20);border-radius:var(--r-lg);padding:20px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:18px;">✍️</span>
+            <div style="font-size:14px;font-weight:700;color:#1a1814;">Facilitation Acknowledgement</div>
+          </div>
+          <span style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--red);background:rgba(217,48,37,0.08);border:1px solid rgba(217,48,37,0.18);border-radius:50px;padding:3px 10px;">SIGN FIRST</span>
+        </div>
+ 
+        <div style="background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:var(--r);overflow:hidden;margin-bottom:14px;">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);">
+            <div style="padding:12px 14px;border-right:1px solid rgba(0,0,0,0.08);">
+              <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Winning Bid</div>
+              <div style="font-size:18px;font-weight:700;color:#1a1814;">$${bid.toLocaleString()}</div>
+            </div>
+            <div style="padding:12px 14px;border-right:1px solid rgba(0,0,0,0.08);background:rgba(217,48,37,0.03);">
+              <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">PB Fee</div>
+              <div style="font-size:18px;font-weight:700;color:var(--red);">−$${SELLER_FEE}</div>
+            </div>
+            <div style="padding:12px 14px;background:rgba(42,158,124,0.04);">
+              <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">You Receive</div>
+              <div style="font-size:18px;font-weight:700;color:var(--accent3);">$${net.toLocaleString()}</div>
+            </div>
+          </div>
+        </div>
+ 
+        <div style="background:#fff;border:1px solid rgba(0,0,0,0.14);border-radius:8px;padding:12px 14px;font-family:'Courier New',monospace;font-size:12px;line-height:2.2;color:#1a1814;margin-bottom:14px;">
+          Dealer's check to you: <strong>$${bid.toLocaleString()}</strong><br>
+          <span style="color:var(--red);">Less: −$${SELLER_FEE} PrivaBuy facilitation fee</span><br>
+          <span style="display:block;border-top:1px solid rgba(0,0,0,0.08);padding-top:4px;">Net to you: <strong style="color:var(--accent3);">$${net.toLocaleString()}</strong></span>
+        </div>
+ 
+        <div style="font-size:12px;color:#1a1814;line-height:1.75;margin-bottom:14px;padding:12px;background:#f8f8f8;border-radius:var(--r);">
+          By signing I confirm: <strong>PrivaBuy LLC facilitated this sale.</strong>
+          The accepted bid is <strong>$${bid.toLocaleString()}</strong>. A <strong>$${SELLER_FEE} PrivaBuy facilitation fee</strong> is deducted from the dealer's payment — I will receive <strong>$${net.toLocaleString()}</strong>.
+          The dealer's check will note the $${SELLER_FEE} deduction. This acknowledgement is <strong>legally binding</strong>.
+        </div>
+ 
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">Full Legal Name</label>
+          <input class="form-input" id="df-sack-sig-${txnId}" placeholder="Type to sign…" style="font-style:italic;font-family:Georgia,serif;font-size:15px;">
+        </div>
+ 
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:#fff;border:1px solid rgba(0,0,0,0.16);border-radius:var(--r-sm);padding:12px;margin-bottom:12px;">
+          <input type="checkbox" id="df-sack-cb-${txnId}" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
+          <span style="font-size:12px;color:#1a1814;line-height:1.5;">I acknowledge the $${SELLER_FEE} PrivaBuy facilitation fee and that I will receive <strong>$${net.toLocaleString()}</strong> from this sale.</span>
+        </label>
+ 
+        <button class="btn btn-primary btn-full" onclick="signDealFlowSellerAck('${txnId}', ${bid})">✍️ Sign Acknowledgement →</button>
+      </div>`;
+  }
+ 
+  return '';
+}
+ 
+function signDealFlowDealerAck(txnId, bidAmount) {
+  const sig     = document.getElementById(`df-dack-sig-${txnId}`)?.value.trim();
+  const checked = document.getElementById(`df-dack-cb-${txnId}`)?.checked;
+  if (!sig)     { showToast('⚠️','Signature Required','Type your full legal name.'); return; }
+  if (!checked) { showToast('⚠️','Required','Check the box to acknowledge.'); return; }
+  S.dealerAckSigned = { party:'dealer', signature:sig, timestamp:new Date().toISOString(), seller_fee:SELLER_FEE, dealer_fee:DEALER_FEE, transaction_id:txnId, bid_amount:bidAmount };
+  fetch(`${API}/transactions/acknowledge`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(S.dealerAckSigned) }).catch(e=>console.warn(e));
+  showToast('✅','Signed!','Acknowledgement recorded. You can now proceed to payment.');
+  loadDealFlow('dealer');
+}
+ 
+function signDealFlowSellerAck(txnId, bidAmount) {
+  const sig     = document.getElementById(`df-sack-sig-${txnId}`)?.value.trim();
+  const checked = document.getElementById(`df-sack-cb-${txnId}`)?.checked;
+  if (!sig)     { showToast('⚠️','Signature Required','Type your full legal name.'); return; }
+  if (!checked) { showToast('⚠️','Required','Check the box to acknowledge.'); return; }
+  S.sellerAckSigned = { party:'seller', signature:sig, timestamp:new Date().toISOString(), seller_fee:SELLER_FEE, transaction_id:txnId, bid_amount:bidAmount, car_id:S.car_id };
+  fetch(`${API}/transactions/acknowledge`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(S.sellerAckSigned) }).catch(e=>console.warn(e));
+  showToast('✅','Signed!','Acknowledgement recorded.');
+  loadDealFlow('seller');
+}
 
 const DEAL_STEPS = [
   { key: 'awaiting_dealer_payment',    label: 'Dealer Pays $600',      icon: '💳' },
@@ -3262,18 +3446,29 @@ function dealFlowStepsHTML(status) {
 }
 
 function dealFlowActionHTML(txn, role) {
-  const status = txn.status;
-  const txnId = txn.transaction_id;
-  const amount = parseFloat(txn.amount).toLocaleString();
-  const deadline = txn.dealer_payment_deadline ? new Date(txn.dealer_payment_deadline).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
-
-  if(status === 'forfeited') return `<div class="alert alert-warning">⚠️ This deal was forfeited.</div>`;
-  if(status === 'dispute_flagged') return `<div class="alert" style="background:rgba(217,48,37,0.07);border:1px solid rgba(217,48,37,0.2);color:var(--red);">⚠️ A discrepancy was flagged. PrivaBuy support will reach out within 24 hours.</div>`;
-  if(status === 'completed') return `<div class="alert alert-success">🎉 Deal complete! Thank you for using PrivaBuy.</div>`;
-  if(role === 'dealer') {
-  if(status === 'inspection_period') {
-    const hasAccident = txn.has_accident === true;
-    return `
+  const status  = txn.status;
+  const txnId   = txn.transaction_id;
+  const amount  = parseFloat(txn.amount).toLocaleString();
+  const rawAmt  = parseFloat(txn.amount);
+  const deadline = txn.dealer_payment_deadline
+    ? new Date(txn.dealer_payment_deadline).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
+    : '';
+ 
+  if (status === 'forfeited')
+    return `<div class="alert alert-warning">⚠️ This deal was forfeited.</div>`;
+  if (status === 'dispute_flagged')
+    return `<div class="alert" style="background:rgba(217,48,37,0.07);border:1px solid rgba(217,48,37,0.2);color:var(--red);">⚠️ A discrepancy was flagged. PrivaBuy support will reach out within 24 hours.</div>`;
+  if (status === 'completed')
+    return `<div class="alert alert-success">🎉 Deal complete! Thank you for using PrivaBuy.</div>`;
+ 
+  const ack = dealFlowAckSection(txn, role);
+  const dealerAcked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
+ 
+  if (role === 'dealer') {
+ 
+    if (status === 'inspection_period') {
+      const hasAccident = txn.has_accident === true;
+      return ack + `
   <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
     <div style="font-size:15px;font-weight:600;margin-bottom:8px;color:#1a1814">Inspection & Payment</div>
     ${hasAccident ? `
@@ -3287,40 +3482,46 @@ function dealFlowActionHTML(txn, role) {
     </div>`}
     <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
       <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">Seller nets from this sale</div>
-      <div style="font-size:22px;font-weight:700;color:var(--accent3);">$${(parseFloat(txn.amount) - 250).toLocaleString()}</div>
-      <div style="font-size:11px;color:var(--g5);margin-top:2px;">$${parseFloat(txn.amount).toLocaleString()} bid − $250 PrivaBuy fee</div>
+      <div style="font-size:22px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
+      <div style="font-size:11px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
     </div>
-    <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;"><strong style="color:#1a1814;">Important:</strong> Seller will not hand over the title until payment is received. Pay the seller the full bid amount of <strong style="color:#1a1814;">$${parseFloat(txn.amount).toLocaleString()}</strong> — PrivaBuy deducts our $250 fee from that automatically.</div>
+    <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;"><strong style="color:#1a1814;">Important:</strong> Seller will not hand over the title until payment is received. Pay the seller the full bid amount of <strong style="color:#1a1814;">$${rawAmt.toLocaleString()}</strong> — PrivaBuy deducts our $${SELLER_FEE} fee from that automatically.</div>
     <button class="btn btn-success btn-full mb-16" onclick="inspectionAccept('${txnId}')">✓ Inspected & Paid Seller — Complete</button>
     <button class="btn btn-danger btn-full" onclick="inspectionReject('${txnId}')">⚠️ Void Sale — Return Vehicle</button>
-  </div>`;}
-    if(status === 'awaiting_dealer_payment') return `
+  </div>`;
+    }
+ 
+    if (status === 'awaiting_dealer_payment') return ack + `
       <div class="alert alert-warning" style="margin-bottom:16px;">⏰ You have until <strong>${deadline}</strong> to pay the $600 platform fee or this bid will be forfeited.</div>
       <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#1a1814">Platform Fee — $600.00</div>
         <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
-        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#16a34a;margin-bottom:4px;">🛡️ Buyer Protection Guarantee</div>
-        <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your <strong>$600 platform fee will be fully refunded</strong>. The sale is void, no money changes hands.</div>
-        <div style="font-size:12px;color:#888;margin-top:8px;"><strong>No accident disclosed:</strong> Inspect at pickup, pay seller on the spot. <strong>Accident disclosed:</strong> You may take the vehicle to a shop — must return it and pay seller same day if keeping it.</div>
-      </div>
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#16a34a;margin-bottom:4px;">🛡️ Buyer Protection Guarantee</div>
+          <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your <strong>$600 platform fee will be fully refunded</strong>.</div>
+          <div style="font-size:12px;color:#888;margin-top:8px;"><strong>No accident disclosed:</strong> Inspect at pickup, pay seller on the spot. <strong>Accident disclosed:</strong> You may take the vehicle to a shop — must return it and pay seller same day if keeping it.</div>
+        </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">One-time fee to complete this auction win.</div>
-        <button class="btn btn-primary btn-full" onclick="dealFlowPayNow('${txnId}', ${parseFloat(txn.amount)})">Pay $600 Now →</button>
+        <button class="btn btn-primary btn-full"
+          onclick="dealFlowPayNow('${txnId}', ${rawAmt})"
+          ${dealerAcked ? '' : 'disabled style="opacity:0.4;cursor:not-allowed;"'}>
+          Pay $600 Now →
+        </button>
+        ${dealerAcked ? '' : '<div style="font-size:12px;color:var(--g5);text-align:center;margin-top:8px;">Sign the acknowledgement above to unlock payment</div>'}
       </div>`;
-    if(status === 'awaiting_bill_of_sale') return txn.bill_of_sale_dealer_acked ? `
+ 
+    if (status === 'awaiting_bill_of_sale') return ack + (txn.bill_of_sale_dealer_acked ? `
       <div class="alert alert-info">✓ You've signed the Bill of Sale. Waiting for seller to acknowledge.</div>` : `
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:12px;">Bill of Sale</div>
-        <div style="font-size:13px;color:var(--g5);line-height:1.7;margin-bottom:16px;">
-          This confirms the purchase of <strong>${txn.year||''} ${txn.make||''} ${txn.model||''}</strong> for <strong style="color:var(--accent)">$${amount}</strong>.<br>
-          The vehicle is sold as-is.
-        </div>
+        <div style="font-size:13px;color:var(--g5);line-height:1.7;margin-bottom:16px;">This confirms the purchase of <strong>${txn.year||''} ${txn.make||''} ${txn.model||''}</strong> for <strong style="color:var(--accent)">$${amount}</strong>.<br>The vehicle is sold as-is.</div>
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:16px;">
           <input type="checkbox" id="dealer-bos-check-${txnId}" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
           <span style="font-size:13px;color:#1a1814;">I acknowledge and agree to the Bill of Sale terms above.</span>
         </label>
         <button class="btn btn-primary btn-full" onclick="ackBillOfSale('dealer','${txnId}')">Sign Bill of Sale →</button>
-      </div>`;
-    if(status === 'awaiting_pickup_schedule') return `
+      </div>`);
+ 
+    if (status === 'awaiting_pickup_schedule') return ack + `
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Propose Pickup Times</div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Offer 3 available time slots within 5 business days.</div>
@@ -3329,17 +3530,16 @@ function dealFlowActionHTML(txn, role) {
         <div class="form-group"><label class="form-label">Option 3</label><input class="form-input" type="datetime-local" id="slot-3-${txnId}"></div>
         <button class="btn btn-primary btn-full" onclick="proposeSlots('${txnId}')">Send Pickup Options →</button>
       </div>`;
-    if(status === 'awaiting_slot_confirmation') return `<div class="alert alert-info">📅 Pickup options sent. Waiting for seller to confirm a time.</div>`;
-    if(status === 'pickup_scheduled') {
+ 
+    if (status === 'awaiting_slot_confirmation') return ack + `<div class="alert alert-info">📅 Pickup options sent. Waiting for seller to confirm a time.</div>`;
+ 
+    if (status === 'pickup_scheduled') {
       const hasAccident = txn.has_accident === true;
-      return `
+      return ack + `
       <div class="alert alert-success" style="margin-bottom:16px;">✅ Pickup confirmed for <strong>${txn.confirmed_pickup_slot ? new Date(txn.confirmed_pickup_slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'TBD'}</strong></div>
       ${hasAccident ? `
       <div style="background:rgba(194,124,42,0.12);border:2px solid rgba(194,124,42,0.45);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <span style="font-size:24px;">⚠️</span>
-          <div style="font-size:16px;font-weight:700;color:var(--accent2);">Accident Disclosed — Read Before Pickup</div>
-        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><span style="font-size:24px;">⚠️</span><div style="font-size:16px;font-weight:700;color:var(--accent2);">Accident Disclosed — Read Before Pickup</div></div>
         <div style="font-size:14px;color:#1a1814;line-height:1.7;">This vehicle has a disclosed accident history. You may take it to a shop for a thorough inspection before completing the purchase. <strong>If you decide to keep it, you must return the vehicle and pay the seller the same day.</strong> If the inspection reveals anything undisclosed, you may void the sale — return the car with no payment and your $600 fee is refunded.</div>
       </div>` : ''}
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
@@ -3347,42 +3547,44 @@ function dealFlowActionHTML(txn, role) {
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you've picked up the vehicle, confirm its condition below.</div>
         <button class="btn btn-success btn-full mb-16" onclick="confirmPickup(true,'${txnId}')">✓ Vehicle As Described</button>
         <button class="btn btn-danger btn-full" onclick="confirmPickup(false,'${txnId}')">⚠️ Flag a Discrepancy</button>
-      </div>`;}
-    if(status === 'awaiting_seller_payment_confirm') return `<div class="alert alert-info">💰 Pay the seller now. Once they confirm receipt, the deal will complete.</div>`;
-    if(status === 'awaiting_seller_fee') return `<div class="alert alert-success">✓ Seller confirmed payment received. Deal is wrapping up!</div>`;
+      </div>`;
+    }
+ 
+    if (status === 'awaiting_seller_payment_confirm') return ack + `<div class="alert alert-info">💰 Pay the seller now. Once they confirm receipt, the deal will complete.</div>`;
+    if (status === 'awaiting_seller_fee') return ack + `<div class="alert alert-success">✓ Seller confirmed payment received. Deal is wrapping up!</div>`;
   }
-
-  if(role === 'seller') {
-    if(status === 'inspection_period') return `
-      <div class="alert alert-warning" style="margin-bottom:12px;">
-        🔍 The dealer is inspecting the vehicle. <strong>Do not hand over the title until you receive payment.</strong>
-      </div>
+ 
+  if (role === 'seller') {
+ 
+    if (status === 'inspection_period') return ack + `
+      <div class="alert alert-warning" style="margin-bottom:12px;">🔍 The dealer is inspecting the vehicle. <strong>Do not hand over the title until you receive payment.</strong></div>
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:16px;margin-bottom:12px;">
         <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">You will receive</div>
-        <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(parseFloat(txn.amount) - 250).toLocaleString()}</div>
-        <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${parseFloat(txn.amount).toLocaleString()} bid − $250 PrivaBuy fee</div>
+        <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
+        <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
       </div>
       <div style="font-size:13px;color:#1a1814;line-height:1.6;padding:12px 14px;background:rgba(42,158,124,0.06);border:1px solid rgba(42,158,124,0.18);border-radius:var(--r);">
-        Once the dealer pays you <strong>$${(parseFloat(txn.amount) - 250).toLocaleString()}</strong>, hand over the title. If anything was misrepresented, the dealer may void the sale — no payment, no title transfer.
+        Once the dealer pays you <strong>$${(rawAmt - SELLER_FEE).toLocaleString()}</strong>, hand over the title.
       </div>`;
-    if(status === 'awaiting_dealer_payment') return `
+ 
+    if (status === 'awaiting_dealer_payment') return ack + `
       <div class="alert alert-warning">⏰ Waiting for dealer to pay the $600 platform fee. Deadline: <strong>${deadline}</strong>. If they don't pay, the next highest bidder will be offered the vehicle.</div>`;
-    if(status === 'awaiting_bill_of_sale') return txn.bill_of_sale_seller_acked ? `
+ 
+    if (status === 'awaiting_bill_of_sale') return ack + (txn.bill_of_sale_seller_acked ? `
       <div class="alert alert-info">✓ You've signed the Bill of Sale. Waiting for dealer to acknowledge.</div>` : `
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:12px;">Bill of Sale</div>
-        <div style="font-size:13px;color:var(--g5);line-height:1.7;margin-bottom:16px;">
-          This confirms the sale of your <strong>${txn.year||''} ${txn.make||''} ${txn.model||''}</strong> for <strong style="color:var(--accent)">$${amount}</strong>.<br>
-          The vehicle is sold as-is.
-        </div>
+        <div style="font-size:13px;color:var(--g5);line-height:1.7;margin-bottom:16px;">This confirms the sale of your <strong>${txn.year||''} ${txn.make||''} ${txn.model||''}</strong> for <strong style="color:var(--accent)">$${amount}</strong>.<br>The vehicle is sold as-is.</div>
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:16px;">
           <input type="checkbox" id="seller-bos-check-${txnId}" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
           <span style="font-size:13px;color:#1a1814;">I acknowledge and agree to the Bill of Sale terms above.</span>
         </label>
         <button class="btn btn-primary btn-full" onclick="ackBillOfSale('seller','${txnId}')">Sign Bill of Sale →</button>
-      </div>`;
-    if(status === 'awaiting_pickup_schedule') return `<div class="alert alert-info">📅 Waiting for dealer to propose pickup times.</div>`;
-    if(status === 'awaiting_slot_confirmation') return `
+      </div>`);
+ 
+    if (status === 'awaiting_pickup_schedule') return ack + `<div class="alert alert-info">📅 Waiting for dealer to propose pickup times.</div>`;
+ 
+    if (status === 'awaiting_slot_confirmation') return ack + `
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Choose a Pickup Time</div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">The dealer proposed these times. Pick one that works for you.</div>
@@ -3392,52 +3594,46 @@ function dealFlowActionHTML(txn, role) {
             <button class="btn btn-primary btn-sm" onclick="confirmSlot('${slot}','${txnId}')">Choose This →</button>
           </div>`).join('')}
       </div>`;
-    if(status === 'pickup_scheduled') return `<div class="alert alert-success">✅ Pickup confirmed for <strong>${txn.confirmed_pickup_slot ? new Date(txn.confirmed_pickup_slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'TBD'}</strong>. Have the title ready.</div>`;
-    if(status === 'awaiting_seller_payment_confirm') return `
+ 
+    if (status === 'pickup_scheduled') return ack + `<div class="alert alert-success">✅ Pickup confirmed for <strong>${txn.confirmed_pickup_slot ? new Date(txn.confirmed_pickup_slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'TBD'}</strong>. Have the title ready.</div>`;
+ 
+    if (status === 'awaiting_seller_payment_confirm') return ack + `
       <div style="background:rgba(194,124,42,0.06);border:1px solid rgba(194,124,42,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;color:var(--accent2);margin-bottom:4px;">Confirm Payment Received</div>
         <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
           <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">You should have received</div>
-          <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(parseFloat(txn.amount) - 250).toLocaleString()}</div>
-          <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${parseFloat(txn.amount).toLocaleString()} bid − $250 PrivaBuy fee</div>
+          <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
+          <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
         </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you have the funds in hand, confirm below and hand over the title.</div>
-        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Received $${(parseFloat(txn.amount) - 250).toLocaleString()} — Hand Over Title</button>
+        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Received $${(rawAmt - SELLER_FEE).toLocaleString()} — Hand Over Title</button>
       </div>`;
-    if(status === 'awaiting_seller_fee') return `
+ 
+    if (status === 'awaiting_seller_fee') return ack + `
       <div style="background:rgba(42,158,124,0.06);border:1px solid rgba(42,158,124,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;color:var(--accent3);margin-bottom:4px;">🎉 Deal Almost Done</div>
-        <div style="font-size:13px;color:var(--g5);margin-bottom:8px;line-height:1.6;">
-          The dealer paid you <strong style="color:#1a1814;">$${parseFloat(txn.amount).toLocaleString()}</strong>. 
-          PrivaBuy's $250 fee comes out of that — you net <strong style="color:var(--accent3);">$${(parseFloat(txn.amount) - 250).toLocaleString()}</strong>.
-        </div>
+        <div style="font-size:13px;color:var(--g5);margin-bottom:8px;line-height:1.6;">The dealer paid you <strong style="color:#1a1814;">$${rawAmt.toLocaleString()}</strong>. PrivaBuy's $${SELLER_FEE} fee comes out of that — you net <strong style="color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</strong>.</div>
         <div class="alert alert-success" style="margin:0;">✓ No further action needed. PrivaBuy will mark this deal complete shortly.</div>
       </div>`;
-    
   }
-
+ 
   return `<div class="alert alert-info">Status: ${status}</div>`;
 }
 
-function dealFlowPayNow(txnId, winPrice) {
-  // Ensure this transaction is in D_pendingFees
+async function dealFlowPayNow(txnId, winPrice) {
+  if (!S.dealerAckSigned || S.dealerAckSigned.transaction_id !== txnId) {
+    showToast('⚠️', 'Sign Acknowledgement First', 'Please sign the facilitation acknowledgement above before proceeding.');
+    return;
+  }
   const exists = D_pendingFees.find(f => f.transaction_id === txnId);
-  if(!exists) {
-    D_pendingFees.push({
-      id: 'fee_' + txnId,
-      transaction_id: txnId,
-      vehicle: 'Vehicle',
-      winPrice: winPrice,
-      sellerName: 'Seller',
-      sellerPhone: '',
-      sellerEmail: '',
-      paid: false
-    });
+  if (!exists) {
+    D_pendingFees.push({ id:'fee_'+txnId, transaction_id:txnId, vehicle:'Vehicle', winPrice:winPrice, sellerName:'Seller', sellerPhone:'', sellerEmail:'', paid:false });
   }
   const feeId = exists ? exists.id : 'fee_' + txnId;
   dealerTab('payment', document.getElementById('dealer-pay-fee-tab'));
   setTimeout(() => selectDealerFee(feeId), 100);
 }
+ 
 
 async function loadDealFlow(role) {
   const el = document.getElementById(`${role}-dealflow-content`);
