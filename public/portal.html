@@ -3501,12 +3501,12 @@ function dealFlowActionHTML(txn, role) {
           <div style="font-size:12px;color:#888;margin-top:8px;"><strong>No accident disclosed:</strong> Inspect at pickup, pay seller on the spot. <strong>Accident disclosed:</strong> You may take the vehicle to a shop — must return it and pay seller same day if keeping it.</div>
         </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">One-time fee to complete this auction win.</div>
-        pk_live_51TNGz<button class="btn btn-primary btn-full"
+        <button class="btn btn-primary btn-full"
           onclick="dealFlowSendInvoice('${txnId}', ${rawAmt})"
           ${dealerAcked ? '' : 'disabled style="opacity:0.4;cursor:not-allowed;"'}>
           📄 Confirm Win — Send Me My Invoice →
         </button>
-        ${dealerAcked ? '' : '<div style="font-size:12px;color:var(--g5);text-align:center;margin-top:8px;">Sign the acknowledgement above to unlock</div>'}OPooe955nktS3X9HMO4xUU0gceM0XajI0KUEuYamGs6MY2QWLn0eiPb2HzOJO9OKdAUmIMcnN1UNuQPFqgb00fyoZL3LC
+        ${dealerAcked ? '' : '<div style="font-size:12px;color:var(--g5);text-align:center;margin-top:8px;">Sign the acknowledgement above to unlock</div>'}
       </div>`;
  
     if (status === 'awaiting_bill_of_sale') return ack + (txn.bill_of_sale_dealer_acked ? `
