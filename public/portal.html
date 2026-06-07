@@ -3367,8 +3367,9 @@ function dealFlowAckSection(txn, role) {
  
         <div style="font-size:12px;color:#1a1814;line-height:1.75;margin-bottom:14px;padding:12px;background:#f8f8f8;border-radius:var(--r);">
           By signing I confirm: <strong>PrivaBuy LLC facilitated this sale.</strong>
-          The accepted bid is <strong>$${bid.toLocaleString()}</strong>. A <strong>$${SELLER_FEE} PrivaBuy facilitation fee</strong> is deducted from the dealer's payment — I will receive <strong>$${net.toLocaleString()}</strong>.
-          The dealer's check will note the $${SELLER_FEE} deduction. This acknowledgement is <strong>legally binding</strong>.
+          The accepted bid is <strong>$${bid.toLocaleString()}</strong>. I will receive a check for <strong>$${net.toLocaleString()}</strong>.
+          The check memo will read <strong>"$${bid.toLocaleString()} - $${SELLER_FEE}"</strong> to note the <strong>$${SELLER_FEE} PrivaBuy facilitation fee</strong>.
+          This acknowledgement is <strong>legally binding</strong>.
         </div>
  
         <div class="form-group" style="margin-bottom:10px;">
