@@ -3573,7 +3573,7 @@ function dealFlowActionHTML(txn, role) {
       </div>`;
  
     if (status === 'awaiting_dealer_payment') return ack + `
-      <div class="alert alert-warning">⏰ Waiting for dealer to pay the $600 platform fee. Deadline: <strong>${deadline}</strong>. If they don't pay, the next highest bidder will be offered the vehicle.</div>`;
+      <div class="alert alert-info">⏳ Waiting for dealer to confirm their auction win. You'll be notified when they proceed.</div>`;
  
     if (status === 'awaiting_bill_of_sale') return ack + (txn.bill_of_sale_seller_acked ? `
       <div class="alert alert-info">✓ You've signed the Bill of Sale. Waiting for dealer to acknowledge.</div>` : `
