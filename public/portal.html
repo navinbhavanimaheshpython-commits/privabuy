@@ -3952,7 +3952,7 @@ async function adminResolveDispute(txnId, decision) {
 }
 
 // ═══════════════════════════════════════════════════════
-//  CAMERA-FIRST DISPUTE FLOW v2 — PrivaBuy color scheme
+//  CAMERA-FIRST DISPUTE FLOW v3 — fixed step isolation
 // ═══════════════════════════════════════════════════════
 
 function inspectionReject(txnId) {
@@ -3962,6 +3962,25 @@ function inspectionReject(txnId) {
 let _cameraDisputeTxnId = null;
 let _cameraDisputePhotos = [];
 let _cameraDisputeCategory = null;
+
+function cdShowStep(n) {
+  [1,2,3,4].forEach(i => {
+    const el = document.getElementById(`cd-step-${i}`);
+    if (!el) return;
+    if (i === n) {
+      el.style.display = 'flex';
+      el.style.flex = '1';
+      el.style.minHeight = '0';
+      el.style.overflow = 'auto';
+    } else {
+      el.style.display = 'none';
+      el.style.flex = '0';
+      el.style.overflow = 'hidden';
+    }
+  });
+  const overlay = document.getElementById('camera-dispute-overlay');
+  if (overlay) overlay.scrollTop = 0;
+}
 
 function openCameraDispute(txnId) {
   _cameraDisputeTxnId = txnId;
@@ -3975,12 +3994,11 @@ function openCameraDispute(txnId) {
   overlay.id = 'camera-dispute-overlay';
   overlay.style.cssText = `
     position:fixed;inset:0;background:#ffffff;z-index:2000;
-    display:flex;flex-direction:column;overflow-y:auto;
+    display:flex;flex-direction:column;overflow:hidden;
     font-family:'Inter',sans-serif;
     animation:cdSlideUp 0.28s cubic-bezier(0.32,0.72,0,1) both;
   `;
 
-  // Inject keyframe if not present
   if (!document.getElementById('cd-keyframes')) {
     const s = document.createElement('style');
     s.id = 'cd-keyframes';
@@ -4004,8 +4022,8 @@ function openCameraDispute(txnId) {
   }
 
   overlay.innerHTML = `
-    <!-- TOP BAR -->
-    <div style="position:sticky;top:0;z-index:10;background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.10);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+    <!-- TOP BAR — sticky, never scrolls -->
+    <div style="flex-shrink:0;position:sticky;top:0;z-index:10;background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.10);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
       <div style="display:flex;align-items:center;gap:12px;">
         <div style="font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:18px;color:#1a1814;">Priva<span style="color:#7c5cbf;">Buy</span></div>
         <div style="width:1px;height:16px;background:rgba(0,0,0,0.12);"></div>
@@ -4022,12 +4040,11 @@ function openCameraDispute(txnId) {
     </div>
 
     <!-- STEP 1: CAMERA -->
-    <div id="cd-step-1" style="display:flex;flex-direction:column;padding:24px 20px;flex:1;">
+    <div id="cd-step-1" style="display:flex;flex-direction:column;padding:24px 20px;flex:1;min-height:0;overflow:auto;">
       <div style="margin-bottom:22px;">
         <div style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;color:#1a1814;line-height:1.15;margin-bottom:6px;">Take photos<br>of the issue</div>
         <div style="font-size:14px;color:rgba(0,0,0,0.45);font-weight:300;">Tap each slot — camera opens immediately</div>
       </div>
-
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
         ${[0,1,2,3,4,5,6,7].map(i => `
           <div id="cd-slot-${i}" class="cd-photo-slot" onclick="cdTakePhoto(${i})"
@@ -4036,29 +4053,26 @@ function openCameraDispute(txnId) {
             <div style="font-size:10px;color:rgba(0,0,0,0.35);font-weight:300;">Photo ${i+1}${i < 2 ? ' — required' : ''}</div>
           </div>`).join('')}
       </div>
-
       <div id="cd-photo-count-label" style="text-align:center;font-size:13px;color:rgba(0,0,0,0.40);margin-bottom:18px;font-weight:300;">0 photos taken</div>
-
       <button id="cd-next-1" onclick="cdGoStep2()" disabled class="cd-btn-primary"
-        style="width:100%;padding:14px;border-radius:50px;border:none;background:rgba(0,0,0,0.08);color:rgba(0,0,0,0.32);font-size:15px;font-weight:600;cursor:not-allowed;font-family:'Inter',sans-serif;">
+        style="width:100%;padding:14px;border-radius:50px;border:none;background:rgba(0,0,0,0.08);color:rgba(0,0,0,0.32);font-size:15px;font-weight:600;cursor:not-allowed;font-family:'Inter',sans-serif;flex-shrink:0;">
         Next — What's the Issue? →
       </button>
     </div>
 
     <!-- STEP 2: CATEGORY -->
-    <div id="cd-step-2" style="display:none;flex-direction:column;padding:24px 20px;flex:1;">
+    <div id="cd-step-2" style="display:none;flex-direction:column;padding:24px 20px;flex:0;min-height:0;overflow:hidden;">
       <div style="margin-bottom:24px;">
         <div style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;color:#1a1814;line-height:1.15;margin-bottom:6px;">What's<br>the problem?</div>
         <div style="font-size:14px;color:rgba(0,0,0,0.45);font-weight:300;">Tap one to select</div>
       </div>
-
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
         ${[
-          {id:'mechanical', icon:'⚙️', label:'Engine / Transmission',     sub:'Mechanical issue not disclosed in listing'},
-          {id:'accident',   icon:'💥', label:'Accident Damage',           sub:'Damage or prior repairs not disclosed'},
-          {id:'mileage',    icon:'🔢', label:"Mileage Doesn't Match",     sub:'Odometer reading inconsistency'},
-          {id:'body',       icon:'🚗', label:'Body / Exterior Damage',    sub:'Visible damage not shown in photos'},
-          {id:'title',      icon:'📋', label:'Title Issue',               sub:'Lien, salvage, or undisclosed title problem'},
+          {id:'mechanical', icon:'⚙️', label:'Engine / Transmission',  sub:'Mechanical issue not disclosed in listing'},
+          {id:'accident',   icon:'💥', label:'Accident Damage',        sub:'Damage or prior repairs not disclosed'},
+          {id:'mileage',    icon:'🔢', label:"Mileage Doesn't Match",  sub:'Odometer reading inconsistency'},
+          {id:'body',       icon:'🚗', label:'Body / Exterior Damage', sub:'Visible damage not shown in photos'},
+          {id:'title',      icon:'📋', label:'Title Issue',            sub:'Lien, salvage, or undisclosed title problem'},
         ].map(c => `
           <div id="cd-cat-${c.id}" class="cd-cat-tile" onclick="cdSelectCategory('${c.id}', this)"
             style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.18);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
@@ -4069,80 +4083,69 @@ function openCameraDispute(txnId) {
             </div>
           </div>`).join('')}
       </div>
-
       <button id="cd-next-2" onclick="cdGoStep3()" disabled class="cd-btn-primary"
-        style="width:100%;padding:14px;border-radius:50px;border:none;background:rgba(0,0,0,0.08);color:rgba(0,0,0,0.32);font-size:15px;font-weight:600;cursor:not-allowed;font-family:'Inter',sans-serif;">
+        style="width:100%;padding:14px;border-radius:50px;border:none;background:rgba(0,0,0,0.08);color:rgba(0,0,0,0.32);font-size:15px;font-weight:600;cursor:not-allowed;font-family:'Inter',sans-serif;flex-shrink:0;">
         Next →
       </button>
     </div>
 
     <!-- STEP 3: NOTE + SUBMIT -->
-    <div id="cd-step-3" style="display:none;flex-direction:column;padding:24px 20px;flex:1;">
+    <div id="cd-step-3" style="display:none;flex-direction:column;padding:24px 20px;flex:0;min-height:0;overflow:hidden;">
       <div style="margin-bottom:20px;">
         <div style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;color:#1a1814;line-height:1.15;margin-bottom:6px;">Anything<br>else to add?</div>
         <div style="font-size:14px;color:rgba(0,0,0,0.45);font-weight:300;">Optional — 2 sentences max</div>
       </div>
-
       <textarea id="cd-note"
         placeholder="e.g. Transmission shudders at highway speed. Seller checked No Issues on mechanical."
         maxlength="300"
-        style="width:100%;background:#ffffff;border:1px solid rgba(0,0,0,0.22);border-radius:12px;padding:14px;font-family:'Barlow',sans-serif;font-size:14px;font-weight:300;color:#1a1814;resize:none;height:88px;outline:none;margin-bottom:16px;box-sizing:border-box;transition:border-color 0.2s;"
+        style="width:100%;background:#ffffff;border:1px solid rgba(0,0,0,0.22);border-radius:12px;padding:14px;font-family:'Barlow',sans-serif;font-size:14px;font-weight:300;color:#1a1814;resize:none;height:88px;outline:none;margin-bottom:16px;box-sizing:border-box;transition:border-color 0.2s;flex-shrink:0;"
         onfocus="this.style.borderColor='rgba(124,92,191,0.5)';this.style.boxShadow='0 0 0 3px rgba(124,92,191,0.08)'"
         onblur="this.style.borderColor='rgba(0,0,0,0.22)';this.style.boxShadow='none'"></textarea>
-
-      <!-- Summary card -->
-      <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.18);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+      <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.18);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);flex-shrink:0;">
         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.10em;color:rgba(0,0,0,0.38);margin-bottom:10px;">Your Report</div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
           <span id="cd-sum-icon" style="font-size:22px;"></span>
           <div id="cd-sum-label" style="font-size:14px;font-weight:600;color:#1a1814;"></div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:11px;background:rgba(124,92,191,0.10);color:#7c5cbf;border:1px solid rgba(124,92,191,0.22);border-radius:50px;padding:2px 9px;font-weight:500;" id="cd-sum-photos">0 photos</div>
+          <span style="font-size:11px;background:rgba(124,92,191,0.10);color:#7c5cbf;border:1px solid rgba(124,92,191,0.22);border-radius:50px;padding:2px 9px;font-weight:500;" id="cd-sum-photos">0 photos</span>
           <span style="font-size:11px;background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.45);border:1px solid rgba(0,0,0,0.12);border-radius:50px;padding:2px 9px;font-weight:400;">Evidence attached</span>
         </div>
       </div>
-
-      <!-- Warning block -->
-      <div style="background:rgba(194,124,42,0.07);border:1px solid rgba(194,124,42,0.22);border-radius:14px;padding:14px;margin-bottom:20px;">
+      <div style="background:rgba(194,124,42,0.07);border:1px solid rgba(194,124,42,0.22);border-radius:14px;padding:14px;margin-bottom:20px;flex-shrink:0;">
         <div style="font-size:12px;font-weight:700;color:#a06020;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.05em;">⏸ Don't do anything yet</div>
         <div style="font-size:13px;color:#1a1814;line-height:1.7;font-weight:300;">
           Once submitted, <strong style="font-weight:600;">do not pay the seller and do not return the vehicle</strong> until PrivaBuy responds. We review within <strong style="font-weight:600;">24 hours.</strong>
         </div>
       </div>
-
       <button onclick="cdSubmitDispute()"
-        style="width:100%;padding:15px;border-radius:50px;border:1px solid rgba(217,48,37,0.30);background:rgba(217,48,37,0.08);color:#d93025;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;margin-bottom:10px;"
+        style="width:100%;padding:15px;border-radius:50px;border:1px solid rgba(217,48,37,0.30);background:rgba(217,48,37,0.08);color:#d93025;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;margin-bottom:10px;flex-shrink:0;"
         onmouseover="this.style.background='rgba(217,48,37,0.14)';this.style.transform='translateY(-1px)'"
         onmouseout="this.style.background='rgba(217,48,37,0.08)';this.style.transform='none'">
         Submit Dispute →
       </button>
       <button onclick="cdGoStep2Back()"
-        style="width:100%;padding:10px;background:none;border:none;color:rgba(0,0,0,0.40);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:300;">
+        style="width:100%;padding:10px;background:none;border:none;color:rgba(0,0,0,0.40);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:300;flex-shrink:0;">
         ← Back
       </button>
     </div>
 
     <!-- STEP 4: CONFIRMATION -->
-    <div id="cd-step-4" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;flex:1;text-align:center;animation:cdFadeIn 0.3s ease both;">
+    <div id="cd-step-4" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;flex:0;min-height:0;overflow:hidden;text-align:center;">
       <div style="width:72px;height:72px;border-radius:50%;background:rgba(42,158,124,0.12);border:2px solid rgba(42,158,124,0.35);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px;">✓</div>
       <div style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;color:#1a1814;line-height:1.2;margin-bottom:12px;">We got it.<br>Don't do<br>anything yet.</div>
       <div style="font-size:14px;color:rgba(0,0,0,0.50);line-height:1.75;margin-bottom:28px;max-width:300px;font-weight:300;">
         PrivaBuy will review your evidence and contact you within <strong style="color:#1a1814;font-weight:600;">24 hours</strong>. Keep the vehicle. Do not pay the seller. Do not return the car until you hear from us.
       </div>
-
-      <!-- Reference card -->
       <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.18);border-radius:14px;padding:16px 20px;margin-bottom:28px;width:100%;max-width:300px;text-align:left;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.10em;color:rgba(0,0,0,0.38);margin-bottom:8px;">Reference</div>
         <div id="cd-ref-id" style="font-size:15px;font-weight:700;color:#1a1814;font-family:monospace;letter-spacing:1px;margin-bottom:4px;"></div>
         <div style="font-size:12px;color:rgba(0,0,0,0.40);font-weight:300;">support@privabuy.com</div>
       </div>
-
-      <!-- What happens next steps -->
       <div style="width:100%;max-width:300px;text-align:left;margin-bottom:28px;">
         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.10em;color:rgba(0,0,0,0.38);margin-bottom:12px;">What happens next</div>
         ${[
-          {icon:'📋', text:'PrivaBuy reviews your photos + the seller\'s original disclosures'},
+          {icon:'📋', text:"PrivaBuy reviews your photos + the seller's original disclosures"},
           {icon:'📱', text:'You\'ll get an email and this page updates automatically'},
           {icon:'✓',  text:'Approved: $600 refunded, sale voided, no payment needed'},
           {icon:'→',  text:'Denied: sale proceeds, you pay seller as agreed'},
@@ -4152,7 +4155,6 @@ function openCameraDispute(txnId) {
             <div style="font-size:13px;color:rgba(0,0,0,0.60);line-height:1.5;font-weight:300;">${s.text}</div>
           </div>`).join('')}
       </div>
-
       <button onclick="closeCameraDispute()"
         style="padding:13px 36px;border-radius:50px;border:1px solid rgba(0,0,0,0.20);background:#f2f2f2;color:#1a1814;font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;"
         onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f2f2f2'">
@@ -4180,17 +4182,11 @@ function cdUpdateDots(step) {
     const d = document.getElementById(`cd-dot-${i}`);
     if (!d) return;
     if (i === step) {
-      d.style.width = '18px';
-      d.style.borderRadius = '3px';
-      d.style.background = '#7c5cbf';
+      d.style.width = '18px'; d.style.borderRadius = '3px'; d.style.background = '#7c5cbf';
     } else if (i < step) {
-      d.style.width = '6px';
-      d.style.borderRadius = '50%';
-      d.style.background = '#2a9e7c';
+      d.style.width = '6px'; d.style.borderRadius = '50%'; d.style.background = '#2a9e7c';
     } else {
-      d.style.width = '6px';
-      d.style.borderRadius = '50%';
-      d.style.background = 'rgba(0,0,0,0.14)';
+      d.style.width = '6px'; d.style.borderRadius = '50%'; d.style.background = 'rgba(0,0,0,0.14)';
     }
   });
 }
@@ -4213,18 +4209,15 @@ function cdTakePhoto(idx) {
       const res = await fetch('https://api.cloudinary.com/v1_1/dptom0qr7/image/upload', {method:'POST', body:fd});
       const data = await res.json();
       if (!data.secure_url) throw new Error('Upload failed');
-
       _cameraDisputePhotos[idx] = data.secure_url;
       slot.style.border = '1.5px solid rgba(42,158,124,0.50)';
       slot.style.background = 'rgba(42,158,124,0.06)';
       slot.innerHTML = `
         <img src="${data.secure_url}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px;">
         <div style="position:absolute;top:6px;right:6px;background:#2a9e7c;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.20);">✓</div>`;
-
       const count = _cameraDisputePhotos.filter(Boolean).length;
       const countLabel = document.getElementById('cd-photo-count-label');
       if (countLabel) countLabel.textContent = `${count} photo${count !== 1 ? 's' : ''} taken`;
-
       const nextBtn = document.getElementById('cd-next-1');
       if (count >= 1 && nextBtn) {
         nextBtn.disabled = false;
@@ -4243,13 +4236,8 @@ function cdTakePhoto(idx) {
 
 function cdGoStep2() {
   if (_cameraDisputePhotos.filter(Boolean).length < 1) return;
-  document.getElementById('cd-step-1').style.display = 'none';
-  const s2 = document.getElementById('cd-step-2');
-  s2.style.display = 'flex';
+  cdShowStep(2);
   cdUpdateDots(2);
-  // Scroll to top
-  const overlay = document.getElementById('camera-dispute-overlay');
-  if (overlay) overlay.scrollTop = 0;
 }
 
 const CD_CAT_MAP = {
@@ -4270,7 +4258,6 @@ function cdSelectCategory(id, el) {
   el.style.background = 'rgba(124,92,191,0.08)';
   el.style.borderColor = 'rgba(124,92,191,0.45)';
   el.style.boxShadow = '0 2px 8px rgba(124,92,191,0.12)';
-
   const nextBtn = document.getElementById('cd-next-2');
   if (nextBtn) {
     nextBtn.disabled = false;
@@ -4283,26 +4270,17 @@ function cdSelectCategory(id, el) {
 
 function cdGoStep3() {
   if (!_cameraDisputeCategory) return;
-  document.getElementById('cd-step-2').style.display = 'none';
-  const s3 = document.getElementById('cd-step-3');
-  s3.style.display = 'flex';
+  cdShowStep(3);
   cdUpdateDots(3);
   const cat = CD_CAT_MAP[_cameraDisputeCategory];
-  const icon = document.getElementById('cd-sum-icon');
-  const label = document.getElementById('cd-sum-label');
-  const photos = document.getElementById('cd-sum-photos');
-  if (icon) icon.textContent = cat.icon;
-  if (label) label.textContent = cat.label;
+  document.getElementById('cd-sum-icon').textContent = cat.icon;
+  document.getElementById('cd-sum-label').textContent = cat.label;
   const photoCount = _cameraDisputePhotos.filter(Boolean).length;
-  if (photos) photos.textContent = `${photoCount} photo${photoCount !== 1 ? 's' : ''}`;
-  const overlay = document.getElementById('camera-dispute-overlay');
-  if (overlay) overlay.scrollTop = 0;
+  document.getElementById('cd-sum-photos').textContent = `${photoCount} photo${photoCount !== 1 ? 's' : ''}`;
 }
 
 function cdGoStep2Back() {
-  document.getElementById('cd-step-3').style.display = 'none';
-  const s2 = document.getElementById('cd-step-2');
-  s2.style.display = 'flex';
+  cdShowStep(2);
   cdUpdateDots(2);
 }
 
@@ -4333,28 +4311,15 @@ async function cdSubmitDispute() {
     console.warn('Dispute API error (showing confirmation anyway):', e);
   }
 
-  document.getElementById('cd-step-3').style.display = 'none';
-  const s4 = document.getElementById('cd-step-4');
-  s4.style.display = 'flex';
-  const refEl = document.getElementById('cd-ref-id');
-  if (refEl) refEl.textContent = 'REF-' + refId;
-
-  // Update dots to show all complete
+  cdShowStep(4);
   [1,2,3].forEach(i => {
     const d = document.getElementById(`cd-dot-${i}`);
     if (d) { d.style.width = '6px'; d.style.borderRadius = '50%'; d.style.background = '#2a9e7c'; }
   });
+  const refEl = document.getElementById('cd-ref-id');
+  if (refEl) refEl.textContent = 'REF-' + refId;
 
-  const overlay = document.getElementById('camera-dispute-overlay');
-  if (overlay) overlay.scrollTop = 0;
-
-  // Reload deal flow in background
   setTimeout(() => {
     if (typeof loadDealFlow === 'function') loadDealFlow('dealer');
   }, 1000);
 }
-
-
-</script>
-</body>
-</html>
