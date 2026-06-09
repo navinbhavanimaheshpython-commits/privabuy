@@ -3410,7 +3410,10 @@ function dealFlowActionHTML(txn, role) {
     return `<div class="alert" style="background:rgba(217,48,37,0.07);border:1px solid rgba(217,48,37,0.2);color:var(--red);">⚠️ A discrepancy was flagged. PrivaBuy support will reach out within 24 hours.</div>`;
   if (status === 'completed')
     return `<div class="alert alert-success">🎉 Deal complete! Thank you for using PrivaBuy.</div>`;
-  
+  if (status === 'dispute_resolved_refund')
+  return `<div class="alert alert-success">✓ PrivaBuy approved your dispute. Your $600 fee has been refunded. The sale has been voided.</div>`;
+  if (status === 'dispute_resolved_denied')
+  return `<div class="alert alert-warning">PrivaBuy reviewed your dispute and determined the vehicle matches the listing. Please proceed with payment to the seller.</div>` + dealFlowActionHTML({...txn, status:'inspection_period'}, role);
   
  
   const ack = dealFlowAckSection(txn, role);
