@@ -3798,7 +3798,11 @@ async function confirmSlot(slot, txnId) {
 }
 
 async function confirmPickup(asDescribed, txnId) {
-  const note = asDescribed ? null : prompt('Briefly describe the discrepancy:');
+  if (!asDescribed) {
+    openCameraDispute(txnId);
+    return;
+  }
+  const note = null;
   try {
     await fetch(`${API}/transactions/pickup/confirm`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
