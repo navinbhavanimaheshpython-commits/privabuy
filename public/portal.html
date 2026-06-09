@@ -3410,10 +3410,24 @@ function dealFlowActionHTML(txn, role) {
     return `<div class="alert" style="background:rgba(217,48,37,0.07);border:1px solid rgba(217,48,37,0.2);color:var(--red);">⚠️ A discrepancy was flagged. PrivaBuy support will reach out within 24 hours.</div>`;
   if (status === 'completed')
     return `<div class="alert alert-success">🎉 Deal complete! Thank you for using PrivaBuy.</div>`;
-  if (status === 'dispute_resolved_refund')
-  return `<div class="alert alert-success">✓ PrivaBuy approved your dispute. Your $600 fee has been refunded. The sale has been voided.</div>`;
-  if (status === 'dispute_resolved_denied')
-  return `<div class="alert alert-warning">PrivaBuy reviewed your dispute and determined the vehicle matches the listing. Please proceed with payment to the seller.</div>` + dealFlowActionHTML({...txn, status:'inspection_period'}, role);
+  if (status === 'dispute_resolved_refund') {
+    if (role === 'dealer')
+      return `<div class="alert alert-success">✓ PrivaBuy approved your dispute. Your $600 platform fee has been refunded. The sale has been voided — no payment to the seller is required.</div>`;
+    if (role === 'seller')
+      return `<div class="alert alert-warning">⚠️ PrivaBuy reviewed the dealer's dispute and ruled in their favor. The sale has been voided. The dealer will return the vehicle to you. No payment will be made.</div>`;
+  }
+  if (status === 'dispute_resolved_denied') {
+    const resumeStatus = txn.pre_dispute_status || 'awaiting_dealer_payment';
+    const resumeBanner = `
+      <div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.22);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:20px;">✅</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--accent3);">Dispute Denied — Deal Continues</div>
+          <div style="font-size:12px;color:var(--g5);margin-top:2px;line-height:1.5;">PrivaBuy reviewed the evidence and determined the vehicle matches the listing. Please continue with the sale below.</div>
+        </div>
+      </div>`;
+    return resumeBanner + dealFlowActionHTML({...txn, status: resumeStatus}, role);
+  }
   
  
   const ack = dealFlowAckSection(txn, role);
@@ -3935,9 +3949,16 @@ async function loadAdminFlags() {
               ${d.dispute_evidence_urls.map(url => `<img src="${url}" style="width:120px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(0,0,0,0.14);cursor:pointer;" onclick="window.open('${url}','_blank')">`).join('')}
             </div>
           </div>` : '<div class="alert alert-warning" style="margin-bottom:16px;">No evidence photos submitted.</div>'}
-          <div style="display:flex;gap:10px;">
-            <button class="btn btn-success" onclick="adminResolveDispute('${d.transaction_id}','refund')">✓ Approve — Refund $600 to Dealer</button>
-            <button class="btn btn-danger" onclick="adminResolveDispute('${d.transaction_id}','deny')">✕ Deny — Keep $600</button>
+          <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:16px;margin-top:4px;">
+            <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--g5);margin-bottom:12px;">Resolution Decision</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <button onclick="adminResolveDispute('${d.transaction_id}','refund')" style="padding:12px 16px;border-radius:var(--r);border:1.5px solid rgba(42,158,124,0.35);background:rgba(42,158,124,0.08);color:var(--accent3);font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:left;line-height:1.4;">
+                ✓ Approve Dispute<br><span style="font-size:11px;font-weight:400;color:var(--g5);">Refund $600 · void sale</span>
+              </button>
+              <button onclick="adminResolveDispute('${d.transaction_id}','deny')" style="padding:12px 16px;border-radius:var(--r);border:1.5px solid rgba(124,92,191,0.30);background:rgba(124,92,191,0.07);color:var(--accent);font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:left;line-height:1.4;">
+                → Deny · Resume Deal<br><span style="font-size:11px;font-weight:400;color:var(--g5);">Keep $600 · deal continues</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>`).join('');
