@@ -357,6 +357,14 @@ body::before {
 .alert-warning{background:rgba(194,124,42,0.07);border:1px solid rgba(194,124,42,0.18);color:#a06020;}
 .hidden{display:none!important;}
 
+/* Deal Flow notification badge */
+.dfn-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--red);margin-left:5px;vertical-align:middle;
+  flex-shrink:0;box-shadow:0 0 0 2px #ffffff;
+}
+
 /* AUCTION MODAL LAYOUT */
 .auction-modal-layout{display:grid;grid-template-columns:1fr 340px;gap:0;min-height:0;}
 .auction-modal-left{overflow-y:auto;padding:0 20px 24px 0;border-right:1px solid rgba(0,0,0,0.07);}
@@ -482,7 +490,7 @@ body::before {
       <button class="tab-btn" onclick="sellerTab('auction',this)">My Auction</button>
       <button class="tab-btn" onclick="sellerTab('history',this)">History</button>
       
-      <button class="tab-btn" id="seller-dealflow-tab" onclick="sellerTab('dealflow',this)" style="display:none">📋 Deal Flow</button>
+      <button class="tab-btn" id="seller-dealflow-tab" onclick="sellerTab('dealflow',this)" style="display:none">📋 Deal Flow<span class="dfn-badge" id="seller-dfn-badge" style="display:none"></span></button>
     </div>
 
     <div id="seller-tab-list">
@@ -1113,7 +1121,7 @@ body::before {
       <button class="tab-btn hidden" id="dealer-pay-fee-tab" onclick="dealerTab('payment',this)" style="position:relative;display:none!important">
          Pay Fee <span id="dealer-fee-badge" style="display:none;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:50px;margin-left:4px;vertical-align:middle">0</span>
       </button>
-      <button class="tab-btn" id="dealer-dealflow-tab" onclick="dealerTab('dealflow',this)" style="display:none">📋 Deal Flow</button>
+      <button class="tab-btn" id="dealer-dealflow-tab" onclick="dealerTab('dealflow',this)" style="display:none">📋 Deal Flow<span class="dfn-badge" id="dealer-dfn-badge" style="display:none"></span></button>
       <button class="tab-btn" onclick="dealerTab('analytics',this)">Analytics</button>
     </div>
     <div id="dealer-tab-feed">
@@ -4350,6 +4358,134 @@ async function cdSubmitDispute() {
   }, 1000);
 }
 
+// ─────────────────────────────────────────────
+//  DEAL FLOW NOTIFICATION BADGES
+// ─────────────────────────────────────────────
+const DFN = {
+  sellerKey: () => `pb_seller_last_step_${S.seller_id || 'anon'}`,
+  dealerKey: () => `pb_dealer_last_step_${S.dealer_id || 'anon'}`,
+
+  stepIndex(status) {
+    return DEAL_STEPS.findIndex(s => s.key === status);
+  },
+
+  getLastSeen(role) {
+    const key = role === 'seller' ? DFN.sellerKey() : DFN.dealerKey();
+    const val = localStorage.getItem(key);
+    return val === null ? -1 : parseInt(val, 10);
+  },
+
+  markSeen(role, status) {
+    const key = role === 'seller' ? DFN.sellerKey() : DFN.dealerKey();
+    const idx = DFN.stepIndex(status);
+    if (idx >= 0) localStorage.setItem(key, String(idx));
+  },
+
+  hasNew(role, status) {
+    return DFN.stepIndex(status) > DFN.getLastSeen(role);
+  },
+
+  showBadge(role, on) {
+    const id = role === 'seller' ? 'seller-dfn-badge' : 'dealer-dfn-badge';
+    const el = document.getElementById(id);
+    if (el) el.style.display = on ? 'inline-flex' : 'none';
+  },
+
+  async refresh(role) {
+    try {
+      let status = null;
+      if (role === 'seller' && S.car_id) {
+        const res = await fetch(`${API}/transactions/car/${S.car_id}`);
+        if (!res.ok) return;
+        const txn = await res.json();
+        if (txn && txn.status) status = txn.status;
+      } else if (role === 'dealer' && S.dealer_id) {
+        const res = await fetch(`${API}/transactions/dealer/${S.dealer_id}`);
+        if (!res.ok) return;
+        const list = await res.json();
+        if (list && list.length) status = list[0].status;
+      }
+      if (!status) return;
+      const tabEl = document.getElementById(role === 'seller' ? 'seller-dealflow-tab' : 'dealer-dealflow-tab');
+      const tabIsActive = tabEl && tabEl.classList.contains('active');
+      DFN.showBadge(role, DFN.hasNew(role, status) && !tabIsActive);
+    } catch(e) {}
+  },
+
+  startPolling(role) {
+    DFN.refresh(role);
+    if (DFN._interval) clearInterval(DFN._interval);
+    DFN._interval = setInterval(() => DFN.refresh(role), 15000);
+  },
+};
+
+// Patch sellerTab — clear badge when Deal Flow clicked
+const _origSellerTab = sellerTab;
+sellerTab = function(tab, el) {
+  _origSellerTab(tab, el);
+  if (tab === 'dealflow') {
+    (async () => {
+      try {
+        if (S.car_id) {
+          const res = await fetch(`${API}/transactions/car/${S.car_id}`);
+          const txn = await res.json();
+          if (txn && txn.status) DFN.markSeen('seller', txn.status);
+        }
+      } catch(e) {}
+      DFN.showBadge('seller', false);
+    })();
+  }
+};
+
+// Patch dealerTab — clear badge when Deal Flow clicked
+const _origDealerTab = dealerTab;
+dealerTab = function(tab, el) {
+  _origDealerTab(tab, el);
+  if (tab === 'dealflow') {
+    (async () => {
+      try {
+        if (S.dealer_id) {
+          const res = await fetch(`${API}/transactions/dealer/${S.dealer_id}`);
+          const list = await res.json();
+          if (list && list.length) DFN.markSeen('dealer', list[0].status);
+        }
+      } catch(e) {}
+      DFN.showBadge('dealer', false);
+    })();
+  }
+};
+
+// Patch initSellerView — start polling after login
+const _origInitSellerView = initSellerView;
+initSellerView = function() {
+  _origInitSellerView();
+  setTimeout(() => DFN.startPolling('seller'), 2000);
+};
+
+// Patch initDealerView — start polling after login
+const _origInitDealerView = initDealerView;
+initDealerView = async function() {
+  await _origInitDealerView();
+  setTimeout(() => DFN.startPolling('dealer'), 2000);
+};
+
+// Patch loadDealFlow — mark seen immediately when page renders
+const _origLoadDealFlow = loadDealFlow;
+loadDealFlow = async function(role) {
+  await _origLoadDealFlow(role);
+  try {
+    if (role === 'seller' && S.car_id) {
+      const res = await fetch(`${API}/transactions/car/${S.car_id}`);
+      const txn = await res.json();
+      if (txn && txn.status) DFN.markSeen('seller', txn.status);
+    } else if (role === 'dealer' && S.dealer_id) {
+      const res = await fetch(`${API}/transactions/dealer/${S.dealer_id}`);
+      const list = await res.json();
+      if (list && list.length) DFN.markSeen('dealer', list[0].status);
+    }
+  } catch(e) {}
+  DFN.showBadge(role, false);
+};
 </script>
 </body>
 </html> 
