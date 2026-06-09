@@ -3361,7 +3361,7 @@ function signDealFlowSellerAck(txnId, bidAmount) {
 }
 
 const DEAL_STEPS = [
-  { key: 'awaiting_dealer_payment',    label: 'Dealer Pays $600',      icon: '💳' },
+  { key: 'awaiting_dealer_payment',    label: 'Dealer Pays $200',      icon: '💳' },
   { key: 'awaiting_bill_of_sale',      label: 'Bill of Sale',          icon: '📄' },
   { key: 'awaiting_pickup_schedule',   label: 'Schedule Pickup',       icon: '📅' },  
   { key: 'awaiting_slot_confirmation', label: 'Confirm Pickup Time',   icon: '✅' },
@@ -4115,11 +4115,11 @@ function openCameraDispute(txnId) {
       </button>
     </div>
 
-    <!-- STEP 3: NOTE + SUBMIT -->
-    <div id="cd-step-3" style="display:none;flex-direction:column;padding:24px 20px;flex:0;min-height:0;overflow:hidden;">
+<!-- STEP 3: NOTE + SUBMIT -->
+    <div id="cd-step-3" style="display:none;flex-direction:column;padding:24px 20px;flex:1;">
       <div style="margin-bottom:20px;">
-        <div style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;color:#1a1814;line-height:1.15;margin-bottom:6px;">Anything<br>else to add?</div>
-        <div style="font-size:14px;color:rgba(0,0,0,0.45);font-weight:300;">Optional — 2 sentences max</div>
+        <div style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;color:#1a1814;line-height:1.15;margin-bottom:6px;">Any additional<br>context or details?</div>
+        <div style="font-size:14px;color:rgba(0,0,0,0.45);font-weight:300;">Optional — Help us understand the issue. Include dates, specific details, or timeline.</div>
       </div>
       <textarea id="cd-note"
         placeholder="e.g. Transmission shudders at highway speed. Seller checked No Issues on mechanical."
@@ -4352,4 +4352,4 @@ async function cdSubmitDispute() {
 
 </script>
 </body>
-</html>
+</html> 
