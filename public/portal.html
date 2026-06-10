@@ -3357,6 +3357,7 @@ function signDealFlowDealerAck(txnId, bidAmount) {
   if (!sig)     { showToast('⚠️','Signature Required','Type your full legal name.'); return; }
   if (!checked) { showToast('⚠️','Required','Check the box to acknowledge.'); return; }
   S.dealerAckSigned = { party:'dealer', signature:sig, timestamp:new Date().toISOString(), seller_fee:SELLER_FEE, dealer_fee:DEALER_FEE, transaction_id:txnId, bid_amount:bidAmount };
+  localStorage.setItem('pb_dealer_ack_' + txnId, JSON.stringify(S.dealerAckSigned));
   fetch(`${API}/transactions/acknowledge`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(S.dealerAckSigned) }).catch(e=>console.warn(e));
   showToast('✅','Signed!','Acknowledgement recorded. You can now proceed to payment.');
   loadDealFlow('dealer');
@@ -3368,6 +3369,7 @@ function signDealFlowSellerAck(txnId, bidAmount) {
   if (!sig)     { showToast('⚠️','Signature Required','Type your full legal name.'); return; }
   if (!checked) { showToast('⚠️','Required','Check the box to acknowledge.'); return; }
   S.sellerAckSigned = { party:'seller', signature:sig, timestamp:new Date().toISOString(), seller_fee:SELLER_FEE, transaction_id:txnId, bid_amount:bidAmount, car_id:S.car_id };
+  localStorage.setItem('pb_seller_ack_' + txnId, JSON.stringify(S.sellerAckSigned));
   fetch(`${API}/transactions/acknowledge`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(S.sellerAckSigned) }).catch(e=>console.warn(e));
   showToast('✅','Signed!','Acknowledgement recorded.');
   loadDealFlow('seller');
@@ -3755,6 +3757,8 @@ if(S.car_id) {
         return;
       }
       S.currentTxn = txn;
+      const savedSellerAck = localStorage.getItem('pb_seller_ack_' + txn.transaction_id);
+      if (savedSellerAck && !S.sellerAckSigned) S.sellerAckSigned = JSON.parse(savedSellerAck);
       el.innerHTML = `<div class="card mb-16"><div class="card-header"><div class="card-title">${txn.year||''} ${txn.make||''} ${txn.model||''}</div><div style="font-size:13px;color:var(--g5)">Agreed price: <strong style="color:var(--accent)">$${parseFloat(txn.amount).toLocaleString()}</strong></div></div><div class="card-body">${dealFlowStepsHTML(txn.status)}<div id="seller-dealflow-action">${dealFlowActionHTML(txn,'seller')}</div></div></div>`;
   } else {
     el.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:40px"><div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#1a1814">No active deals</div><div class="text-muted">Deal progress will appear here once a bid is accepted.</div></div></div>';
@@ -3768,6 +3772,10 @@ if(S.car_id) {
         return;
       }
       S.currentTxn = list[0];
+      list.forEach(t => {
+        const savedDealerAck = localStorage.getItem('pb_dealer_ack_' + t.transaction_id);
+        if (savedDealerAck && !S.dealerAckSigned) S.dealerAckSigned = JSON.parse(savedDealerAck);
+      });
       S.allTxns = list;
       el.innerHTML = list.map(txn => `
         <div class="card mb-16" style="margin-bottom:20px;">
