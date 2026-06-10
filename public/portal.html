@@ -1628,7 +1628,6 @@ function togglePasswordVisibility() {
 }
   
 function initSellerView() {
-  sellerTab('auction', document.querySelector('#screen-seller .tab-btn[onclick*="auction"]'));
   loadSellerActiveAuction();
 }
 async function loadSellerActiveAuction() {
@@ -1660,6 +1659,7 @@ async function loadSellerActiveAuction() {
         <div class="text-muted mt-16 text-sm">Floor: <strong style="color:var(--accent)">$${(active.floor_price||0).toLocaleString()}</strong></div>`;
       startAuctionTimer();
       startSellerBidPoll();
+      sellerTab('auction', document.querySelector('#screen-seller .tab-btn[onclick*="auction"]'));
     } else if(accepted) {
       S.car_id = accepted.car_id;
       S.auctionData = accepted;
