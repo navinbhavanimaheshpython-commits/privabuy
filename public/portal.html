@@ -1636,14 +1636,22 @@ async function loadSellerActiveAuction() {
   try {
     const res = await fetch(`${API}/sellers/${S.seller_id}/listings`);
     const listings = await res.json();
-    const accepted = listings.find(l => l.status === 'accepted' || l.status === 'accepted_pending_settlement');
-    const active = !accepted && listings.find(l => l.status === 'open');
+    const active = listings.find(l => l.status === 'open');
+    const accepted = !active && listings.find(l => l.status === 'accepted' || l.status === 'accepted_pending_settlement');
 
     if(active) {
       S.car_id = active.car_id;
       S.auctionActive = true;
       S.auctionData = active;
       const rawTs = active.created_at;
+      if (rawTs) {
+        const normalized = rawTs.endsWith('Z') || rawTs.includes('+') ? rawTs : rawTs + 'Z';
+        S.auctionStartTime = new Date(normalized).getTime();
+        S.elapsedSeconds = Math.max(0, Math.floor((Date.now() - S.auctionStartTime) / 1000));
+      } else {
+        S.auctionStartTime = Date.now();
+        S.elapsedSeconds = 0;
+      }reated_at;
       const normalized = rawTs.endsWith('Z') || rawTs.includes('+') ? rawTs : rawTs + 'Z';
       S.auctionStartTime = new Date(normalized).getTime();
       S.elapsedSeconds = Math.max(0, Math.floor((Date.now() - S.auctionStartTime) / 1000));
@@ -3793,7 +3801,7 @@ async function ackBillOfSale(party, txnId) {
       body: JSON.stringify({transaction_id: txnId, party})
     });
     const data = await res.json();
-    showToast('✓','Signed!', data.both_acked ? 'Both parties signed. Moving to pickup scheduling.' : `Waiting for ${data.waiting_on} to sign.`);
+    showToast('✓','Signed!', data.both_acked ? 'Both parties signed. Moving to pickup scheduling.' : `Waiting for the ${data.waiting_on || 'other party'} to sign.`);
     loadDealFlow(party === 'dealer' ? 'dealer' : 'seller');
   } catch(e) { showToast('❌','Error','Could not submit.'); }
 }
