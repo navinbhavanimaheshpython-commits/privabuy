@@ -649,7 +649,7 @@ function ForSellers() {
     { value:"$2,400+", label:"avg. over private listing", color:"var(--accent)" },
     { value:"94%", label:"of listings receive 5 bids", color:"var(--accent2)" },
     { value:"< 1hr", label:"start to accepted offer", color:"var(--accent3)" },
-    { value:"Zero", label:"fees for sellers. Ever.", color:"var(--accent)" },
+    { value:"Minimal", label:"fees for sellers", color:"var(--accent)" },
   ];
   return (
     <section id="for-sellers" style={{ background:"#f5f3ef", padding:"7rem 1.5rem", overflow:"hidden" }}>
@@ -666,7 +666,7 @@ function ForSellers() {
               Facebook Marketplace and Craigslist mean one buyer, zero competition, and you absorbing all the lowball offers. PrivaBuy flips the dynamic — dealers fight for your car because they know these 6–8 year old vehicles carry serious profit margins.
             </p>
             <div style={{ display:"flex", flexDirection:"column", gap:"0.6rem" }}>
-              {["No fees, ever — dealers pay us","Instant VIN pull, no manual entry","Real offers from licensed dealers only","Pickup or drop-off arranged for you"].map(t => (
+              {["Minimal fees, dealers pay us","Instant VIN pull, no manual entry","Real offers from licensed dealers only","Pickup or drop-off arranged for you"].map(t => (
                 <div key={t} style={{ display:"flex", alignItems:"center", gap:"0.6rem", fontSize:"0.85rem", color:"rgba(26,24,20,0.88)" }}>
                   <span style={{ color:"var(--accent3)", fontSize:"0.75rem" }}>✦</span> {t}
                 </div>
@@ -811,7 +811,7 @@ function About() {
 /* ─── FAQ ───────────────────────────────────────────────────────────────── */
 const faqs = [
   { q:"What vehicles qualify?", a:"We focus on vehicles that are 6–8 years old with 70,000–130,000 miles. These are the highest-demand units for franchised dealers because they carry strong gross profit margins on pre-owned lots." },
-  { q:"Is there a fee for sellers?", a:"Zero. PrivaBuy is completely free for sellers. Dealers pay a transaction fee when they win an auction, so our incentives are aligned: we only make money when you get a great offer." },
+  { q:"Is there a fee for sellers?", a:"Just a small percentage of your sale price—typically less than 1% after you close a deal. It's minimal compared to traditional dealer markups, and dealers pay a fee too, so we're all invested in getting you top dollar." },
   { q:"What if no one bids on my car?", a:"It's rare — over 94% of listings receive the full 5 bids. If an auction closes without meeting your reserve, you keep the car with no obligation whatsoever." },
   { q:"How do dealers know my vehicle's condition?", a:"Before the auction opens, we surface your full VIN history report, any self-reported condition notes, and photos. Dealers can bid confidently; surprises at handoff are a policy violation." },
   { q:"Why only 5 dealers per auction?", a:"More isn't always better. Five geo-scoped dealers create competitive urgency without the chaotic noise of an open marketplace. Each dealer knows they're in a tight race — that's what pushes bids up." },
