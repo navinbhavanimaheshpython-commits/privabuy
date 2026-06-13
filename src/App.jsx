@@ -859,7 +859,7 @@ function Footer() {
             <div style={{ fontSize:"0.68rem", color:"rgba(26,24,20,0.48)", marginTop:"0.2rem" }}>Founded by automotive and tech entrepreneurs.</div>
           </div>
           <div style={{ display:"flex", gap:"1.5rem" }}>
-            {[["Privacy","#"],["Terms","#"],["About","#about"],["For Dealers","#for-dealers"],["Contact","mailto:support@privabuy.com"]].map(([l,h]) => (
+            {[["Privacy","#"],["Terms","#"],["About","#about"],["For Dealers","#for-dealers"],["Contact","mailto:navin@privabuy.com"]].map(([l,h]) => (
               <a key={l} href={h} style={{ fontSize:"0.75rem", color:"rgba(26,24,20,0.56)", textDecoration:"none", transition:"color 0.2s" }}
                 onMouseEnter={e=>e.target.style.color="rgba(26,24,20,0.80)"} onMouseLeave={e=>e.target.style.color="rgba(26,24,20,0.56)"}>
                 {l}
