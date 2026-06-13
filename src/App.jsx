@@ -228,6 +228,45 @@ const FontLink = () => (
   `}</style>
 );
 
+/* ─── META PIXEL + GOOGLE TAG ──────────────────────────────────────────── */
+const TrackingPixels = () => {
+  useEffect(() => {
+    if (!window.fbq) {
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+      document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      window.fbq('init', '1958235388393786');
+      window.fbq('track', 'PageView');
+    }
+    if (!window.gtag) {
+      const s1 = document.createElement('script');
+      s1.async = true;
+      s1.src = 'https://www.googletagmanager.com/gtag/js?id=AW-18160958792';
+      document.head.appendChild(s1);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(){ window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', 'AW-18160958792');
+    }
+  }, []);
+  return null;
+};
+
+function trackLead(type) {
+  if (typeof window.fbq !== 'undefined') {
+    window.fbq('track', 'Lead', { content_name: type });
+  }
+  if (typeof window.gtag !== 'undefined') {
+    window.gtag('event', 'conversion', {
+      'send_to': 'AW-18160958792/Lead',
+      'value': 1.0,
+      'currency': 'USD'
+    });
+  }
+}
+
 /* ─── SVG ICONS ─────────────────────────────────────────────────────────── */
 const iconStroke = { fill:"none", strokeLinecap:"round", strokeLinejoin:"round", strokeWidth:"1.6" };
 
@@ -348,7 +387,7 @@ function Navbar() {
         </div>
         {/* CTA */}
         <div style={{ flex:1, display:"flex", justifyContent:"flex-end" }}>
-          <button onClick={() => window.location.href='/portal?role=seller'} style={{ background:"#1a1814", color:"#f5f3ef", border:"none", borderRadius:"9999px", padding:"0.4rem 1.1rem", fontSize:"0.82rem", fontWeight:500, cursor:"pointer", display:"flex", alignItems:"center", gap:"0.3rem", fontFamily:"Barlow, sans-serif" }}>
+          <button onClick={() => { trackLead('seller_nav'); window.location.href='/portal?role=seller'; }} style={{ background:"#1a1814", color:"#f5f3ef", border:"none", borderRadius:"9999px", padding:"0.4rem 1.1rem", fontSize:"0.82rem", fontWeight:500, cursor:"pointer", display:"flex", alignItems:"center", gap:"0.3rem", fontFamily:"Barlow, sans-serif" }}>
             List Your Car <span style={{ fontSize:"0.85rem" }}>↗</span>
           </button>
         </div>
@@ -514,10 +553,10 @@ function Hero() {
         </p>
 
         <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"2.75rem" }}>
-          <button className="lg-strong" onClick={() => window.location.href='/portal?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
+          <button className="lg-strong" onClick={() => { trackLead('seller_hero'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
             List Your Car ↗
           </button>
-          <button className="lg" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
+          <button className="lg" onClick={() => { trackLead('dealer_hero'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
             I'm a Dealer →
           </button>
         </div>
@@ -707,7 +746,7 @@ function ForDealers() {
         </div>
 
         <div className="reveal" style={{ textAlign:"center", marginTop:"2.5rem" }}>
-          <button className="lg-strong" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.85rem 2rem", fontSize:"0.9rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500 }}>
+          <button className="lg-strong" onClick={() => { trackLead('dealer_apply'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.85rem 2rem", fontSize:"0.9rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500 }}>
             Apply for Dealer Access ↗
           </button>
         </div>
@@ -829,10 +868,10 @@ function CTA() {
             List in 3 minutes. Watch dealers compete. Walk away with more than you expected.
           </p>
           <div style={{ display:"flex", gap:"0.75rem", justifyContent:"center", flexWrap:"wrap" }}>
-            <button className="lg-strong" onClick={() => window.location.href='/portal?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"0.95rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500, display:"flex", alignItems:"center", gap:"0.4rem" }}>
+            <button className="lg-strong" onClick={() => { trackLead('seller_cta'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"0.95rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500, display:"flex", alignItems:"center", gap:"0.4rem" }}>
               List My Car Free ↗
             </button>
-            <button className="lg" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"0.95rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:300, background:"rgba(255,255,255,0.4)" }}>
+            <button className="lg" onClick={() => { trackLead('dealer_cta'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"0.95rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:300, background:"rgba(255,255,255,0.4)" }}>
               Dealer Access →
             </button>
           </div>
@@ -878,6 +917,7 @@ export default function App() {
   return (
     <>
       <FontLink />
+      <TrackingPixels />
       <div className="grain" />
       <Navbar />
       <Hero />
