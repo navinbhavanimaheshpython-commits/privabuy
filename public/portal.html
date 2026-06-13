@@ -3458,7 +3458,7 @@ function dealFlowActionHTML(txn, role) {
     ${hasAccident ? `
     <div style="background:rgba(194,124,42,0.08);border:1px solid rgba(194,124,42,0.25);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:4px;">⚠️ Accident Disclosed</div>
-      <div style="font-size:13px;color:#1a1814;line-height:1.6;">You may take the vehicle to a shop for a thorough inspection. <strong>You must return the vehicle and pay the seller the same day</strong> if you decide to keep it. If the inspection reveals undisclosed issues, you may void the sale — return the car with no payment and your $600 fee is refunded.</div>
+      <div style="font-size:13px;color:#1a1814;line-height:1.6;">You may take the vehicle to a shop for a thorough inspection. <strong>You must return the vehicle and pay the seller the same day</strong> if you decide to keep it. If the inspection reveals undisclosed issues, you may void the sale — return the car with no payment and your deal is terminated.</div>
     </div>` : `
     <div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.20);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:700;color:var(--accent3);margin-bottom:4px;">✓ No Accident Disclosed</div>
@@ -3523,7 +3523,7 @@ function dealFlowActionHTML(txn, role) {
       ${hasAccident ? `
       <div style="background:rgba(194,124,42,0.12);border:2px solid rgba(194,124,42,0.45);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><span style="font-size:24px;">⚠️</span><div style="font-size:16px;font-weight:700;color:var(--accent2);">Accident Disclosed — Read Before Pickup</div></div>
-        <div style="font-size:14px;color:#1a1814;line-height:1.7;">This vehicle has a disclosed accident history. You may take it to a shop for a thorough inspection before completing the purchase. <strong>If you decide to keep it, you must return the vehicle and pay the seller the same day.</strong> If the inspection reveals anything undisclosed, you may void the sale — return the car with no payment and your $600 fee is refunded.</div>
+        <div style="font-size:14px;color:#1a1814;line-height:1.7;">This vehicle has a disclosed accident history. You may take it to a shop for a thorough inspection before completing the purchase. <strong>If you decide to keep it, you must return the vehicle and pay the seller the same day.</strong> If the inspection reveals anything undisclosed, you may void the sale — return the car with no payment and your deal is terminated.</div>
       </div>` : ''}
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;">After Pickup</div>
