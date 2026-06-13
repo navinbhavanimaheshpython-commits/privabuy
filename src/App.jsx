@@ -435,7 +435,7 @@ function AuctionDemo() {
     <div className="lg" style={{ borderRadius:"1.75rem", padding:"2.25rem", width:"100%", border:"1px solid rgba(26,24,20,0.08)" }}>
       <div style={{ display:"flex", gap:"1rem", marginBottom:"1.25rem", alignItems:"center" }}>
         <div style={{ width:56, height:56, borderRadius:"0.875rem", overflow:"hidden", border:"1px solid rgba(26,24,20,0.10)", flexShrink:0 }}>
-          <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=120&q=80" alt="2019 Honda Accord" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+          <img src="https://images.unsplash.com/photo-1617531653332-bd46c16f4d68?w=120&q=80" alt="2019 Honda Accord" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
         </div>
         <div>
           <div style={{ fontWeight:500, fontSize:"1.1rem", letterSpacing:"-0.01em", color:"#1a1814" }}>2019 Honda Accord EX</div>
