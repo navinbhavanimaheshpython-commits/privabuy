@@ -545,7 +545,7 @@ function Hero() {
         <h1 className="serif-italic fade-up-2" style={{ fontSize:"clamp(3.5rem, 7.5vw, 8rem)", lineHeight:0.9, letterSpacing:"-0.04em", margin:"0 0 1.75rem", fontWeight:400, color:"#1a1814", maxWidth:"18ch" }}>
           The <span style={{ color:"var(--accent)" }}>highest offer</span><br />
           your car will ever get.<br />
-          Done in <span style={{ fontFamily: "Georgia, serif", fontStyle: "italic" }}>15</span> minutes.
+          Done in minutes.
         </h1>
 
         <p className="fade-up-3" style={{ color:"#1a1814", fontSize:"clamp(0.95rem, 1.1vw, 1.1rem)", lineHeight:1.65, maxWidth:"52ch", margin:"0 0 2.25rem", fontWeight:400 }}>
