@@ -1155,7 +1155,7 @@ body::before {
 
     <div id="dealer-tab-payment" class="hidden">
       <div class="flex-between mb-24">
-        <div><div class="section-title">Outstanding Platform Fees</div><div class="section-sub" style="margin-bottom:0">$600 per vehicle won</div></div>
+        <div><div class="section-title">Outstanding Platform Fees</div><div class="section-sub" style="margin-bottom:0">$0 per vehicle won fro your first 5 wins</div></div>
         <div class="badge badge-live" style="font-size:13px;padding:8px 16px"> Secure Checkout</div>
       </div>
       <div id="dealer-pending-fees-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px"></div>
@@ -2480,7 +2480,8 @@ function showRealDealerStatus(amount, isWon) {
         <div style="font-size:13px;color:var(--g5)">Winning bid: <strong style="color:#1a1814">$${amount.toLocaleString()}</strong></div>
       </div>
       <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:14px;text-align:center">
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#1a1814">$600 platform fee added to your Pay Fee tab</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#1a1814">You won! Proceed to Bill of Sale in the Deal Flow tab.
+No dealer fee — check the Deal Flow tab to continue.</div>
         <div style="font-size:12px;color:var(--g5)">Seller contact will be unlocked after payment.</div>
       </div>`;
   } else {
@@ -3184,7 +3185,7 @@ if(dealerModal && dealerModal.parentElement !== document.body) {
 //  DEAL FLOW
 // ─────────────────────────────────────────────
 const SELLER_FEE = 200;
-const DEALER_FEE = 200;
+const DEALER_FEE = 0;
  
 function dealFlowAckSection(txn, role) {
   const bid   = parseFloat(txn.amount);
@@ -3238,7 +3239,7 @@ function dealFlowAckSection(txn, role) {
             </div>
           </div>
           <div style="padding:10px 14px;border-top:1px solid rgba(0,0,0,0.08);background:#f8f8f8;">
-            <div style="font-size:11px;color:var(--g5);">Dealer fee: <strong style="color:#1a1814;">$${DEALER_FEE}</strong> — invoiced bi-monthly per deal won</div>
+            <div style="font-size:11px;color:var(--g5);">Dealer fee: <strong style="color:#1a1814;">$${DEALER_FEE}</strong> — no dealer fees for your first 5 wins</div>
           </div>
         </div>
  
@@ -3376,7 +3377,7 @@ function signDealFlowSellerAck(txnId, bidAmount) {
 }
 
 const DEAL_STEPS = [
-  { key: 'awaiting_dealer_payment',    label: 'Dealer Pays $200',      icon: '💳' },
+  { key: 'awaiting_dealer_payment',    label: 'Confirm Win',      icon: '💳' },
   { key: 'awaiting_bill_of_sale',      label: 'Bill of Sale',          icon: '📄' },
   { key: 'awaiting_pickup_schedule',   label: 'Schedule Pickup',       icon: '📅' },  
   { key: 'awaiting_slot_confirmation', label: 'Confirm Pickup Time',   icon: '✅' },
@@ -3475,9 +3476,9 @@ function dealFlowActionHTML(txn, role) {
     }
  
     if (status === 'awaiting_dealer_payment') return ack + `
-      <div class="alert alert-warning" style="margin-bottom:16px;">⏰ You have until <strong>${deadline}</strong> to pay the $200 platform fee or this bid will be forfeited.</div>
+      <div class="alert alert-warning" style="margin-bottom:16px;">⏰ You have until <strong>${deadline}</strong> to confirm your auction win and pay the $0 platform fee or this bid will be forfeited.</div>
       <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
-        <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#1a1814">Platform Fee — $200.00</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#1a1814">Platform Fee — $0.00</div>
         <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
           <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#16a34a;margin-bottom:4px;">🛡️ Buyer Protection Guarantee</div>
           <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your <strong>$600 platform fee will be fully refunded</strong>.</div>

@@ -663,7 +663,7 @@ function ForSellers() {
               Stop leaving<br />money on<br />the table.
             </h2>
             <p style={{ color:"rgba(26,24,20,0.84)", fontSize:"1rem", lineHeight:1.65, maxWidth:420, marginBottom:"1.75rem" }}>
-              Facebook Marketplace and Craigslist mean one buyer, zero competition, and you absorbing all the lowball offers. PrivaBuy flips the dynamic — dealers fight for your car because they know these 6–8 year old vehicles carry serious profit margins.
+              Facebook Marketplace and Craigslist mean one buyer, zero competition, and you absorbing all the lowball offers. PrivaBuy flips the dynamic — dealers fight for your car because they know these six to eight year old vehicles carry serious profit margins.
             </p>
             <div style={{ display:"flex", flexDirection:"column", gap:"0.6rem" }}>
               {["Minimal fees, dealers pay us","Instant VIN pull, no manual entry","Real offers from licensed dealers only","Pickup or drop-off arranged for you"].map(t => (
