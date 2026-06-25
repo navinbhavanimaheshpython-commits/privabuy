@@ -3217,7 +3217,9 @@ function dealFlowAckSection(txn, role) {
   const net   = bid - SELLER_FEE;
  
   if (role === 'dealer') {
-    const acked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
+    const savedAck = localStorage.getItem('pb_dealer_ack_' + txnId);
+    if (savedAck && !S.dealerAckSigned) S.dealerAckSigned = JSON.parse(savedAck);
+    const acked = (S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId) || !!savedAck;
  
     if (acked) {
       const dt = new Date(S.dealerAckSigned.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
