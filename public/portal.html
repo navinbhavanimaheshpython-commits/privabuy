@@ -3471,7 +3471,9 @@ function dealFlowActionHTML(txn, role) {
   
  
   const ack = dealFlowAckSection(txn, role);
-  const dealerAcked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
+  const savedAck = localStorage.getItem('pb_dealer_ack_' + txnId);
+  const dealerAcked = (S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId) || !!savedAck;
+  if (savedAck && !S.dealerAckSigned) S.dealerAckSigned = JSON.parse(savedAck);
  
   if (role === 'dealer') {
  
