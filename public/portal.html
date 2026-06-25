@@ -3385,7 +3385,7 @@ function signDealFlowDealerAck(txnId, bidAmount) {
   localStorage.setItem('pb_dealer_ack_' + txnId, JSON.stringify(S.dealerAckSigned));
   fetch(`${API}/transactions/acknowledge`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(S.dealerAckSigned) }).catch(e=>console.warn(e));
   showToast('✅','Signed!','Acknowledgement recorded. You can now proceed to payment.');
-  loadDealFlow('dealer');
+  setTimeout(() => loadDealFlow('dealer'), 300);
 }
  
 function signDealFlowSellerAck(txnId, bidAmount) {
@@ -3506,7 +3506,7 @@ function dealFlowActionHTML(txn, role) {
         ${_dealerFeeExempt ? `<div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.22);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--accent3);line-height:1.6;">🎉 <strong>Free win!</strong> You have <strong>${_dealerWinsRemaining} free win${_dealerWinsRemaining !== 1 ? 's' : ''} remaining</strong>. After your first ${DEALER_FREE_WIN_THRESHOLD} wins, a flat $${DEALER_FEE_FULL.toLocaleString()} fee applies.</div>` : `<div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--g5);line-height:1.6;">Flat $${DEALER_FEE_FULL.toLocaleString()} per completed transaction — no subscriptions, no surprises.</div>`}
         <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
           <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#16a34a;margin-bottom:4px;">🛡️ Buyer Protection Guarantee</div>
-          <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your <strong>$600 platform fee will be fully refunded</strong>.</div>
+          <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your platform fee will be fully refunded.</div>
           <div style="font-size:12px;color:#888;margin-top:8px;"><strong>No accident disclosed:</strong> Inspect at pickup, pay seller on the spot. <strong>Accident disclosed:</strong> You may take the vehicle to a shop — must return it and pay seller same day if keeping it.</div>
         </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">One-time fee to complete this auction win.</div>
