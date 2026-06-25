@@ -3184,8 +3184,33 @@ if(dealerModal && dealerModal.parentElement !== document.body) {
 // ─────────────────────────────────────────────
 //  DEAL FLOW
 // ─────────────────────────────────────────────
-const SELLER_FEE = 200;
-const DEALER_FEE = 0;
+const SELLER_FEE = 250;
+const DEALER_FEE_FULL = 600; // ← set your real fee here
+const DEALER_FREE_WIN_THRESHOLD = 5;
+
+// Resolved per-dealer at runtime
+async function getDealerFee(dealerId) {
+  if (!dealerId) return { fee: 0, isExempt: true, winsRemaining: DEALER_FREE_WIN_THRESHOLD };
+  try {
+    const res = await fetch(`${API}/dealers/${dealerId}/win-count`);
+    const data = await res.json();
+    const wins = data.completed_wins ?? 0;
+    const isExempt = wins < DEALER_FREE_WIN_THRESHOLD;
+    return {
+      fee: isExempt ? 0 : DEALER_FEE_FULL,
+      isExempt,
+      winsRemaining: Math.max(0, DEALER_FREE_WIN_THRESHOLD - wins),
+      completedWins: wins,
+    };
+  } catch (e) {
+    return { fee: 0, isExempt: true, winsRemaining: DEALER_FREE_WIN_THRESHOLD };
+  }
+}
+
+// Synchronous fallback used in rendering — set by loadDealFlow before rendering
+let DEALER_FEE = 0;
+let _dealerFeeExempt = true;
+let _dealerWinsRemaining = DEALER_FREE_WIN_THRESHOLD;
  
 function dealFlowAckSection(txn, role) {
   const bid   = parseFloat(txn.amount);
@@ -3239,7 +3264,7 @@ function dealFlowAckSection(txn, role) {
             </div>
           </div>
           <div style="padding:10px 14px;border-top:1px solid rgba(0,0,0,0.08);background:#f8f8f8;">
-            <div style="font-size:11px;color:var(--g5);">Dealer fee: <strong style="color:#1a1814;">$${DEALER_FEE}</strong> — no dealer fees for your first 5 wins</div>
+            <div style="font-size:11px;color:var(--g5);">Dealer fee: <strong style="color:#1a1814;">$${DEALER_FEE}</strong> — ${_dealerFeeExempt ? `🎉 <strong style="color:#1a1814;">${_dealerWinsRemaining} free win${_dealerWinsRemaining !== 1 ? 's' : ''} remaining</strong>` : `flat per-transaction · no subscriptions`}</div>
           </div>
         </div>
  
@@ -3478,7 +3503,8 @@ function dealFlowActionHTML(txn, role) {
     if (status === 'awaiting_dealer_payment') return ack + `
       <div class="alert alert-warning" style="margin-bottom:16px;">⏰ You have until <strong>${deadline}</strong> to confirm your auction win and pay the $0 platform fee or this bid will be forfeited.</div>
       <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
-        <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#1a1814">Platform Fee — $0.00</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#1a1814">Platform Fee — ${_dealerFeeExempt ? '$0.00 🎉' : `$${DEALER_FEE_FULL.toLocaleString()}`}</div>
+        ${_dealerFeeExempt ? `<div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.22);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--accent3);line-height:1.6;">🎉 <strong>Free win!</strong> You have <strong>${_dealerWinsRemaining} free win${_dealerWinsRemaining !== 1 ? 's' : ''} remaining</strong>. After your first ${DEALER_FREE_WIN_THRESHOLD} wins, a flat $${DEALER_FEE_FULL.toLocaleString()} fee applies.</div>` : `<div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--g5);line-height:1.6;">Flat $${DEALER_FEE_FULL.toLocaleString()} per completed transaction — no subscriptions, no surprises.</div>`}
         <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
           <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#16a34a;margin-bottom:4px;">🛡️ Buyer Protection Guarantee</div>
           <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your <strong>$600 platform fee will be fully refunded</strong>.</div>
@@ -3767,6 +3793,10 @@ if(S.car_id) {
     el.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:40px"><div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#1a1814">No active deals</div><div class="text-muted">Deal progress will appear here once a bid is accepted.</div></div></div>';
   }
     } else if(role === 'dealer' && S.dealer_id) {
+      const feeData = await getDealerFee(S.dealer_id);
+      DEALER_FEE = feeData.fee;
+      _dealerFeeExempt = feeData.isExempt;
+      _dealerWinsRemaining = feeData.winsRemaining;
       const res = await fetch(`${API}/transactions/dealer/${S.dealer_id}`);
       if(!res.ok) throw new Error();
       const list = await res.json();
