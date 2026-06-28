@@ -434,7 +434,7 @@ body::before {
 <div id="screen-login" class="screen active">
   <div class="login-card">
     <div class="login-logo">Priva<span>Buy</span> <span style="font-size:14px;color:var(--g4);font-family:var(--sans);font-weight:400"></span></div>
-    <div class="login-tagline">****STAGING****The auction platform for serious vehicle inventory.</div>
+    <div class="login-tagline">The auction platform for serious vehicle inventory.</div>
     <div class="role-select">
       <div class="role-btn " data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">&#x1F464;</div><div class="role-name">Seller</div></div>
       <div class="role-btn" data-role="dealer" onclick="selectRole('dealer',this)"><div class="role-icon">&#x1F3E2;</div><div class="role-name">Dealer</div></div>
@@ -1155,7 +1155,7 @@ body::before {
 
     <div id="dealer-tab-payment" class="hidden">
       <div class="flex-between mb-24">
-        <div><div class="section-title">Outstanding Platform Fees</div><div class="section-sub" style="margin-bottom:0">$600 per vehicle won</div></div>
+        <div><div class="section-title">Outstanding Platform Fees</div><div class="section-sub" style="margin-bottom:0">$0 per vehicle won fro your first 5 wins</div></div>
         <div class="badge badge-live" style="font-size:13px;padding:8px 16px"> Secure Checkout</div>
       </div>
       <div id="dealer-pending-fees-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px"></div>
@@ -1390,7 +1390,7 @@ body::before {
 // ─────────────────────────────────────────────
 //  ALL JAVASCRIPT BELOW IS UNTOUCHED FROM ORIGINAL
 // ─────────────────────────────────────────────
-const API = 'https://web-production-534ed.up.railway.app';
+const API = 'https://privabuy-backend-production.up.railway.app';
 const STRIPE_PK = 'pk_live_51TNGzOPooe955nktS3X9HMO4xUU0gceM0XajI0KUEuYamGs6MY2QWLn0eiPb2HzOJO9OKdAUmIMcnN1UNuQPFqgb00fyoZL3LC';
 const stripeClient = Stripe(STRIPE_PK);
 const S = {
@@ -2480,7 +2480,8 @@ function showRealDealerStatus(amount, isWon) {
         <div style="font-size:13px;color:var(--g5)">Winning bid: <strong style="color:#1a1814">$${amount.toLocaleString()}</strong></div>
       </div>
       <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:14px;text-align:center">
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#1a1814">$600 platform fee added to your Pay Fee tab</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#1a1814">You won! Proceed to Bill of Sale in the Deal Flow tab.
+No dealer fee — check the Deal Flow tab to continue.</div>
         <div style="font-size:12px;color:var(--g5)">Seller contact will be unlocked after payment.</div>
       </div>`;
   } else {
@@ -3183,8 +3184,8 @@ if(dealerModal && dealerModal.parentElement !== document.body) {
 // ─────────────────────────────────────────────
 //  DEAL FLOW
 // ─────────────────────────────────────────────
-const SELLER_FEE = 200;
-const DEALER_FEE_FULL = 300; // ← set your real fee here
+const SELLER_FEE = 250;
+const DEALER_FEE_FULL = 600; // ← set your real fee here
 const DEALER_FREE_WIN_THRESHOLD = 5;
 
 // Resolved per-dealer at runtime
@@ -3217,9 +3218,7 @@ function dealFlowAckSection(txn, role) {
   const net   = bid - SELLER_FEE;
  
   if (role === 'dealer') {
-    const savedAck = localStorage.getItem('pb_dealer_ack_' + txnId);
-    if (savedAck && !S.dealerAckSigned) S.dealerAckSigned = JSON.parse(savedAck);
-    const acked = (S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId) || !!savedAck;
+    const acked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
  
     if (acked) {
       const dt = new Date(S.dealerAckSigned.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
@@ -3265,7 +3264,7 @@ function dealFlowAckSection(txn, role) {
             </div>
           </div>
           <div style="padding:10px 14px;border-top:1px solid rgba(0,0,0,0.08);background:#f8f8f8;">
-<div style="font-size:11px;color:var(--g5);">Dealer fee: <strong style="color:#1a1814;">$${DEALER_FEE}</strong> — ${_dealerFeeExempt ? `🎉 <strong style="color:#1a1814;">${_dealerWinsRemaining} free win${_dealerWinsRemaining !== 1 ? 's' : ''} remaining</strong>` : `flat per-transaction · no subscriptions`}</div>
+            <div style="font-size:11px;color:var(--g5);">Dealer fee: <strong style="color:#1a1814;">$${DEALER_FEE}</strong> — ${_dealerFeeExempt ? `🎉 <strong style="color:#1a1814;">${_dealerWinsRemaining} free win${_dealerWinsRemaining !== 1 ? 's' : ''} remaining</strong>` : `flat per-transaction · no subscriptions`}</div>
           </div>
         </div>
  
@@ -3387,7 +3386,7 @@ function signDealFlowDealerAck(txnId, bidAmount) {
   localStorage.setItem('pb_dealer_ack_' + txnId, JSON.stringify(S.dealerAckSigned));
   fetch(`${API}/transactions/acknowledge`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(S.dealerAckSigned) }).catch(e=>console.warn(e));
   showToast('✅','Signed!','Acknowledgement recorded. You can now proceed to payment.');
-  setTimeout(() => loadDealFlow('dealer'), 300);
+  loadDealFlow('dealer');
 }
  
 function signDealFlowSellerAck(txnId, bidAmount) {
@@ -3403,7 +3402,7 @@ function signDealFlowSellerAck(txnId, bidAmount) {
 }
 
 const DEAL_STEPS = [
-  { key: 'awaiting_dealer_payment',    label: 'Dealer Pays $200',      icon: '💳' },
+  { key: 'awaiting_dealer_payment',    label: 'Confirm Win',      icon: '💳' },
   { key: 'awaiting_bill_of_sale',      label: 'Bill of Sale',          icon: '📄' },
   { key: 'awaiting_pickup_schedule',   label: 'Schedule Pickup',       icon: '📅' },  
   { key: 'awaiting_slot_confirmation', label: 'Confirm Pickup Time',   icon: '✅' },
@@ -3473,9 +3472,7 @@ function dealFlowActionHTML(txn, role) {
   
  
   const ack = dealFlowAckSection(txn, role);
-  const savedAck = localStorage.getItem('pb_dealer_ack_' + txnId);
-  const dealerAcked = (S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId) || !!savedAck;
-  if (savedAck && !S.dealerAckSigned) S.dealerAckSigned = JSON.parse(savedAck);
+  const dealerAcked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
  
   if (role === 'dealer') {
  
@@ -3504,13 +3501,13 @@ function dealFlowActionHTML(txn, role) {
     }
  
     if (status === 'awaiting_dealer_payment') return ack + `
-      <div class="alert alert-warning" style="margin-bottom:16px;">⏰ You have until <strong>${deadline}</strong> to pay the $200 platform fee or this bid will be forfeited.</div>
+      <div class="alert alert-warning" style="margin-bottom:16px;">⏰ You have until <strong>${deadline}</strong> to confirm your auction win and pay the $0 platform fee or this bid will be forfeited.</div>
       <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#1a1814">Platform Fee — ${_dealerFeeExempt ? '$0.00 🎉' : `$${DEALER_FEE_FULL.toLocaleString()}`}</div>
         ${_dealerFeeExempt ? `<div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.22);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--accent3);line-height:1.6;">🎉 <strong>Free win!</strong> You have <strong>${_dealerWinsRemaining} free win${_dealerWinsRemaining !== 1 ? 's' : ''} remaining</strong>. After your first ${DEALER_FREE_WIN_THRESHOLD} wins, a flat $${DEALER_FEE_FULL.toLocaleString()} fee applies.</div>` : `<div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--g5);line-height:1.6;">Flat $${DEALER_FEE_FULL.toLocaleString()} per completed transaction — no subscriptions, no surprises.</div>`}
         <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
           <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#16a34a;margin-bottom:4px;">🛡️ Buyer Protection Guarantee</div>
-          <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your platform fee will be fully refunded.</div>
+          <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your <strong>$600 platform fee will be fully refunded</strong>.</div>
           <div style="font-size:12px;color:#888;margin-top:8px;"><strong>No accident disclosed:</strong> Inspect at pickup, pay seller on the spot. <strong>Accident disclosed:</strong> You may take the vehicle to a shop — must return it and pay seller same day if keeping it.</div>
         </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">One-time fee to complete this auction win.</div>
