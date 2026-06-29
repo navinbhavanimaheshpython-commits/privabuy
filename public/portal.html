@@ -1170,9 +1170,9 @@ body::before {
               <div style="height:1px;background:rgba(0,0,0,0.07);margin:20px 0"></div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:var(--r);margin-bottom:20px">
                 <span style="font-size:15px;font-weight:600;color:#1a1814">Total Due</span>
-                <span style="font-size:22px;font-weight:700;color:var(--accent)">$600.00</span>
+                <span style="font-size:22px;font-weight:700;color:var(--accent)">$450.00</span>
               </div>
-              <button class="btn btn-primary btn-full btn-lg" id="dealer-pay-btn" onclick="processDealerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $600.00 →</button>
+              <button class="btn btn-primary btn-full btn-lg" id="dealer-pay-btn" onclick="processDealerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $450.00 →</button>
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:16px">
@@ -3011,11 +3011,11 @@ function renderDealerFeeList() {
       <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
         <div style="display:flex;align-items:center;gap:14px;flex:1">
           <div style="width:44px;height:44px;border-radius:10px;background:rgba(124,92,191,0.08);border:1px solid rgba(124,92,191,0.18);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🚗</div>
-          <div><div style="font-size:14px;font-weight:600;margin-bottom:3px;color:#1a1814">${f.vehicle}</div><div style="font-size:12px;color:var(--g5)">Winning bid: <strong style="color:var(--accent)">$${f.winPrice.toLocaleString()}</strong> · Fee: <strong style="color:#1a1814">$600</strong></div></div>
+          <div><div style="font-size:14px;font-weight:600;margin-bottom:3px;color:#1a1814">${f.vehicle}</div><div style="font-size:12px;color:var(--g5)">Winning bid: <strong style="color:var(--accent)">$${f.winPrice.toLocaleString()}</strong> · Fee: <strong style="color:#1a1814">$450</strong></div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
           <span style="font-size:11px;color:var(--accent2);background:rgba(194,124,42,0.08);border:1px solid rgba(194,124,42,0.18);padding:3px 10px;border-radius:50px">Fee Due</span>
-          <button onclick="selectDealerFee('${f.id}')" style="padding:9px 18px;background:var(--accent);color:#ffffff;border:1px solid var(--accent);border-radius:50px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Pay $600 →</button>
+          <button onclick="selectDealerFee('${f.id}')" style="padding:9px 18px;background:var(--accent);color:#ffffff;border:1px solid var(--accent);border-radius:50px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Pay $450 →</button>
         </div>
       </div>
     </div>`).join('');
@@ -3028,7 +3028,7 @@ function selectDealerFee(id) {
   document.getElementById('fee-summary-vehicle').textContent=fee.vehicle;
   document.getElementById('fee-summary-price').textContent='$'+fee.winPrice.toLocaleString();
   const btn=document.getElementById('dealer-pay-btn');
-  if(btn){btn.textContent='Pay $600.00 →';btn.disabled=false;btn.style.cssText='';}
+  if(btn){btn.textContent='Pay $450.00 →';btn.disabled=false;btn.style.cssText='';}
   renderDealerFeeList();
   document.getElementById('dealer-payment-form-wrap').scrollIntoView({behavior:'smooth',block:'start'});
   setTimeout(() => mountDealerStripeCard(), 100);
@@ -3070,7 +3070,7 @@ async function processDealerPayment() {
       }
     }
     updateDealerFeeTab();
-    showToast('✓','Payment Complete','$600 paid. Seller contact unlocked.');
+    showToast('✓','Payment Complete','$450 paid. Seller contact unlocked.');
     // Advance transaction status to awaiting_bill_of_sale
     const txnIdToPay = fee?.transaction_id || S.currentTxn?.transaction_id;
     if(txnIdToPay) {
@@ -3078,7 +3078,7 @@ async function processDealerPayment() {
     }
     document.getElementById('dealer-dealflow-tab').style.display = '';
   } catch(err) {
-    btn.textContent = 'Pay $600.00 →';
+    btn.textContent = 'Pay $450.00 →';
     btn.disabled = false;
     showToast('❌','Payment Failed', err.message);
     console.error(err);
@@ -3184,8 +3184,8 @@ if(dealerModal && dealerModal.parentElement !== document.body) {
 // ─────────────────────────────────────────────
 //  DEAL FLOW
 // ─────────────────────────────────────────────
-const SELLER_FEE = 250;
-const DEALER_FEE_FULL = 600; // ← set your real fee here
+const SELLER_FEE = 350;
+const DEALER_FEE_FULL = 450; // ← set your real fee here
 const DEALER_FREE_WIN_THRESHOLD = 5;
 
 // Resolved per-dealer at runtime
@@ -3453,7 +3453,7 @@ function dealFlowActionHTML(txn, role) {
     return `<div class="alert alert-success">🎉 Deal complete! Thank you for using PrivaBuy.</div>`;
   if (status === 'dispute_resolved_refund') {
     if (role === 'dealer')
-      return `<div class="alert alert-success">✓ PrivaBuy approved your dispute. Your $600 platform fee has been refunded. The sale has been voided — no payment to the seller is required.</div>`;
+      return `<div class="alert alert-success">✓ PrivaBuy approved your dispute. Your $450 platform fee has been refunded. The sale has been voided — no payment to the seller is required.</div>`;
     if (role === 'seller')
       return `<div class="alert alert-warning">⚠️ PrivaBuy reviewed the dealer's dispute and ruled in their favor. The sale has been voided. The dealer will return the vehicle to you. No payment will be made.</div>`;
   }
@@ -3488,7 +3488,7 @@ function dealFlowActionHTML(txn, role) {
     </div>` : `
     <div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.20);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:700;color:var(--accent3);margin-bottom:4px;">✓ No Accident Disclosed</div>
-      <div style="font-size:13px;color:#1a1814;line-height:1.6;">Inspect the vehicle at pickup. If everything matches the listing, pay the seller on the spot. If you need a more thorough inspection, you may take it to a shop — <strong>must return and pay seller same day</strong>. If anything was misrepresented, void the sale and return the car for a full $600 refund.</div>
+      <div style="font-size:13px;color:#1a1814;line-height:1.6;">Inspect the vehicle at pickup. If everything matches the listing, pay the seller on the spot. If you need a more thorough inspection, you may take it to a shop — <strong>must return and pay seller same day</strong>. If anything was misrepresented, void the sale and return the car for a full $450 refund.</div>
     </div>`}
     <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
       <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">Seller nets from this sale</div>
@@ -3507,7 +3507,7 @@ function dealFlowActionHTML(txn, role) {
         ${_dealerFeeExempt ? `<div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.22);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--accent3);line-height:1.6;">🎉 <strong>Free win!</strong> You have <strong>${_dealerWinsRemaining} free win${_dealerWinsRemaining !== 1 ? 's' : ''} remaining</strong>. After your first ${DEALER_FREE_WIN_THRESHOLD} wins, a flat $${DEALER_FEE_FULL.toLocaleString()} fee applies.</div>` : `<div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--g5);line-height:1.6;">Flat $${DEALER_FEE_FULL.toLocaleString()} per completed transaction — no subscriptions, no surprises.</div>`}
         <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
           <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#16a34a;margin-bottom:4px;">🛡️ Buyer Protection Guarantee</div>
-          <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your <strong>$600 platform fee will be fully refunded</strong>.</div>
+          <div style="font-size:13px;color:#333;line-height:1.6;">If any information the seller disclosed is false or omitted — undisclosed mechanical issues, accident history, mileage inconsistency, or any factor reducing the vehicle's value below what you paid — <strong>you may void the sale and return the vehicle</strong>. Your <strong>$450 platform fee will be fully refunded</strong>.</div>
           <div style="font-size:12px;color:#888;margin-top:8px;"><strong>No accident disclosed:</strong> Inspect at pickup, pay seller on the spot. <strong>Accident disclosed:</strong> You may take the vehicle to a shop — must return it and pay seller same day if keeping it.</div>
         </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">One-time fee to complete this auction win.</div>
@@ -3976,7 +3976,7 @@ async function submitDispute() {
       })
     });
     closeModal('dispute-modal');
-    showToast('⚠️','Dispute Submitted','PrivaBuy support will review within 24 hours. Your $600 refund eligibility will be determined after review.');
+    showToast('⚠️','Dispute Submitted','PrivaBuy support will review within 24 hours. Your $450 refund eligibility will be determined after review.');
     loadDealFlow('dealer');
   } catch(e) { showToast('❌','Error','Could not submit dispute.'); }
 }
@@ -3994,7 +3994,7 @@ async function loadAdminFlags() {
           <div class="flex-between mb-16">
             <div>
               <div style="font-size:15px;font-weight:600;color:#1a1814">${d.year||''} ${d.make||''} ${d.model||''}</div>
-              <div style="font-size:12px;color:var(--g5);margin-top:4px;">Win price: $${parseFloat(d.amount).toLocaleString()} · Dealer fee: $600</div>
+              <div style="font-size:12px;color:var(--g5);margin-top:4px;">Win price: $${parseFloat(d.amount).toLocaleString()} · Dealer fee: $450</div>
             </div>
             <span class="badge badge-pending">Dispute Flagged</span>
           </div>
@@ -4015,10 +4015,10 @@ async function loadAdminFlags() {
             <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--g5);margin-bottom:12px;">Resolution Decision</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
               <button onclick="adminResolveDispute('${d.transaction_id}','refund')" style="padding:12px 16px;border-radius:var(--r);border:1.5px solid rgba(42,158,124,0.35);background:rgba(42,158,124,0.08);color:var(--accent3);font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:left;line-height:1.4;">
-                ✓ Approve Dispute<br><span style="font-size:11px;font-weight:400;color:var(--g5);">Refund $600 · void sale</span>
+                ✓ Approve Dispute<br><span style="font-size:11px;font-weight:400;color:var(--g5);">Refund $450 · void sale</span>
               </button>
               <button onclick="adminResolveDispute('${d.transaction_id}','deny')" style="padding:12px 16px;border-radius:var(--r);border:1.5px solid rgba(124,92,191,0.30);background:rgba(124,92,191,0.07);color:var(--accent);font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:left;line-height:1.4;">
-                → Deny · Resume Deal<br><span style="font-size:11px;font-weight:400;color:var(--g5);">Keep $600 · deal continues</span>
+                → Deny · Resume Deal<br><span style="font-size:11px;font-weight:400;color:var(--g5);">Keep $450 · deal continues</span>
               </button>
             </div>
           </div>
@@ -4028,7 +4028,7 @@ async function loadAdminFlags() {
 }
 
 async function adminResolveDispute(txnId, decision) {
-  if(!confirm(decision === 'refund' ? 'Refund $600 to dealer and close dispute?' : 'Deny refund and close dispute?')) return;
+  if(!confirm(decision === 'refund' ? 'Refund $450 to dealer and close dispute?' : 'Deny refund and close dispute?')) return;
   try {
     await fetch(`${API}/transactions/${txnId}/dispute/resolve`, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -4235,7 +4235,7 @@ function openCameraDispute(txnId) {
         ${[
           {icon:'📋', text:"PrivaBuy reviews your photos + the seller's original disclosures"},
           {icon:'📱', text:'You\'ll get an email and this page updates automatically'},
-          {icon:'✓',  text:'Approved: $600 refunded, sale voided, no payment needed'},
+          {icon:'✓',  text:'Approved: $450 refunded, sale voided, no payment needed'},
           {icon:'→',  text:'Denied: sale proceeds, you pay seller as agreed'},
         ].map(s => `
           <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
