@@ -434,7 +434,7 @@ body::before {
 <div id="screen-login" class="screen active">
   <div class="login-card">
     <div class="login-logo">Priva<span>Buy</span> <span style="font-size:14px;color:var(--g4);font-family:var(--sans);font-weight:400"></span></div>
-    <div class="login-tagline">The auction platform for serious vehicle inventory.</div>
+    <div class="login-tagline" id="login-tagline">The auction platform for serious vehicle inventory.</div>
     <div class="role-select">
       <div class="role-btn " data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">&#x1F464;</div><div class="role-name">Seller</div></div>
       <div class="role-btn" data-role="dealer" onclick="selectRole('dealer',this)"><div class="role-icon">&#x1F3E2;</div><div class="role-name">Dealer</div></div>
@@ -3134,10 +3134,14 @@ setTimeout(() => {
 
 setTimeout(() => {
   const urlRole = new URLSearchParams(window.location.search).get('role');
+  const hasSession = !!(localStorage.getItem('pb_seller_session') || localStorage.getItem('pb_dealer_session'));
+
   if(urlRole === 'dealer') {
     selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
   } else if(urlRole === 'seller') {
     selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+    document.getElementById('login-tagline').textContent = 'List your car and get competitive offers.';
+    if(!hasSession) setSellerMode('register');
   }
 }, 0);
 
