@@ -1325,6 +1325,7 @@ body::before {
       <div style="display:flex;align-items:center;gap:12px;"><div class="badge badge-live">● Live</div><button class="modal-close" onclick="closeModal('dealer-auction-modal')">✕</button></div>
     </div>
     <div class="modal-body" style="padding-top:20px;">
+      <div id="dam-lien-banner" class="hidden" style="margin-bottom:16px;background:rgba(194,124,42,0.08);border:1.5px solid rgba(194,124,42,0.35);border-radius:var(--r-lg);padding:16px 20px;display:flex;align-items:flex-start;gap:12px;"></div>
       <div class="auction-timer-block" style="margin-bottom:20px;padding:16px 20px;">
         <div><div style="font-size:11px;color:var(--accent3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">● Open Auction</div><div class="timer-digits" id="dealer-modal-timer" style="font-size:40px;"></div><div class="timer-label">No time limit · Bid at any time</div></div>
         <div style="text-align:right;font-size:13px;color:var(--g5)" id="dam-bid-summary">Loading bids...</div>
@@ -2776,6 +2777,21 @@ async function openRealDealerAuction(carId, title, zip, mileage, condition, floo
     buildDocs('dam', car.title_status, 'On File', 'IL', car.vin);
     const loanEl = document.getElementById('dam-loan-val');
     if(loanEl) loanEl.textContent = car.loan_status;
+
+    const lienBanner = document.getElementById('dam-lien-banner');
+    if(car.loan_status === 'Loan' || car.loan_status === 'Lease') {
+      lienBanner.classList.remove('hidden');
+      lienBanner.innerHTML = `
+        <span style="font-size:22px;flex-shrink:0;">⚠️</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#a06020;margin-bottom:4px;">Active Lien — 10-Day Payoff Required</div>
+          <div style="font-size:13px;color:#1a1814;line-height:1.6;">
+            This vehicle has an outstanding balance${car.lien_holder ? ' with <strong>'+car.lien_holder+'</strong>' : ''}. Before this sale can close, you must obtain a <strong>10-day payoff letter</strong> from the lienholder and have the seller sign the required release paperwork. <strong>Payment cannot be finalized until title (or lien release documents) is confirmed in hand.</strong>
+          </div>
+        </div>`;
+    } else {
+      lienBanner.classList.add('hidden');
+    }
     buildCarfax('dam', car.owners||1, car.accidents==='None'?0:car.accidents==='One'?1:2, 0);
     // Load VinAudit history if VIN available
     if(car.vin && car.vin.length === 17) {
@@ -3408,6 +3424,7 @@ const DEAL_STEPS = [
   { key: 'awaiting_slot_confirmation', label: 'Confirm Pickup Time',   icon: '✅' },
   { key: 'pickup_scheduled',           label: 'Pickup Day',            icon: '🚗' },
   { key: 'inspection_period', label: '24hr Inspection', icon: '🔍' },
+  { key: 'awaiting_title_confirmation', label: 'Title Transfer', icon: '📜' },
   { key: 'awaiting_seller_payment_confirm', label: 'Seller Confirms Payment', icon: '💰' },
   
   { key: 'completed',                  label: 'Complete',              icon: '🎉' },
@@ -3496,7 +3513,39 @@ function dealFlowActionHTML(txn, role) {
       <div style="font-size:11px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
     </div>
     <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;"><strong style="color:#1a1814;">Important:</strong> Seller will not hand over the title until payment is received. Pay the seller the full bid amount of <strong style="color:#1a1814;">$${rawAmt.toLocaleString()}</strong> — PrivaBuy deducts our $${SELLER_FEE} fee from that automatically.</div>
-    <button class="btn btn-success btn-full mb-16" onclick="inspectionAccept('${txnId}')">✓ Inspected & Paid Seller — Complete</button>
+    <button class="btn btn-success btn-full mb-16" onclick="inspectionAccept('${txnId}')">✓ Vehicle Matches Listing — Continue</button>
+  </div>`;
+    }
+
+    if (status === 'awaiting_title_confirmation') {
+      const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
+      const titleConfirmed = S.titleConfirmed && S.titleConfirmed[txnId];
+      return ack + `
+  <div style="background:rgba(217,48,37,0.05);border:2px solid rgba(217,48,37,0.30);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
+    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;">
+      <span style="font-size:22px;flex-shrink:0;">🔒</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#1a1814;margin-bottom:4px;">Title Required Before Payment</div>
+        <div style="font-size:13px;color:var(--g5);line-height:1.6;">You cannot pay the seller until you have the signed title in hand${hasLien ? ' (or the 10-day payoff + lien release paperwork, if applicable)' : ''}. <strong style="color:#1a1814;">If you don't get the title, don't pay.</strong></div>
+      </div>
+    </div>
+    ${hasLien ? `
+    <div style="background:rgba(194,124,42,0.08);border:1px solid rgba(194,124,42,0.25);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:4px;">⚠️ Lien Vehicle</div>
+      <div style="font-size:13px;color:#1a1814;line-height:1.6;">This vehicle has an outstanding lien. Confirm you have the seller's <strong>10-day payoff letter</strong> and signed release paperwork before proceeding.</div>
+    </div>` : ''}
+    <div class="form-group">
+      <label class="form-label">Upload Photo of Signed Title${hasLien ? ' / Payoff Documents' : ''}</label>
+      <div id="title-upload-slot-${txnId}" onclick="uploadTitlePhoto('${txnId}')" style="background:#ffffff;border:1.5px dashed rgba(0,0,0,0.25);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;">
+        <div style="font-size:24px;margin-bottom:6px;">📄</div>
+        <div style="font-size:13px;color:var(--g5);">Click to upload photo of the signed title</div>
+      </div>
+    </div>
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:#fff;border:1px solid rgba(0,0,0,0.16);border-radius:var(--r-sm);padding:12px;margin:14px 0;">
+      <input type="checkbox" id="title-confirm-cb-${txnId}" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
+      <span style="font-size:12px;color:#1a1814;line-height:1.5;">I confirm I have physically received the signed title${hasLien ? ' (or valid payoff/lien release documentation)' : ''} from the seller.</span>
+    </label>
+    <button class="btn btn-success btn-full" onclick="confirmTitleReceived('${txnId}')">✓ I Have the Title — Proceed to Payment</button>
   </div>`;
     }
  
@@ -3919,9 +3968,56 @@ async function inspectionAccept(txnId) {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({dealer_id: S.dealer_id})
     });
-    showToast('✓','Vehicle Accepted','Proceeding to payment.');
+    showToast('✓','Vehicle Accepted','Now confirm you have the title before paying.');
     loadDealFlow('dealer');
   } catch(e) { showToast('❌','Error','Could not confirm.'); }
+}
+
+async function uploadTitlePhoto(txnId) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,.pdf';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const slot = document.getElementById(`title-upload-slot-${txnId}`);
+    slot.innerHTML = '<div style="font-size:13px;color:var(--g5)">Uploading...</div>';
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'privabuy_photos');
+      formData.append('cloud_name', 'dptom0qr7');
+      const res = await fetch('https://api.cloudinary.com/v1_1/dptom0qr7/auto/upload', {method:'POST', body:formData});
+      const data = await res.json();
+      if(!data.secure_url) throw new Error('Upload failed');
+      if(!S.titlePhotoUrls) S.titlePhotoUrls = {};
+      S.titlePhotoUrls[txnId] = data.secure_url;
+      slot.innerHTML = `<div style="font-size:13px;color:var(--accent3);font-weight:600;">✓ Title photo uploaded</div><div style="font-size:11px;color:var(--g5);margin-top:4px;">Tap to replace</div>`;
+      slot.style.borderColor = 'rgba(42,158,124,0.4)';
+      slot.style.borderStyle = 'solid';
+      showToast('✓','Uploaded','Title photo saved.');
+    } catch(err) {
+      slot.innerHTML = '<div style="font-size:13px;color:var(--red)">Upload failed — tap to try again</div>';
+    }
+  };
+  input.click();
+}
+
+async function confirmTitleReceived(txnId) {
+  const checked = document.getElementById(`title-confirm-cb-${txnId}`)?.checked;
+  const photoUrl = S.titlePhotoUrls && S.titlePhotoUrls[txnId];
+  if(!photoUrl) { showToast('⚠️','Photo Required','Upload a photo of the signed title first.'); return; }
+  if(!checked) { showToast('⚠️','Required','Check the box to confirm.'); return; }
+  try {
+    await fetch(`${API}/transactions/${txnId}/title-confirmed`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({dealer_id: S.dealer_id, title_photo_url: photoUrl})
+    });
+    if(!S.titleConfirmed) S.titleConfirmed = {};
+    S.titleConfirmed[txnId] = true;
+    showToast('✓','Title Confirmed','You can now pay the seller.');
+    loadDealFlow('dealer');
+  } catch(e) { showToast('❌','Error','Could not confirm title receipt.'); }
 }
 
 
