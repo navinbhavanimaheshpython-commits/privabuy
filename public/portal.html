@@ -2218,10 +2218,10 @@ function startSellerBidPoll() {
       return;
     }
     const auctionAge = (Date.now() - S.auctionStartTime) / (1000 * 60 * 60 * 24);
-    if(auctionAge > 30) {
+    if(auctionAge > 14) {
       clearInterval(S.bidPollInterval);
       S.auctionActive = false;
-      showToast('⚠️', 'Auction Expired', 'Your auction has been open for 30 days and has been closed.');
+      showToast('⚠️', 'Auction Expired', 'Your auction has been open for 14 days and has been closed.');
       document.getElementById('seller-elapsed').textContent = 'EXPIRED';
       return;
     }
