@@ -2148,6 +2148,16 @@ async function addPhotoToListing(el, label) {
   input.click();
 }
 
+function selectRadioByValue(groupId, value) {
+  const group = document.getElementById(groupId);
+  if(!group || !value) return;
+  const pills = group.querySelectorAll('.radio-pill');
+  pills.forEach(p => p.classList.remove('selected'));
+  const match = Array.from(pills).find(p => p.textContent.trim() === value);
+  if(match) match.classList.add('selected');
+  S.radioValues[groupId] = value;
+}
+
 async function decodeVIN() {
   const vin = document.getElementById('vin-input').value.trim();
   if(vin.length < 17) { showToast( 'Invalid VIN','VIN must be exactly 17 characters.'); return; }
@@ -2165,18 +2175,27 @@ async function decodeVIN() {
     const transmission = get('Transmission Style') || 'Automatic';
     const drivetrain = get('Drive Type') || 'FWD';
     const bodyClass = get('Body Class');
-    if(!make || make === 'null') { showToast('','VIN Not Found','Could not decode this VIN. Check and try again.'); return; }
+    if(!make || make === 'null') {
+      document.getElementById('vin-result').classList.remove('hidden');
+      document.getElementById('vin-result').innerHTML = `<div class="alert alert-warning">Couldn't auto-fill from that VIN — no problem, just enter the details below. Double-check the VIN if you'd like to try again.</div>`;
+      showToast('','VIN Not Found','No worries — just fill in the fields below.');
+      return;
+    }
     document.getElementById('f-year').value = year;
     document.getElementById('f-make').value = make.charAt(0) + make.slice(1).toLowerCase();
     document.getElementById('f-model').value = model.charAt(0) + model.slice(1).toLowerCase();
     document.getElementById('f-trim').value = trim || '';
-    S.radioValues['transmission-group'] = transmission.includes('Manual') ? 'Manual' : transmission.includes('CVT') ? 'CVT' : 'Automatic';
-    S.radioValues['drivetrain-group'] = drivetrain.includes('AWD') || drivetrain.includes('All') ? 'AWD' : drivetrain.includes('4WD') || drivetrain.includes('4x4') ? '4WD' : drivetrain.includes('Rear') ? 'RWD' : 'FWD';
+    const transmissionValue = transmission.includes('Manual') ? 'Manual' : transmission.includes('CVT') ? 'CVT' : 'Automatic';
+    const drivetrainValue = drivetrain.includes('AWD') || drivetrain.includes('All') ? 'AWD' : drivetrain.includes('4WD') || drivetrain.includes('4x4') ? '4WD' : drivetrain.includes('Rear') ? 'RWD' : 'FWD';
+    selectRadioByValue('transmission-group', transmissionValue);
+    selectRadioByValue('drivetrain-group', drivetrainValue);
     document.getElementById('vin-result').classList.remove('hidden');
-    document.getElementById('vin-result').innerHTML = `<div class="alert alert-success"> VIN Decoded: ${year} ${make} ${model} ${trim}  ${bodyClass}  ${engine}  Drivetrain: ${S.radioValues['drivetrain-group']}</div>`;
+    document.getElementById('vin-result').innerHTML = `<div class="alert alert-success"> VIN Decoded: ${year} ${make} ${model} ${trim}  ${bodyClass}  ${engine}  Drivetrain: ${drivetrainValue}</div>`;
     showToast('','VIN Decoded!',`${year} ${make} ${model} confirmed from NHTSA.`);
   } catch(err) {
-    showToast('','Decode Failed','Could not reach NHTSA. Check your connection.');
+    document.getElementById('vin-result').classList.remove('hidden');
+    document.getElementById('vin-result').innerHTML = `<div class="alert alert-warning">Couldn't reach the VIN database — no problem, just enter the details below manually. Enter your VIN anyways.</div>`;
+    showToast('','Decode Unavailable','No worries — just fill in the fields below.');
     console.error(err);
   }
 }
