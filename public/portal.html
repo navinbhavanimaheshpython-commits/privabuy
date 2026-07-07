@@ -1383,37 +1383,68 @@ body::before {
   </div>
 </div>
 
-<!-- SELLER INTRO OVERLAY -->
-<div class="modal-overlay" id="seller-intro-overlay">
-  <div class="modal" style="max-width:460px;">
-    <div class="modal-body" style="padding:36px 32px 32px;">
-      <div style="font-family:var(--serif);font-size:27px;line-height:1.3;color:#1a1814;margin-bottom:22px;">
-        You're 5 minutes away from a live auction — <span style="color:var(--accent)">free to list.</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:22px;">
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div style="width:22px;height:22px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.30);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">1</div>
-          <div style="font-size:14px;color:#1a1814;line-height:1.5;">Enter your vehicle info</div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div style="width:22px;height:22px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.30);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">2</div>
-          <div style="font-size:14px;color:#1a1814;line-height:1.5;">We calculate your market value</div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div style="width:22px;height:22px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.30);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">3</div>
-          <div style="font-size:14px;color:#1a1814;line-height:1.5;">Dealers compete in a live auction</div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div style="width:22px;height:22px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.30);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">4</div>
-          <div style="font-size:14px;color:#1a1814;line-height:1.5;">You accept whenever you're ready — no pressure</div>
-        </div>
-      </div>
-      <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:12px 16px;margin-bottom:24px;font-size:13px;color:var(--g5);">
-        No fee unless you sell. No obligation to accept any offer.
-      </div>
-      <button class="btn btn-primary btn-full btn-lg" onclick="dismissSellerIntro()" style="border-radius:12px">Start My Listing →</button>
+<!-- SELLER INTRO WALKTHROUGH (full screen) -->
+<div id="seller-intro-overlay" style="display:none;position:fixed;inset:0;background:#ffffff;z-index:2000;flex-direction:column;overflow:hidden;font-family:'Inter',sans-serif;">
+
+  <!-- Top bar -->
+  <div style="flex-shrink:0;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,0.08);">
+    <div style="font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:18px;color:#1a1814;">Priva<span style="color:#7c5cbf;">Buy</span></div>
+    <div id="si-dots" style="display:flex;gap:5px;align-items:center;">
+      <div class="si-dot" id="si-dot-0" style="width:18px;height:6px;border-radius:3px;background:#7c5cbf;transition:all 0.3s;"></div>
+      <div class="si-dot" id="si-dot-1" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+      <div class="si-dot" id="si-dot-2" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+      <div class="si-dot" id="si-dot-3" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+      <div class="si-dot" id="si-dot-4" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+    </div>
+    <button onclick="skipSellerIntro()" style="background:none;border:none;color:rgba(0,0,0,0.40);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">Skip</button>
+  </div>
+
+  <!-- Screen 0: Headline -->
+  <div id="si-screen-0" class="si-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;flex:1;">
+    <div style="width:64px;height:64px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.25);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:28px;">🚗</div>
+    <div style="font-family:var(--serif);font-size:34px;line-height:1.25;color:#1a1814;max-width:440px;margin-bottom:14px;">
+      You're 5 minutes away from a live auction — <span style="color:var(--accent)">free to list.</span>
+    </div>
+    <div style="font-size:15px;color:var(--g5);max-width:380px;line-height:1.6;">Here's exactly how it works, step by step.</div>
+  </div>
+
+  <!-- Screen 1 -->
+  <div id="si-screen-1" class="si-screen" style="display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;flex:1;">
+    <div style="width:64px;height:64px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.25);color:var(--accent);font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:28px;">1</div>
+    <div style="font-family:var(--serif);font-size:28px;color:#1a1814;margin-bottom:12px;">Enter your vehicle info</div>
+    <div style="font-size:15px;color:var(--g5);max-width:380px;line-height:1.6;">VIN, mileage, condition, and a few photos — takes about 5 minutes.</div>
+  </div>
+
+  <!-- Screen 2 -->
+  <div id="si-screen-2" class="si-screen" style="display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;flex:1;">
+    <div style="width:64px;height:64px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.25);color:var(--accent);font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:28px;">2</div>
+    <div style="font-family:var(--serif);font-size:28px;color:#1a1814;margin-bottom:12px;">We calculate your market value</div>
+    <div style="font-size:15px;color:var(--g5);max-width:380px;line-height:1.6;">Real market data, so you know what your car is actually worth before dealers bid.</div>
+  </div>
+
+  <!-- Screen 3 -->
+  <div id="si-screen-3" class="si-screen" style="display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;flex:1;">
+    <div style="width:64px;height:64px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.25);color:var(--accent);font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:28px;">3</div>
+    <div style="font-family:var(--serif);font-size:28px;color:#1a1814;margin-bottom:12px;">Dealers compete in a live auction</div>
+    <div style="font-size:15px;color:var(--g5);max-width:380px;line-height:1.6;">Local dealers bid on your car in real time. You watch the offers come in.</div>
+  </div>
+
+  <!-- Screen 4: Close + CTA -->
+  <div id="si-screen-4" class="si-screen" style="display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;flex:1;">
+    <div style="width:64px;height:64px;border-radius:50%;background:rgba(42,158,124,0.10);border:1px solid rgba(42,158,124,0.30);color:var(--accent3);font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:28px;">4</div>
+    <div style="font-family:var(--serif);font-size:28px;color:#1a1814;margin-bottom:12px;">You accept whenever you're ready — no pressure</div>
+    <div style="font-size:15px;color:var(--g5);max-width:380px;line-height:1.6;margin-bottom:24px;">Take your time. Accept a bid only if it works for you.</div>
+    <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:12px 20px;font-size:13px;color:var(--g5);max-width:380px;">
+      No fee unless you sell. No obligation to accept any offer.
     </div>
   </div>
+
+  <!-- Bottom nav -->
+  <div style="flex-shrink:0;padding:20px 24px 28px;display:flex;gap:12px;max-width:460px;margin:0 auto;width:100%;box-sizing:border-box;">
+    <button id="si-back-btn" onclick="siGoStep(siCurrentStep-1)" style="display:none;flex:0 0 auto;padding:14px 20px;border-radius:50px;border:1px solid rgba(0,0,0,0.18);background:#f2f2f2;color:#1a1814;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">← Back</button>
+    <button id="si-next-btn" onclick="siGoStep(siCurrentStep+1)" style="flex:1;padding:14px 20px;border-radius:50px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;cursor:pointer;">Next →</button>
+  </div>
+
 </div>
 
 <div id="toast-container"></div>
@@ -1665,8 +1696,10 @@ function initSellerView() {
   loadSellerActiveAuction();
   setTimeout(maybeShowSellerIntro, 800);
 }
+const SELLER_INTRO_KEY = 'privabuy_seen_seller_intro_v2';
+let siCurrentStep = 0;
+const SI_TOTAL_STEPS = 5;
 
-const SELLER_INTRO_KEY = 'privabuy_seen_seller_intro_v1';
 function maybeShowSellerIntro() {
   if(localStorage.getItem(SELLER_INTRO_KEY)) return;
   if(S.auctionActive) return;
@@ -1674,14 +1707,43 @@ function maybeShowSellerIntro() {
   const screen = document.getElementById('screen-seller');
   if(!listTab || listTab.classList.contains('hidden')) return;
   if(!screen || !screen.classList.contains('active')) return;
-  document.getElementById('seller-intro-overlay').classList.add('open');
-}
-function dismissSellerIntro() {
-  localStorage.setItem(SELLER_INTRO_KEY, '1');
-  document.getElementById('seller-intro-overlay').classList.remove('open');
-  if(typeof gtag !== 'undefined') gtag('event', 'intro_screen_cta_click');
+  siCurrentStep = 0;
+  siRenderStep();
+  document.getElementById('seller-intro-overlay').style.display = 'flex';
 }
 
+function siRenderStep() {
+  for(let i=0;i<SI_TOTAL_STEPS;i++) {
+    document.getElementById(`si-screen-${i}`).style.display = i===siCurrentStep ? 'flex' : 'none';
+    const dot = document.getElementById(`si-dot-${i}`);
+    if(i===siCurrentStep) { dot.style.width='18px'; dot.style.borderRadius='3px'; dot.style.background='#7c5cbf'; }
+    else if(i<siCurrentStep) { dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='#2a9e7c'; }
+    else { dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='rgba(0,0,0,0.14)'; }
+  }
+  document.getElementById('si-back-btn').style.display = siCurrentStep === 0 ? 'none' : 'block';
+  const nextBtn = document.getElementById('si-next-btn');
+  if(siCurrentStep === SI_TOTAL_STEPS - 1) {
+    nextBtn.textContent = 'Start My Listing →';
+    nextBtn.onclick = dismissSellerIntro;
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.onclick = () => siGoStep(siCurrentStep + 1);
+  }
+}
+
+function siGoStep(step) {
+  if(step < 0 || step >= SI_TOTAL_STEPS) return;
+  siCurrentStep = step;
+  siRenderStep();
+}
+
+function skipSellerIntro() { dismissSellerIntro(); }
+
+function dismissSellerIntro() {
+  localStorage.setItem(SELLER_INTRO_KEY, '1');
+  document.getElementById('seller-intro-overlay').style.display = 'none';
+  if(typeof gtag !== 'undefined') gtag('event', 'intro_screen_cta_click');
+}
 
 async function loadSellerActiveAuction() {
   if(!S.seller_id || S.auctionActive) return;
@@ -1692,7 +1754,8 @@ async function loadSellerActiveAuction() {
     const accepted = !active && listings.find(l => l.status === 'accepted' || l.status === 'accepted_pending_settlement');
 
     if(active) {
-      document.getElementById('seller-intro-overlay')?.classList.remove('open');
+      const introEl = document.getElementById('seller-intro-overlay');
+      if(introEl) introEl.style.display = 'none';
       S.car_id = active.car_id;
       S.auctionActive = true;
       S.auctionData = active;
@@ -1715,7 +1778,8 @@ async function loadSellerActiveAuction() {
       startSellerBidPoll();
       sellerTab('auction', document.querySelector('#screen-seller .tab-btn[onclick*="auction"]'));
     } else if(accepted) {
-      document.getElementById('seller-intro-overlay')?.classList.remove('open');
+      const introEl = document.getElementById('seller-intro-overlay');
+      if(introEl) introEl.style.display = 'none';
       S.car_id = accepted.car_id;
       S.auctionData = accepted;
       document.getElementById('seller-dealflow-tab').style.display = '';
