@@ -434,7 +434,7 @@ body::before {
 <div id="screen-login" class="screen active">
   <div class="login-card">
     <div class="login-logo">Priva<span>Buy</span> <span style="font-size:14px;color:var(--g4);font-family:var(--sans);font-weight:400"></span></div>
-    <div class="login-tagline" id="login-tagline">The auction platform for serious vehicle inventory.</div>
+    <div class="login-tagline" id="login-tagline">****STAGING****The auction platform for serious vehicle inventory.</div>
     <div class="role-select">
       <div class="role-btn " data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">&#x1F464;</div><div class="role-name">Seller</div></div>
       <div class="role-btn" data-role="dealer" onclick="selectRole('dealer',this)"><div class="role-icon">&#x1F3E2;</div><div class="role-name">Dealer</div></div>
@@ -505,7 +505,7 @@ body::before {
 
       <div id="wizard-step-1">
         <div class="card mb-24">
-          <div class="card-header"><div class="card-title">Your Vehicle Details</div><span class="text-muted text-sm">Takes about 2 minutes</span></div>
+          <div class="card-header"><div class="card-title">Your Vehicle Details</div><span class="text-muted text-sm">All fields required</span></div>
           <div class="card-body">
             <div class="form-group">
               <label class="form-label">VIN Number</label>
@@ -532,7 +532,7 @@ body::before {
                 <div class="radio-group" id="transmission-group">
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Automatic')">Automatic</div>
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Manual')">Manual</div>
-                  <div class="radio-pill" onclick="selectRadio('transmission-group',this,'CVT')">CVT</div>
+                  <div class="radio-pill" onclick="selectRadio('transmission-groutedp',this,'CVT')">CVT</div>
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Other')">Other</div>
                 </div>
               </div>
@@ -2148,16 +2148,6 @@ async function addPhotoToListing(el, label) {
   input.click();
 }
 
-function selectRadioByValue(groupId, value) {
-  const group = document.getElementById(groupId);
-  if(!group || !value) return;
-  const pills = group.querySelectorAll('.radio-pill');
-  pills.forEach(p => p.classList.remove('selected'));
-  const match = Array.from(pills).find(p => p.textContent.trim() === value);
-  if(match) match.classList.add('selected');
-  S.radioValues[groupId] = value;
-}
-
 async function decodeVIN() {
   const vin = document.getElementById('vin-input').value.trim();
   if(vin.length < 17) { showToast( 'Invalid VIN','VIN must be exactly 17 characters.'); return; }
@@ -2175,27 +2165,18 @@ async function decodeVIN() {
     const transmission = get('Transmission Style') || 'Automatic';
     const drivetrain = get('Drive Type') || 'FWD';
     const bodyClass = get('Body Class');
-    if(!make || make === 'null') {
-      document.getElementById('vin-result').classList.remove('hidden');
-      document.getElementById('vin-result').innerHTML = `<div class="alert alert-warning">Couldn't auto-fill from that VIN — no problem, just enter the details below. Double-check the VIN if you'd like to try again.</div>`;
-      showToast('','VIN Not Found','No worries — just fill in the fields below.');
-      return;
-    }
+    if(!make || make === 'null') { showToast('','VIN Not Found','Could not decode this VIN. Check and try again.'); return; }
     document.getElementById('f-year').value = year;
     document.getElementById('f-make').value = make.charAt(0) + make.slice(1).toLowerCase();
     document.getElementById('f-model').value = model.charAt(0) + model.slice(1).toLowerCase();
     document.getElementById('f-trim').value = trim || '';
-    const transmissionValue = transmission.includes('Manual') ? 'Manual' : transmission.includes('CVT') ? 'CVT' : 'Automatic';
-    const drivetrainValue = drivetrain.includes('AWD') || drivetrain.includes('All') ? 'AWD' : drivetrain.includes('4WD') || drivetrain.includes('4x4') ? '4WD' : drivetrain.includes('Rear') ? 'RWD' : 'FWD';
-    selectRadioByValue('transmission-group', transmissionValue);
-    selectRadioByValue('drivetrain-group', drivetrainValue);
+    S.radioValues['transmission-group'] = transmission.includes('Manual') ? 'Manual' : transmission.includes('CVT') ? 'CVT' : 'Automatic';
+    S.radioValues['drivetrain-group'] = drivetrain.includes('AWD') || drivetrain.includes('All') ? 'AWD' : drivetrain.includes('4WD') || drivetrain.includes('4x4') ? '4WD' : drivetrain.includes('Rear') ? 'RWD' : 'FWD';
     document.getElementById('vin-result').classList.remove('hidden');
-    document.getElementById('vin-result').innerHTML = `<div class="alert alert-success"> VIN Decoded: ${year} ${make} ${model} ${trim}  ${bodyClass}  ${engine}  Drivetrain: ${drivetrainValue}</div>`;
+    document.getElementById('vin-result').innerHTML = `<div class="alert alert-success"> VIN Decoded: ${year} ${make} ${model} ${trim}  ${bodyClass}  ${engine}  Drivetrain: ${S.radioValues['drivetrain-group']}</div>`;
     showToast('','VIN Decoded!',`${year} ${make} ${model} confirmed from NHTSA.`);
   } catch(err) {
-    document.getElementById('vin-result').classList.remove('hidden');
-    document.getElementById('vin-result').innerHTML = `<div class="alert alert-warning">Couldn't reach the VIN database — no problem, just enter the details below manually. Enter your VIN anyways.</div>`;
-    showToast('','Decode Unavailable','No worries — just fill in the fields below.');
+    showToast('','Decode Failed','Could not reach NHTSA. Check your connection.');
     console.error(err);
   }
 }
@@ -2491,7 +2472,7 @@ async function buildValueEstimate() {
 }
 
 function updateFloor(val) {
-  S.floorPrice = parseInt(String(val).replace(/,/g,''))||0;
+  S.floorPrice = parseInt(val)||0;
   const pb = S.formData.pbExpected||10000;
   const ti = S.formData.tradeIn||8000;
   const el = document.getElementById('floor-feedback');
@@ -2587,13 +2568,10 @@ async function startAuction() {
     showToast('','Auction Live!',`${data.connected_dealers} dealers notified. Car ID: ${S.car_id.slice(0,8)}...`);
     startAuctionTimer();
     startSellerBidPoll();
-} catch(err) {
+  } catch(err) {
     showToast('','Failed to Start','Could not create listing: ' + err.message);
     btn.textContent = 'Start My Auction — It\'s Free';
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.cursor = 'pointer';
-}
+  }
 }
 
 function startAuctionTimer() {
