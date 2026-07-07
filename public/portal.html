@@ -661,9 +661,9 @@ body::before {
 
       <div id="wizard-step-2" class="hidden">
         <div class="card mb-24">
-          <div class="card-header"><div class="card-title">Vehicle Photos</div><span class="text-muted text-sm">6 required  2 optional</span></div>
+          <div class="card-header"><div class="card-title">Vehicle Photos</div><span class="text-muted text-sm">6 recommended  2 optional</span></div>
           <div class="card-body">
-            <div class="alert alert-info"> <strong>Better photos = higher bids.</strong> Required shots marked in red.</div>
+            <div class="alert alert-info"> <strong>Better photos = higher bids.</strong> Recommended shots marked in red — but you can finish this step later from your phone if you're not near the car right now.</div>
             <div class="photo-grid" id="photo-grid">
               <div class="photo-slot" onclick="simulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Front Exterior</div></div>
               <div class="photo-slot" onclick="simulatePhoto(this,'Rear Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Rear Exterior</div></div>
@@ -674,12 +674,15 @@ body::before {
               <div class="photo-slot" onclick="simulatePhoto(this,'Engine Bay',false)"><div class="photo-slot-icon">·</div><div class="photo-slot-label">Engine Bay</div></div>
               <div class="photo-slot" onclick="simulatePhoto(this,'Any Damage',false)"><div class="photo-slot-icon">·</div><div class="photo-slot-label">Any Damage</div></div>
             </div>
-            <div id="photos-uploaded-count" class="text-muted mt-16 text-sm">0 of 8 photos uploaded (6 required)</div>
+            <div id="photos-uploaded-count" class="text-muted mt-16 text-sm">0 of 8 photos uploaded (6 recommended)</div>
           </div>
         </div>
         <div class="flex-between">
           <button class="btn btn-secondary" onclick="wizardGo(1)">← Back</button>
-          <button class="btn btn-primary" id="photos-next-btn" onclick="checkPhotosAndContinue()">Continue →</button>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <a href="#" onclick="skipPhotosForNow();return false;" id="photos-skip-link" style="font-size:14px;font-weight:500;color:var(--accent2);text-decoration:none;padding:11px 20px;border-radius:50px;border:1.5px solid rgba(194,124,42,0.45);background:rgba(194,124,42,0.08);white-space:nowrap;transition:all 0.2s;" onmouseover="this.style.background='rgba(194,124,42,0.16)'" onmouseout="this.style.background='rgba(194,124,42,0.08)'">Not near the car? Skip for now →</a>
+            <button class="btn btn-primary" id="photos-next-btn" onclick="checkPhotosAndContinue()">Continue →</button>
+          </div>
         </div>
       </div>
 
@@ -1058,6 +1061,16 @@ body::before {
             <div class="badge badge-live" style="margin-bottom:8px">● Open</div>
             <div id="dealer-count-display" style="font-size:13px;color:var(--g5)">5 dealers notified</div>
           </div>
+        </div>
+        <div id="photo-reminder-banner" class="hidden" style="background:rgba(194,124,42,0.08);border:1px solid rgba(194,124,42,0.28);border-radius:var(--r-lg);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:22px;">📸</span>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:#1a1814;">Finish adding photos</div>
+              <div style="font-size:13px;color:var(--g5);margin-top:2px;" id="photo-reminder-sub">You're missing recommended photos. Listings with complete photos get faster, higher bids.</div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddPhotosModal()">Add Photos Now →</button>
         </div>
         <div class="grid-2">
           <div class="card">
@@ -1955,6 +1968,8 @@ async function loadSellerActiveAuction() {
         <div style="font-family:var(--serif);font-size:20px;margin-bottom:8px">${active.year} ${active.make} ${active.model}</div>
         <div class="vehicle-card-meta"><span class="meta-tag">${(active.mileage||0).toLocaleString()} mi</span><span class="meta-tag">${active.title_status||'Clean'}</span><span class="meta-tag">ZIP ${active.zip||''}</span></div>
         <div class="text-muted mt-16 text-sm">Floor: <strong style="color:var(--accent)">$${(active.floor_price||0).toLocaleString()}</strong></div>`;
+      S.photoUrls = active.photos || S.photoUrls || [];
+      try { updatePhotoReminderBanner(S.photoUrls); } catch(bannerErr) { console.warn('Photo reminder banner failed to update:', bannerErr); }
       startAuctionTimer();
       startSellerBidPoll();
       sellerTab('auction', document.querySelector('#screen-seller .tab-btn[onclick*="auction"]'));
@@ -2032,10 +2047,105 @@ function wizardGo(step) {
 
 function checkPhotosAndContinue() {
   if(requiredFilled < 6) {
-    showToast('⚠️','Photos Required', `Please upload all 6 required photos. You have ${requiredFilled}/6.`);
+    skipPhotosForNow();
     return;
   }
+  S.photosSkipped = false;
   wizardGo(3);
+}
+
+async function skipPhotosForNow() {
+  if(requiredFilled >= 6) { wizardGo(3); return; }
+  const confirmed = await showConfirmModal(
+    `Continue without all photos?`,
+    `You've uploaded ${photoCount} of 6 recommended photos. You can finish this later from your phone — your listing will go live now, and we'll remind you to add the rest from the "My Auction" tab. Dealers bid faster on listings with complete photos, so don't wait too long.`
+  );
+  if(!confirmed) return;
+  S.photosSkipped = true;
+  wizardGo(3);
+}
+
+// ── Post-listing photo completion ──
+const REQUIRED_PHOTO_LABELS = ['Front Exterior','Rear Exterior','Driver Side','Passenger Side','Interior / Dashboard','Odometer'];
+function getMissingPhotoLabels(existingPhotos) {
+  const have = (existingPhotos || []).map(p => p.label);
+  return REQUIRED_PHOTO_LABELS.filter(l => !have.includes(l));
+}
+function updatePhotoReminderBanner(photos) {
+  const banner = document.getElementById('photo-reminder-banner');
+  if(!banner) return;
+  const missing = getMissingPhotoLabels(photos);
+  if(missing.length === 0) { banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+  const sub = document.getElementById('photo-reminder-sub');
+  if(sub) sub.textContent = `Missing ${missing.length} of 6 recommended photo${missing.length!==1?'s':''}: ${missing.join(', ')}.`;
+}
+
+function openAddPhotosModal() {
+  if(!S.car_id) { showToast('⚠️','No Active Listing','Start or load your auction first.'); return; }
+  const existing = S.photoUrls || [];
+
+  const overlay = document.createElement('div');
+  overlay.id = 'add-photos-overlay';
+  overlay.className = 'modal-overlay open';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-header">
+        <div class="modal-title">Add Photos</div>
+        <button class="modal-close" onclick="document.getElementById('add-photos-overlay').remove()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">Tap a slot to take or upload a photo. Photos save immediately — close this any time.</div>
+        <div class="photo-grid" id="add-photos-grid">
+          ${REQUIRED_PHOTO_LABELS.map(label => {
+            const already = existing.find(p => p.label === label);
+            return `<div class="photo-slot${already?' filled':''}" onclick="addPhotoToListing(this,'${label.replace(/'/g,"\\'")}')">
+              ${already ? `<img src="${already.url}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:var(--r);"><div class="photo-slot-label" style="position:absolute;bottom:6px;z-index:1;background:rgba(255,255,255,0.85);padding:2px 8px;border-radius:4px;font-size:10px;color:#1a1814">✓ ${label}</div>`
+              : `<div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">${label}</div>`}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-primary" onclick="document.getElementById('add-photos-overlay').remove()">Done</button></div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function addPhotoToListing(el, label) {
+  if(el.classList.contains('filled')) return;
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    el.innerHTML = `<div style="font-size:12px;color:var(--g5);padding:8px">Uploading...</div>`;
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'privabuy_photos');
+      formData.append('cloud_name', 'dptom0qr7');
+      const res = await fetch(`https://api.cloudinary.com/v1_1/dptom0qr7/image/upload`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if(!data.secure_url) throw new Error('Upload failed');
+      if(!S.photoUrls) S.photoUrls = [];
+      S.photoUrls = S.photoUrls.filter(p => p.label !== label);
+      S.photoUrls.push({label, url: data.secure_url});
+      el.classList.add('filled');
+      el.innerHTML = `<img src="${data.secure_url}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:var(--r);"><div class="photo-slot-label" style="position:absolute;bottom:6px;z-index:1;background:rgba(255,255,255,0.85);padding:2px 8px;border-radius:4px;font-size:10px;color:#1a1814">✓ ${label}</div>`;
+      await fetch(`${API}/cars/${S.car_id}/photos`, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ photos: S.photoUrls })
+      });
+      updatePhotoReminderBanner(S.photoUrls);
+      showToast('✓','Photo Added', `${label} saved to your listing.`);
+    } catch(err) {
+      el.innerHTML = `<div class="photo-slot-icon">📷</div><div class="photo-slot-label" style="color:var(--red)">Upload failed — tap to retry</div>`;
+      showToast('❌','Upload Failed', err.message);
+    }
+  };
+  input.click();
 }
 
 async function decodeVIN() {
@@ -2388,10 +2498,11 @@ function populateReview() {
       <div><div class="text-muted text-sm">Loan/Lease</div><div class="mt-4;color:#1a1814">${d.loan||'None'}</div></div>
     </div>
     <div class="form-row mt-16">
-      <div><div class="text-muted text-sm">Photos</div><div class="mt-4;color:#1a1814">${photoCount} uploaded (${requiredFilled}/6 required)</div></div>
+      <div><div class="text-muted text-sm">Photos</div><div class="mt-4;color:#1a1814">${photoCount} uploaded (${requiredFilled}/6 recommended)${requiredFilled<6?' <span style="color:var(--accent2)">— add more after you go live</span>':''}</div></div>
       <div><div class="text-muted text-sm">Damage Areas</div><div class="mt-4;color:#1a1814">${Object.values(damagePins).length>0?Object.values(damagePins).join(', '):'None disclosed'}</div></div>
       <div><div class="text-muted text-sm">ZIP Code</div><div class="mt-4;color:#1a1814">${d.zip||''}</div></div>
-    </div>`;
+    </div>
+    ${requiredFilled<6?`<div class="alert alert-warning mt-16">You're missing ${6-requiredFilled} recommended photo${6-requiredFilled!==1?'s':''}. Your auction will still go live — dealers can see and bid on it now — but listings with complete photos get faster, higher bids. You'll get a reminder to finish from the My Auction tab.</div>`:''}`;
 }
 
 async function startAuction() {
@@ -2450,6 +2561,7 @@ async function startAuction() {
       <div class="text-muted mt-16 text-sm">Car ID: <strong style="color:var(--accent);font-family:monospace;font-size:11px">${S.car_id.slice(0,8)}...</strong></div>
       <div class="text-muted mt-8 text-sm">Floor: <strong style="color:var(--accent)">$${(S.floorPrice||0).toLocaleString()}</strong></div>`;
     notifyDealerPortal();
+    try { updatePhotoReminderBanner(S.photoUrls || []); } catch(bannerErr) { console.warn('Photo reminder banner failed to update:', bannerErr); }
     btn.textContent = '✓ Auction Live!';
     btn.disabled = false;
     btn.style.opacity = '1';
