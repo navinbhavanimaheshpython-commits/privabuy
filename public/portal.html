@@ -1969,7 +1969,7 @@ async function loadSellerActiveAuction() {
         <div class="vehicle-card-meta"><span class="meta-tag">${(active.mileage||0).toLocaleString()} mi</span><span class="meta-tag">${active.title_status||'Clean'}</span><span class="meta-tag">ZIP ${active.zip||''}</span></div>
         <div class="text-muted mt-16 text-sm">Floor: <strong style="color:var(--accent)">$${(active.floor_price||0).toLocaleString()}</strong></div>`;
       S.photoUrls = active.photos || S.photoUrls || [];
-      updatePhotoReminderBanner(S.photoUrls);
+      try { updatePhotoReminderBanner(S.photoUrls); } catch(bannerErr) { console.warn('Photo reminder banner failed to update:', bannerErr); }
       startAuctionTimer();
       startSellerBidPoll();
       sellerTab('auction', document.querySelector('#screen-seller .tab-btn[onclick*="auction"]'));
@@ -2561,7 +2561,7 @@ async function startAuction() {
       <div class="text-muted mt-16 text-sm">Car ID: <strong style="color:var(--accent);font-family:monospace;font-size:11px">${S.car_id.slice(0,8)}...</strong></div>
       <div class="text-muted mt-8 text-sm">Floor: <strong style="color:var(--accent)">$${(S.floorPrice||0).toLocaleString()}</strong></div>`;
     notifyDealerPortal();
-    updatePhotoReminderBanner(S.photoUrls || []);
+    try { updatePhotoReminderBanner(S.photoUrls || []); } catch(bannerErr) { console.warn('Photo reminder banner failed to update:', bannerErr); }
     btn.textContent = '✓ Auction Live!';
     btn.disabled = false;
     btn.style.opacity = '1';
