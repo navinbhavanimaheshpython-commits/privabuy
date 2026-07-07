@@ -532,7 +532,7 @@ body::before {
                 <div class="radio-group" id="transmission-group">
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Automatic')">Automatic</div>
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Manual')">Manual</div>
-                  <div class="radio-pill" onclick="selectRadio('transmission-groutedp',this,'CVT')">CVT</div>
+                  <div class="radio-pill" onclick="selectRadio('transmission-group',this,'CVT')">CVT</div>
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Other')">Other</div>
                 </div>
               </div>
@@ -2472,7 +2472,7 @@ async function buildValueEstimate() {
 }
 
 function updateFloor(val) {
-  S.floorPrice = parseInt(val)||0;
+  S.floorPrice = parseInt(String(val).replace(/,/g,''))||0;
   const pb = S.formData.pbExpected||10000;
   const ti = S.formData.tradeIn||8000;
   const el = document.getElementById('floor-feedback');
@@ -2568,10 +2568,13 @@ async function startAuction() {
     showToast('','Auction Live!',`${data.connected_dealers} dealers notified. Car ID: ${S.car_id.slice(0,8)}...`);
     startAuctionTimer();
     startSellerBidPoll();
-  } catch(err) {
+} catch(err) {
     showToast('','Failed to Start','Could not create listing: ' + err.message);
     btn.textContent = 'Start My Auction — It\'s Free';
-  }
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+}
 }
 
 function startAuctionTimer() {
