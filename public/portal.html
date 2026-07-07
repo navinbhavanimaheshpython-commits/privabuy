@@ -479,11 +479,11 @@ body::before {
 <div id="screen-seller" class="screen">
   <div class="topbar">
     <div class="topbar-logo">Priva<span>Buy</span></div>
-<div class="topbar-right">
-  <button class="btn btn-secondary btn-sm" onclick="openHelpGuide()">? Help</button>
-  <span class="topbar-user" id="seller-topbar-user">Seller</span>
-  <button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button>
-</div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="seller-topbar-user">Seller</span>
+      <button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
   <div class="content">
     <div class="tabs" id="seller-tabs">
       <button class="tab-btn active" onclick="sellerTab('list',this)">List Vehicle</button>
@@ -1478,7 +1478,7 @@ body::before {
         <div style="font-family:var(--serif);font-size:30px;color:#1a1814;margin-bottom:8px;">Getting Started</div>
         <p style="font-size:14px;color:var(--g5);line-height:1.7;margin-bottom:24px;">PrivaBuy connects you with local dealers who bid on your vehicle in a live auction. Here's the full flow, top to bottom:</p>
         <div style="display:flex;flex-direction:column;gap:14px;">
-         
+          ${''}
         </div>
         <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.14);border-radius:14px;padding:18px 20px;margin-bottom:14px;">
           <div style="font-size:14px;font-weight:600;color:#1a1814;margin-bottom:4px;">1. List Vehicle</div>
@@ -1601,7 +1601,6 @@ body::before {
     </div>
   </div>
 </div>
-
 
 <div id="toast-container"></div>
 
@@ -1899,30 +1898,6 @@ function dismissSellerIntro() {
   localStorage.setItem(SELLER_INTRO_KEY, '1');
   document.getElementById('seller-intro-overlay').style.display = 'none';
   if(typeof gtag !== 'undefined') gtag('event', 'intro_screen_cta_click');
-}
-
-function openHelpGuide() {
-  document.getElementById('help-guide-overlay').style.display = 'flex';
-  switchHelpSection('start', document.querySelector('.hg-nav-item[data-section="start"]'));
-}
-
-function closeHelpGuide() {
-  document.getElementById('help-guide-overlay').style.display = 'none';
-}
-
-function switchHelpSection(section, el) {
-  document.querySelectorAll('.hg-section').forEach(s => s.style.display = 'none');
-  document.getElementById(`hg-section-${section}`).style.display = 'block';
-  document.querySelectorAll('.hg-nav-item').forEach(n => {
-    n.style.background = 'none';
-    n.style.borderRight = 'none';
-    n.style.color = 'var(--g5)';
-    n.style.fontWeight = '400';
-  });
-  el.style.background = 'rgba(124,92,191,0.08)';
-  el.style.borderRight = '2px solid #7c5cbf';
-  el.style.color = '#1a1814';
-  el.style.fontWeight = '600';
 }
 
 async function loadSellerActiveAuction() {
