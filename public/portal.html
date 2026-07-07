@@ -1383,6 +1383,39 @@ body::before {
   </div>
 </div>
 
+<!-- SELLER INTRO OVERLAY -->
+<div class="modal-overlay" id="seller-intro-overlay">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-body" style="padding:36px 32px 32px;">
+      <div style="font-family:var(--serif);font-size:27px;line-height:1.3;color:#1a1814;margin-bottom:22px;">
+        You're 5 minutes away from a live auction — <span style="color:var(--accent)">free to list.</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:22px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:22px;height:22px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.30);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">1</div>
+          <div style="font-size:14px;color:#1a1814;line-height:1.5;">Enter your vehicle info</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:22px;height:22px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.30);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">2</div>
+          <div style="font-size:14px;color:#1a1814;line-height:1.5;">We calculate your market value</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:22px;height:22px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.30);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">3</div>
+          <div style="font-size:14px;color:#1a1814;line-height:1.5;">Dealers compete in a live auction</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:22px;height:22px;border-radius:50%;background:rgba(124,92,191,0.10);border:1px solid rgba(124,92,191,0.30);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">4</div>
+          <div style="font-size:14px;color:#1a1814;line-height:1.5;">You accept whenever you're ready — no pressure</div>
+        </div>
+      </div>
+      <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:12px 16px;margin-bottom:24px;font-size:13px;color:var(--g5);">
+        No fee unless you sell. No obligation to accept any offer.
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="dismissSellerIntro()" style="border-radius:12px">Start My Listing →</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-container"></div>
 
 
@@ -1630,7 +1663,26 @@ function togglePasswordVisibility() {
   
 function initSellerView() {
   loadSellerActiveAuction();
+  setTimeout(maybeShowSellerIntro, 800);
 }
+
+const SELLER_INTRO_KEY = 'privabuy_seen_seller_intro_v1';
+function maybeShowSellerIntro() {
+  if(localStorage.getItem(SELLER_INTRO_KEY)) return;
+  if(S.auctionActive) return;
+  const listTab = document.getElementById('seller-tab-list');
+  const screen = document.getElementById('screen-seller');
+  if(!listTab || listTab.classList.contains('hidden')) return;
+  if(!screen || !screen.classList.contains('active')) return;
+  document.getElementById('seller-intro-overlay').classList.add('open');
+}
+function dismissSellerIntro() {
+  localStorage.setItem(SELLER_INTRO_KEY, '1');
+  document.getElementById('seller-intro-overlay').classList.remove('open');
+  if(typeof gtag !== 'undefined') gtag('event', 'intro_screen_cta_click');
+}
+
+
 async function loadSellerActiveAuction() {
   if(!S.seller_id || S.auctionActive) return;
   try {
@@ -1640,6 +1692,7 @@ async function loadSellerActiveAuction() {
     const accepted = !active && listings.find(l => l.status === 'accepted' || l.status === 'accepted_pending_settlement');
 
     if(active) {
+      document.getElementById('seller-intro-overlay')?.classList.remove('open');
       S.car_id = active.car_id;
       S.auctionActive = true;
       S.auctionData = active;
@@ -1662,6 +1715,7 @@ async function loadSellerActiveAuction() {
       startSellerBidPoll();
       sellerTab('auction', document.querySelector('#screen-seller .tab-btn[onclick*="auction"]'));
     } else if(accepted) {
+      document.getElementById('seller-intro-overlay')?.classList.remove('open');
       S.car_id = accepted.car_id;
       S.auctionData = accepted;
       document.getElementById('seller-dealflow-tab').style.display = '';
