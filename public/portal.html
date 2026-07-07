@@ -479,11 +479,11 @@ body::before {
 <div id="screen-seller" class="screen">
   <div class="topbar">
     <div class="topbar-logo">Priva<span>Buy</span></div>
-    <div class="topbar-right">
-      <span class="topbar-user" id="seller-topbar-user">Seller</span>
-      <button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button>
-    </div>
-  </div>
+<div class="topbar-right">
+  <button class="btn btn-secondary btn-sm" onclick="openHelpGuide()">? Help</button>
+  <span class="topbar-user" id="seller-topbar-user">Seller</span>
+  <button class="btn btn-secondary btn-sm" onclick="logout()">Sign Out</button>
+</div>
   <div class="content">
     <div class="tabs" id="seller-tabs">
       <button class="tab-btn active" onclick="sellerTab('list',this)">List Vehicle</button>
@@ -1447,6 +1447,162 @@ body::before {
 
 </div>
 
+<!-- SELLER HELP GUIDE (full screen) -->
+<div id="help-guide-overlay" style="display:none;position:fixed;inset:0;background:#ffffff;z-index:2500;flex-direction:column;overflow:hidden;font-family:'Inter',sans-serif;">
+
+  <div style="flex-shrink:0;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,0.10);background:rgba(255,255,255,0.95);">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:19px;color:#1a1814;">Priva<span style="color:#7c5cbf;">Buy</span></div>
+      <div style="width:1px;height:18px;background:rgba(0,0,0,0.12);"></div>
+      <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.55);text-transform:uppercase;letter-spacing:0.06em;">Help Guide</div>
+    </div>
+    <button onclick="closeHelpGuide()" style="background:#f2f2f2;border:1px solid rgba(0,0,0,0.16);color:#1a1814;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+  </div>
+
+  <div style="flex:1;display:flex;min-height:0;">
+
+    <!-- SIDEBAR -->
+    <div style="width:230px;flex-shrink:0;background:#fafafa;border-right:1px solid rgba(0,0,0,0.10);padding:20px 0;overflow-y:auto;">
+      <div class="hg-nav-item hg-nav-active" data-section="start" onclick="switchHelpSection('start',this)" style="padding:11px 22px;font-size:13px;color:#1a1814;cursor:pointer;font-weight:600;background:rgba(124,92,191,0.08);border-right:2px solid #7c5cbf;">Getting Started</div>
+      <div class="hg-nav-item" data-section="list" onclick="switchHelpSection('list',this)" style="padding:11px 22px;font-size:13px;color:var(--g5);cursor:pointer;font-weight:400;">List Vehicle</div>
+      <div class="hg-nav-item" data-section="auction" onclick="switchHelpSection('auction',this)" style="padding:11px 22px;font-size:13px;color:var(--g5);cursor:pointer;font-weight:400;">My Auction</div>
+      <div class="hg-nav-item" data-section="history" onclick="switchHelpSection('history',this)" style="padding:11px 22px;font-size:13px;color:var(--g5);cursor:pointer;font-weight:400;">History</div>
+      <div class="hg-nav-item" data-section="dealflow" onclick="switchHelpSection('dealflow',this)" style="padding:11px 22px;font-size:13px;color:var(--g5);cursor:pointer;font-weight:400;">Deal Flow</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div style="flex:1;overflow-y:auto;padding:36px 48px;max-width:760px;">
+
+      <!-- GETTING STARTED -->
+      <div id="hg-section-start" class="hg-section">
+        <div style="font-family:var(--serif);font-size:30px;color:#1a1814;margin-bottom:8px;">Getting Started</div>
+        <p style="font-size:14px;color:var(--g5);line-height:1.7;margin-bottom:24px;">PrivaBuy connects you with local dealers who bid on your vehicle in a live auction. Here's the full flow, top to bottom:</p>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+         
+        </div>
+        <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.14);border-radius:14px;padding:18px 20px;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:600;color:#1a1814;margin-bottom:4px;">1. List Vehicle</div>
+          <div style="font-size:13px;color:var(--g5);line-height:1.6;">Fill out a 5-step form describing your car. Takes about 5 minutes.</div>
+        </div>
+        <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.14);border-radius:14px;padding:18px 20px;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:600;color:#1a1814;margin-bottom:4px;">2. My Auction</div>
+          <div style="font-size:13px;color:var(--g5);line-height:1.6;">Your auction goes live immediately. Dealers place bids in real time. You accept whenever you're ready — no deadline.</div>
+        </div>
+        <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.14);border-radius:14px;padding:18px 20px;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:600;color:#1a1814;margin-bottom:4px;">3. Deal Flow</div>
+          <div style="font-size:13px;color:var(--g5);line-height:1.6;">Once you accept a bid, a step-by-step checklist walks both you and the dealer through the Bill of Sale, pickup scheduling, inspection, and payment.</div>
+        </div>
+        <div style="background:#f7f7f7;border:1px solid rgba(0,0,0,0.14);border-radius:14px;padding:18px 20px;">
+          <div style="font-size:14px;font-weight:600;color:#1a1814;margin-bottom:4px;">4. History</div>
+          <div style="font-size:13px;color:var(--g5);line-height:1.6;">See all your past listings, bid counts, and final sale prices in one table.</div>
+        </div>
+      </div>
+
+      <!-- LIST VEHICLE -->
+      <div id="hg-section-list" class="hg-section" style="display:none;">
+        <div style="font-family:var(--serif);font-size:30px;color:#1a1814;margin-bottom:8px;">List Vehicle</div>
+        <p style="font-size:14px;color:var(--g5);line-height:1.7;margin-bottom:24px;">A 5-step wizard. You must complete each step before moving to the next.</p>
+
+        <div style="font-size:16px;font-weight:700;color:#7c5cbf;margin:24px 0 10px;">Step 1 — Vehicle</div>
+        <ul style="font-size:13px;color:#1a1814;line-height:1.9;padding-left:18px;margin-bottom:8px;">
+          <li><strong>VIN Number + Decode VIN button:</strong> Enter your 17-character VIN and click Decode VIN to auto-fill Year, Make, Model, and Trim from the NHTSA database.</li>
+          <li><strong>Year / Make / Model / Trim / Color / Mileage:</strong> Basic vehicle details — all required.</li>
+          <li><strong>Transmission / Drivetrain pills:</strong> Tap to select one option each.</li>
+          <li><strong>Title Status pills:</strong> Clean, Salvage, Rebuilt, or Lien Present.</li>
+          <li><strong>Loan or Lease pills:</strong> If you select Loan or Lease, a lien section appears asking for your lienholder, 10-day payoff amount, and a payoff statement upload — required before you can continue.</li>
+          <li><strong>Add-ons / Upgrades:</strong> Free text — list anything or write N/A.</li>
+          <li><strong>ZIP Code / Two or More Keys pills.</strong></li>
+          <li><strong>"Check Eligibility & Continue" button:</strong> Validates all fields, shows a pass/fail card based on your vehicle's age and mileage, then advances you to Step 2 automatically.</li>
+        </ul>
+
+        <div style="font-size:16px;font-weight:700;color:#7c5cbf;margin:24px 0 10px;">Step 2 — Photos</div>
+        <ul style="font-size:13px;color:#1a1814;line-height:1.9;padding-left:18px;margin-bottom:8px;">
+          <li><strong>6 required photo slots:</strong> Front Exterior, Rear Exterior, Driver Side, Passenger Side, Interior/Dash, Odometer.</li>
+          <li><strong>2 optional slots:</strong> Engine Bay, Any Damage.</li>
+          <li>Tap any slot to open your device's file picker.</li>
+          <li><strong>"Continue" button:</strong> Disabled logic-wise until all 6 required photos are uploaded.</li>
+        </ul>
+
+        <div style="font-size:16px;font-weight:700;color:#7c5cbf;margin:24px 0 10px;">Step 3 — Condition</div>
+        <ul style="font-size:13px;color:#1a1814;line-height:1.9;padding-left:18px;margin-bottom:8px;">
+          <li><strong>Exterior / Interior / Mechanical tabs:</strong> Three sub-sections you complete in order.</li>
+          <li><strong>Exterior:</strong> Click the car diagram (Front/Side/Rear views) to mark specific damage points, plus condition pills (scratches, dents, rust, etc.), tires replaced, windshield condition.</li>
+          <li><strong>Interior:</strong> Odor, stains, rips, dashboard damage cards; moonroof status; smoked-in status.</li>
+          <li><strong>Mechanical:</strong> Warning lights, mechanical issues, driveability, accident history.</li>
+          <li><strong>Overall Condition pills</strong> and <strong>Additional Comments</strong> free text apply to the whole vehicle.</li>
+          <li><strong>Truthfulness confirmation:</strong> Required "Yes" selection before continuing.</li>
+          <li><strong>Back / Continue buttons:</strong> Move between the three sub-tabs, then to Step 4.</li>
+        </ul>
+
+        <div style="font-size:16px;font-weight:700;color:#7c5cbf;margin:24px 0 10px;">Step 4 — Value & Price</div>
+        <ul style="font-size:13px;color:#1a1814;line-height:1.9;padding-left:18px;margin-bottom:8px;">
+          <li>Shows an <strong>estimated trade-in value</strong> pulled from real market listings when available.</li>
+          <li><strong>Set Your Minimum Price (floor price) input:</strong> The lowest bid you'll accept. Dealers never see this number — it's for your protection only.</li>
+          <li>Live feedback tells you if your floor is too low, too high, or well-calibrated.</li>
+        </ul>
+
+        <div style="font-size:16px;font-weight:700;color:#7c5cbf;margin:24px 0 10px;">Step 5 — Review</div>
+        <ul style="font-size:13px;color:#1a1814;line-height:1.9;padding-left:18px;margin-bottom:8px;">
+          <li>Summarizes your vehicle, minimum price, and disclosures.</li>
+          <li><strong>Exclusivity agreement checkbox:</strong> You're agreeing not to sell the car elsewhere while the auction is live.</li>
+          <li><strong>Terms & Conditions checkbox:</strong> Confirms your listing information is accurate.</li>
+          <li><strong>"Start My Auction — It's Free" button:</strong> Stays disabled until both checkboxes are checked. Submitting goes live immediately and notifies local dealers.</li>
+        </ul>
+      </div>
+
+      <!-- MY AUCTION -->
+      <div id="hg-section-auction" class="hg-section" style="display:none;">
+        <div style="font-family:var(--serif);font-size:30px;color:#1a1814;margin-bottom:8px;">My Auction</div>
+        <p style="font-size:14px;color:var(--g5);line-height:1.7;margin-bottom:24px;">Once your listing goes live, this tab shows the real-time auction.</p>
+        <ul style="font-size:13px;color:#1a1814;line-height:1.9;padding-left:18px;">
+          <li><strong>Elapsed timer:</strong> Shows how long your auction has been open. There's no deadline — it stays open until you accept a bid.</li>
+          <li><strong>Live Bids feed:</strong> Every dealer offer appears here, anonymized as "Dealer A," "Dealer B," etc. The top bid is highlighted.</li>
+          <li><strong>Your Vehicle card:</strong> A summary of what you listed, plus your floor price.</li>
+          <li><strong>"Accept Top Bid" button:</strong> Disabled until at least one bid comes in. Clicking it opens a confirmation — accepting is binding and starts the Deal Flow.</li>
+          <li><strong>"Counter Offer" button:</strong> Lets you propose a higher amount to the current top bidder, who then has a window to respond.</li>
+          <li>If the top bid is below your floor price, a warning banner appears — you're never required to accept a bid below your floor.</li>
+        </ul>
+      </div>
+
+      <!-- HISTORY -->
+      <div id="hg-section-history" class="hg-section" style="display:none;">
+        <div style="font-family:var(--serif);font-size:30px;color:#1a1814;margin-bottom:8px;">History</div>
+        <p style="font-size:14px;color:var(--g5);line-height:1.7;margin-bottom:24px;">A table of every listing you've ever created, past or present.</p>
+        <ul style="font-size:13px;color:#1a1814;line-height:1.9;padding-left:18px;">
+          <li><strong>Vehicle:</strong> Year/Make/Model and mileage.</li>
+          <li><strong>Date:</strong> When the listing was created.</li>
+          <li><strong>Bids:</strong> Total number of offers received.</li>
+          <li><strong>Top Offer:</strong> The highest bid the auction reached.</li>
+          <li><strong>Floor:</strong> The minimum price you set for that listing.</li>
+          <li><strong>Status:</strong> Open (live), Won/Accepted, or Closed.</li>
+        </ul>
+      </div>
+
+      <!-- DEAL FLOW -->
+      <div id="hg-section-dealflow" class="hg-section" style="display:none;">
+        <div style="font-family:var(--serif);font-size:30px;color:#1a1814;margin-bottom:8px;">Deal Flow</div>
+        <p style="font-size:14px;color:var(--g5);line-height:1.7;margin-bottom:24px;">After you accept a bid, this tab appears and walks you through completing the sale, step by step.</p>
+        <ol style="font-size:13px;color:#1a1814;line-height:2;padding-left:18px;">
+          <li><strong>Confirm Win:</strong> The dealer confirms their win and signs a facilitation acknowledgement.</li>
+          <li><strong>Bill of Sale:</strong> Both you and the dealer must check a box agreeing to the terms of sale before moving forward.</li>
+          <li><strong>Schedule Pickup:</strong> The dealer proposes 3 possible pickup times.</li>
+          <li><strong>Confirm Pickup Time:</strong> You pick whichever of the 3 times works best for you.</li>
+          <li><strong>Pickup Day:</strong> On the scheduled day, the dealer confirms the vehicle matches your listing (or flags a discrepancy).</li>
+          <li><strong>24hr Inspection:</strong> If the vehicle has disclosed accident history, the dealer may take extra time to inspect before paying.</li>
+          <li><strong>Title Transfer:</strong> The dealer must upload a photo of the signed title before they're allowed to pay you — this protects you from handing over the car without payment.</li>
+          <li><strong>Seller Confirms Payment:</strong> Once the dealer pays, you confirm receipt and hand over the title.</li>
+          <li><strong>Complete:</strong> The deal is finished.</li>
+        </ol>
+        <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:14px;padding:16px 18px;margin-top:20px;">
+          <div style="font-size:13px;color:#1a1814;line-height:1.7;"><strong>Note:</strong> A $350 PrivaBuy facilitation fee is deducted from the dealer's payment to you — you never pay anything out of pocket. Your Deal Flow tab always shows what you'll actually receive after this fee.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 <div id="toast-container"></div>
 
 
@@ -1743,6 +1899,30 @@ function dismissSellerIntro() {
   localStorage.setItem(SELLER_INTRO_KEY, '1');
   document.getElementById('seller-intro-overlay').style.display = 'none';
   if(typeof gtag !== 'undefined') gtag('event', 'intro_screen_cta_click');
+}
+
+function openHelpGuide() {
+  document.getElementById('help-guide-overlay').style.display = 'flex';
+  switchHelpSection('start', document.querySelector('.hg-nav-item[data-section="start"]'));
+}
+
+function closeHelpGuide() {
+  document.getElementById('help-guide-overlay').style.display = 'none';
+}
+
+function switchHelpSection(section, el) {
+  document.querySelectorAll('.hg-section').forEach(s => s.style.display = 'none');
+  document.getElementById(`hg-section-${section}`).style.display = 'block';
+  document.querySelectorAll('.hg-nav-item').forEach(n => {
+    n.style.background = 'none';
+    n.style.borderRight = 'none';
+    n.style.color = 'var(--g5)';
+    n.style.fontWeight = '400';
+  });
+  el.style.background = 'rgba(124,92,191,0.08)';
+  el.style.borderRight = '2px solid #7c5cbf';
+  el.style.color = '#1a1814';
+  el.style.fontWeight = '600';
 }
 
 async function loadSellerActiveAuction() {
