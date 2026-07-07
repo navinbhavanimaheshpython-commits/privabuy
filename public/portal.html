@@ -680,7 +680,7 @@ body::before {
         <div class="flex-between">
           <button class="btn btn-secondary" onclick="wizardGo(1)">← Back</button>
           <div style="display:flex;align-items:center;gap:16px;">
-            <a href="#" onclick="skipPhotosForNow();return false;" id="photos-skip-link" style="font-size:13px;color:var(--g5);text-decoration:underline;">Not near the car? Skip for now →</a>
+            <a href="#" onclick="skipPhotosForNow();return false;" id="photos-skip-link" style="font-size:14px;font-weight:500;color:var(--accent2);text-decoration:none;padding:11px 20px;border-radius:50px;border:1.5px solid rgba(194,124,42,0.45);background:rgba(194,124,42,0.08);white-space:nowrap;transition:all 0.2s;" onmouseover="this.style.background='rgba(194,124,42,0.16)'" onmouseout="this.style.background='rgba(194,124,42,0.08)'">Not near the car? Skip for now →</a>
             <button class="btn btn-primary" id="photos-next-btn" onclick="checkPhotosAndContinue()">Continue →</button>
           </div>
         </div>
