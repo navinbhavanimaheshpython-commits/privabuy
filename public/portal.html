@@ -553,39 +553,69 @@ body::before {
 
       <div id="wizard-step-1" class="hidden">
         <div class="card mb-24">
-          <div class="card-header"><div class="card-title">Your Vehicle Details</div><span class="text-muted text-sm">A few more details — most are optional</span></div>
+          <div class="card-header"><div class="card-title">Your Vehicle Details</div><span class="text-muted text-sm" id="v1-progress-label">Question 1 of 6</span></div>
           <div class="card-body">
-            <div class="form-group">
-              <label class="form-label">VIN Number <span style="font-weight:400;color:var(--g5)">(optional — speeds up review)</span></label>
-              <div class="vin-row">
-                <input class="form-input" id="vin-input" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()">
-                <button class="btn btn-secondary" onclick="decodeVIN()">Decode VIN</button>
-              </div>
-              <div id="vin-result" class="hidden mt-8"></div>
+            <div class="v1-dots" style="display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:22px;">
+              <div class="v1-dot" id="v1-dot-1" style="width:18px;height:6px;border-radius:3px;background:#7c5cbf;transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v1-dot-2" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v1-dot-3" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v1-dot-4" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v1-dot-5" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v1-dot-6" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
             </div>
-            <div class="divider"></div>
-            <div class="form-row-3">
-              <div class="form-group"><label class="form-label">Year *</label><input class="form-input" id="f-year" type="number" placeholder="2017" min="2010" max="2022"></div>
-              <div class="form-group"><label class="form-label">Make *</label><input class="form-input" id="f-make" placeholder="Honda"></div>
-              <div class="form-group"><label class="form-label">Model *</label><input class="form-input" id="f-model" placeholder="CR-V"></div>
-            </div>
-            <div class="form-row-3">
-              <div class="form-group"><label class="form-label">Trim <span style="font-weight:400;color:var(--g5)">(optional)</span></label><input class="form-input" id="f-trim" placeholder="EX-L"></div>
-              <div class="form-group"><label class="form-label">Color <span style="font-weight:400;color:var(--g5)">(optional)</span></label><input class="form-input" id="f-color" placeholder="Silver"></div>
-              <div class="form-group"><label class="form-label">Mileage *</label><input class="form-input" id="f-mileage" type="number" placeholder="94200"></div>
-            </div>
-            <div class="form-row">
+
+            <!-- hidden fields already captured by the quick-start screen -->
+            <input type="hidden" id="f-year"><input type="hidden" id="f-make"><input type="hidden" id="f-model">
+
+            <!-- Q1: VIN / Trim / Color (all optional) -->
+            <div id="v1-step-1" class="v1-step">
+              <div class="quick-start-eyebrow">Optional — speeds up review</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Know the VIN, trim, or color?</div>
               <div class="form-group">
-                <label class="form-label">Transmission *</label>
+                <label class="form-label">VIN Number</label>
+                <div class="vin-row">
+                  <input class="form-input" id="vin-input" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()">
+                  <button class="btn btn-secondary" onclick="decodeVIN()">Decode VIN</button>
+                </div>
+                <div id="vin-result" class="hidden mt-8"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Trim</label><input class="form-input" id="f-trim" placeholder="EX-L"></div>
+                <div class="form-group"><label class="form-label">Color</label><input class="form-input" id="f-color" placeholder="Silver"></div>
+              </div>
+              <div class="quick-start-hint" style="text-align:left;">Don't know these? Skip ahead — dealers can still bid.</div>
+            </div>
+
+            <!-- Q2: Mileage -->
+            <div id="v1-step-2" class="v1-step" style="display:none;">
+              <div class="quick-start-eyebrow">Required</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">How many miles are on it?</div>
+              <div class="form-group"><input class="form-input" id="f-mileage" type="number" placeholder="94200" style="font-size:20px;padding:16px;"></div>
+            </div>
+
+            <!-- Q3: ZIP -->
+            <div id="v1-step-3" class="v1-step" style="display:none;">
+              <div class="quick-start-eyebrow">Required</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Where's the car located?</div>
+              <div class="form-group"><input class="form-input" id="f-zip" placeholder="ZIP code, e.g. 60601" maxlength="5" type="number" style="font-size:20px;padding:16px;"></div>
+              <div class="quick-start-hint" style="text-align:left;">This is how we match you with nearby dealers.</div>
+            </div>
+
+            <!-- Q4: Transmission & Drivetrain -->
+            <div id="v1-step-4" class="v1-step" style="display:none;">
+              <div class="quick-start-eyebrow">Pre-filled with the most common answer</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Transmission & drivetrain?</div>
+              <div class="form-group">
+                <label class="form-label">Transmission</label>
                 <div class="radio-group" id="transmission-group">
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Automatic')">Automatic</div>
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Manual')">Manual</div>
-                  <div class="radio-pill" onclick="selectRadio('transmission-groutedp',this,'CVT')">CVT</div>
+                  <div class="radio-pill" onclick="selectRadio('transmission-group',this,'CVT')">CVT</div>
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Other')">Other</div>
                 </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Drivetrain *</label>
+                <label class="form-label">Drivetrain</label>
                 <div class="radio-group" id="drivetrain-group">
                   <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'FWD')">FWD</div>
                   <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'AWD')">AWD</div>
@@ -594,9 +624,13 @@ body::before {
                 </div>
               </div>
             </div>
-            <div class="form-row">
+
+            <!-- Q5: Title status & Loan/Lease (+ lien follow-up) -->
+            <div id="v1-step-5" class="v1-step" style="display:none;">
+              <div class="quick-start-eyebrow">Required — affects your payout</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Title status, and any loan or lease?</div>
               <div class="form-group">
-                <label class="form-label">Title Status *</label>
+                <label class="form-label">Title Status</label>
                 <div class="radio-group" id="title-group">
                   <div class="radio-pill" onclick="selectRadio('title-group',this,'Clean')">Clean</div>
                   <div class="radio-pill" onclick="selectRadio('title-group',this,'Salvage')">Salvage</div>
@@ -605,18 +639,17 @@ body::before {
                 </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Loan or Lease? *</label>
+                <label class="form-label">Loan or Lease?</label>
                 <div class="radio-group" id="loan-group">
-                <div class="radio-pill" onclick="selectRadio('loan-group',this,'None');toggleLienSection('None')">None — I own it outright</div>
-                <div class="radio-pill" onclick="selectRadio('loan-group',this,'Loan');toggleLienSection('Loan')">Loan</div>
-                <div class="radio-pill" onclick="selectRadio('loan-group',this,'Lease');toggleLienSection('Lease')">Lease</div>
+                  <div class="radio-pill" onclick="selectRadio('loan-group',this,'None');toggleLienSection('None')">None — I own it outright</div>
+                  <div class="radio-pill" onclick="selectRadio('loan-group',this,'Loan');toggleLienSection('Loan')">Loan</div>
+                  <div class="radio-pill" onclick="selectRadio('loan-group',this,'Lease');toggleLienSection('Lease')">Lease</div>
                 </div>
               </div>
 
               <!-- LIEN SECTION — shown when Loan or Lease selected -->
               <div id="lien-section" class="hidden" style="margin-top:4px;">
                 <div style="background:rgba(217,48,37,0.04);border:1px solid rgba(217,48,37,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:4px;">
-                  
                   <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(217,48,37,0.12);">
                     <span style="font-size:20px;flex-shrink:0;">⚠️</span>
                     <div>
@@ -624,7 +657,6 @@ body::before {
                       <div style="font-size:12px;color:var(--g5);line-height:1.6;">If the winning bid is less than your payoff amount, <strong style="color:#1a1814;">you are responsible for the difference</strong>. PrivaBuy cannot cover shortfalls. Once your auction goes live, it cannot be cancelled.</div>
                     </div>
                   </div>
-
                   <div class="form-row">
                     <div class="form-group">
                       <label class="form-label">Lien Holder (Bank / Finance Co.) *</label>
@@ -639,28 +671,15 @@ body::before {
                       <div style="font-size:11px;color:var(--g5);margin-top:5px;">Call your lender for a 10-day payoff quote. This differs from your remaining balance.</div>
                     </div>
                   </div>
-
-                  <!-- Live gap calculator -->
                   <div id="lien-calc-block" class="hidden" style="background:#ffffff;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:16px;margin-bottom:16px;">
                     <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--g5);margin-bottom:12px;">If Top Bid Equals Your Market Value</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
-                      <div>
-                        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">Est. Top Bid</div>
-                        <div id="lien-est-bid" style="font-size:20px;font-weight:700;color:var(--accent);">—</div>
-                      </div>
-                      <div>
-                        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">Your Payoff</div>
-                        <div id="lien-payoff-display" style="font-size:20px;font-weight:700;color:var(--red);">—</div>
-                      </div>
-                      <div>
-                        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">You Walk Away With</div>
-                        <div id="lien-net-display" style="font-size:20px;font-weight:700;">—</div>
-                      </div>
+                      <div><div style="font-size:11px;color:var(--g5);margin-bottom:4px;">Est. Top Bid</div><div id="lien-est-bid" style="font-size:20px;font-weight:700;color:var(--accent);">—</div></div>
+                      <div><div style="font-size:11px;color:var(--g5);margin-bottom:4px;">Your Payoff</div><div id="lien-payoff-display" style="font-size:20px;font-weight:700;color:var(--red);">—</div></div>
+                      <div><div style="font-size:11px;color:var(--g5);margin-bottom:4px;">You Walk Away With</div><div id="lien-net-display" style="font-size:20px;font-weight:700;">—</div></div>
                     </div>
                     <div id="lien-gap-warning" class="hidden" style="margin-top:12px;padding:10px 12px;background:rgba(217,48,37,0.06);border:1px solid rgba(217,48,37,0.18);border-radius:var(--r-sm);font-size:12px;color:var(--red);line-height:1.5;"></div>
                   </div>
-
-                  <!-- Payoff statement upload -->
                   <div class="form-group">
                     <label class="form-label">Upload 10-Day Payoff Statement *</label>
                     <div id="payoff-upload-slot" onclick="uploadPayoffStatement()" style="background:#ffffff;border:1.5px dashed rgba(0,0,0,0.25);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:border-color 0.2s;">
@@ -670,8 +689,6 @@ body::before {
                     </div>
                     <div id="payoff-upload-status" style="font-size:12px;color:var(--g5);margin-top:6px;display:none;"></div>
                   </div>
-
-                  <!-- Hard acknowledgment -->
                   <div style="background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-top:4px;">
                     <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
                       <input type="checkbox" id="lien-ack-checkbox" onchange="checkLienAck()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
@@ -680,30 +697,33 @@ body::before {
                       </span>
                     </label>
                   </div>
-
                 </div>
               </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Add-ons / Upgrades <span style="font-weight:400;color:var(--g5)">(optional — list any, or leave blank)</span></label>
-              <input class="form-input" id="f-addons" placeholder="e.g. Remote start, tinted windows, N/A">
-            </div>
-            <div class="form-row">
+
+            <!-- Q6: Add-ons & keys -->
+            <div id="v1-step-6" class="v1-step" style="display:none;">
+              <div class="quick-start-eyebrow">Last one</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Any upgrades, and how many keys?</div>
               <div class="form-group">
-                <label class="form-label">ZIP Code *</label>
-                <input class="form-input" id="f-zip" placeholder="60601" maxlength="5" type="number">
+                <label class="form-label">Add-ons / Upgrades <span style="font-weight:400;color:var(--g5)">(optional)</span></label>
+                <input class="form-input" id="f-addons" placeholder="e.g. Remote start, tinted windows, N/A">
               </div>
               <div class="form-group">
-                <label class="form-label">Two or More Keys? *</label>
+                <label class="form-label">Two or More Keys?</label>
                 <div class="radio-group" id="keys-group">
                   <div class="radio-pill " onclick="selectRadio('keys-group',this,'Yes')">Yes</div>
-                  <div class="radio-pill" onclick="selectRadio('keys-group',this,'No')">No  1 Key</div>
+                  <div class="radio-pill" onclick="selectRadio('keys-group',this,'No')">No — 1 Key</div>
                 </div>
               </div>
+              <div id="eligibility-result"></div>
             </div>
-            <div id="eligibility-result"></div>
-       </div>
-          <div class="flex-between" style="padding:0 24px 24px;"><div></div><button class="btn btn-primary" onclick="checkEligibility()">Check Eligibility & Continue →</button></div>
+
+            <div class="flex-between" style="margin-top:24px;">
+              <button class="btn btn-secondary" id="v1-back-btn" onclick="v1Back()" style="visibility:hidden;">← Back</button>
+              <button class="btn btn-primary" id="v1-next-btn" onclick="v1Next()">Next →</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2148,6 +2168,76 @@ function applyLikelyDefaults(which) {
   }
 }
 
+// ── replace the giant vehicle-details form with a 6-question sequence ──
+const V1_TOTAL_STEPS = 6;
+let v1CurrentStep = 1;
+
+function v1ResetToStart() {
+  v1CurrentStep = 1;
+  v1GoStep(1);
+}
+
+function v1GoStep(step) {
+  v1CurrentStep = step;
+  for(let i=1;i<=V1_TOTAL_STEPS;i++){
+    const el = document.getElementById(`v1-step-${i}`);
+    if(el) el.style.display = i===step ? 'block' : 'none';
+    const dot = document.getElementById(`v1-dot-${i}`);
+    if(dot){
+      if(i===step){ dot.style.width='18px'; dot.style.borderRadius='3px'; dot.style.background='#7c5cbf'; }
+      else if(i<step){ dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='#2a9e7c'; }
+      else { dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='rgba(0,0,0,0.14)'; }
+    }
+  }
+  const label = document.getElementById('v1-progress-label');
+  if(label) label.textContent = `Question ${step} of ${V1_TOTAL_STEPS}`;
+  const backBtn = document.getElementById('v1-back-btn');
+  if(backBtn) backBtn.style.visibility = step===1 ? 'hidden' : 'visible';
+  const nextBtn = document.getElementById('v1-next-btn');
+  if(nextBtn) nextBtn.textContent = step===V1_TOTAL_STEPS ? 'Check Eligibility & Continue →' : 'Next →';
+  saveDraftProgress();
+}
+
+function v1ValidateStep(step) {
+  if(step === 2) {
+    const mileage = parseInt(document.getElementById('f-mileage')?.value) || 0;
+    if(!mileage) { showToast('⚠️','Missing Field','Please enter the mileage.'); return false; }
+  }
+  if(step === 3) {
+    const zip = document.getElementById('f-zip')?.value.trim() || '';
+    if(!zip || zip.length < 5) { showToast('⚠️','Missing Field','Please enter a valid ZIP code.'); return false; }
+  }
+  if(step === 5) {
+    if(!getRadio('title-group')) { showToast('⚠️','Missing Field','Select your title status.'); return false; }
+    const loan = getRadio('loan-group');
+    if(!loan) { showToast('⚠️','Missing Field','Let us know if you have a loan or lease.'); return false; }
+    if(loan === 'Loan' || loan === 'Lease') {
+      const holder = document.getElementById('lien-holder-input')?.value.trim();
+      const payoff = parseInt(document.getElementById('lien-payoff-input')?.value) || 0;
+      const ack = document.getElementById('lien-ack-checkbox')?.checked;
+      if(!holder) { showToast('⚠️','Missing Field','Enter your lienholder name.'); return false; }
+      if(!payoff) { showToast('⚠️','Missing Field','Enter your 10-day payoff amount.'); return false; }
+      if(!S.lienPayoffUrl) { showToast('⚠️','Missing Upload','Upload your 10-day payoff statement.'); return false; }
+      if(!ack) { showToast('⚠️','Required','Check the lien acknowledgement box.'); return false; }
+    }
+  }
+  return true;
+}
+
+function v1Next() {
+  if(!v1ValidateStep(v1CurrentStep)) return;
+  if(v1CurrentStep >= V1_TOTAL_STEPS) {
+    checkEligibility();
+    return;
+  }
+  v1GoStep(v1CurrentStep + 1);
+}
+
+function v1Back() {
+  if(v1CurrentStep <= 1) return;
+  v1GoStep(v1CurrentStep - 1);
+}
+
 function checkPhotosAndContinue() {
   if(requiredFilled < 6) {
     skipPhotosForNow();
@@ -2272,6 +2362,7 @@ function quickStartSubmit() {
   setTimeout(() => {
     document.getElementById('quick-start-card').style.display = 'none';
     document.getElementById('wizard-step-1').classList.remove('hidden');
+    v1ResetToStart();
     document.getElementById('wizard-step-1').scrollIntoView({behavior:'smooth', block:'start'});
   }, 1100);
 }
@@ -2353,6 +2444,7 @@ function resumeDraft() {
     document.getElementById('quick-start-card').style.display = 'none';
     document.getElementById('wizard-step-1').classList.remove('hidden');
     wizardGo(1);
+    v1ResetToStart();
     document.getElementById('wizard-step-1').scrollIntoView({behavior:'smooth', block:'start'});
   } catch(err) { console.warn('Resume-draft failed:', err); }
 }
