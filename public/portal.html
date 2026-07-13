@@ -2241,8 +2241,8 @@ function v1Back() {
   v1GoStep(v1CurrentStep - 1);
 }
 
-// ── replace the tabbed condition/damage form with a 5-question sequence ──
-const V3_STEP_IDS = ['v3-step-1','damage-interior','v3-step-3','v3-step-4','v3-step-5'];
+// ── replace the tabbed condition/damage form with a 7-question sequence ──
+const V3_STEP_IDS = ['v3-step-1','v3-step-2','damage-interior','v3-step-4','v3-step-5','v3-step-6','v3-step-7'];
 const V3_TOTAL_STEPS = V3_STEP_IDS.length;
 let v3CurrentStep = 1;
 
@@ -2274,25 +2274,29 @@ function v3ValidateStep(step) {
   if(step === 1) {
     const extCond = document.querySelectorAll('#ext-condition-group .check-pill.selected');
     if(!extCond.length) { showToast('⚠️','Required','Select at least one exterior condition.'); return false; }
+  }
+  if(step === 2) {
     if(!getRadio('tires-group')) { showToast('⚠️','Required','Select tires replaced.'); return false; }
     if(!getRadio('windshield-group')) { showToast('⚠️','Required','Select windshield condition.'); return false; }
   }
-  if(step === 2) {
+  if(step === 3) {
     if(!getRadio('moonroof-group')) { showToast('⚠️','Required','Select moonroof status.'); return false; }
     if(!getRadio('smoked-group')) { showToast('⚠️','Required','Select smoked-in status.'); return false; }
   }
-  if(step === 3) {
+  if(step === 4) {
     const warnLights = document.querySelectorAll('#warning-lights-group .check-pill.selected');
     if(!warnLights.length) { showToast('⚠️','Required','Select warning lights status.'); return false; }
     const mechIssues = document.querySelectorAll('#mech-issues-group .check-pill.selected');
     if(!mechIssues.length) { showToast('⚠️','Required','Select mechanical issues status.'); return false; }
+  }
+  if(step === 5) {
     if(!getRadio('driveable-group')) { showToast('⚠️','Required','Is your vehicle driveable?'); return false; }
     if(!getRadio('accident-group')) { showToast('⚠️','Required','Select accident history.'); return false; }
   }
-  if(step === 4) {
+  if(step === 6) {
     if(!getRadio('overall-condition-group')) { showToast('⚠️','Required','Select overall condition.'); return false; }
   }
-  if(step === 5) {
+  if(step === 7) {
     if(!getRadio('truthful-group')) { showToast('⚠️','Required','Confirm all information is accurate.'); return false; }
   }
   return true;
