@@ -756,15 +756,22 @@ body::before {
 
       <div id="wizard-step-3" class="hidden">
         <div class="card mb-24">
-          <div class="card-header"><div class="card-title">Condition & Damage Disclosure</div><span class="text-muted text-sm">Pre-filled with common answers — tap any that don't match your car</span></div>
+          <div class="card-header"><div class="card-title">Condition & Damage Disclosure</div><span class="text-muted text-sm" id="v3-progress-label">Question 1 of 7</span></div>
           <div class="card-body">
-            <div class="damage-tabs">
-              <button class="damage-tab active" onclick="switchDamageTab('exterior',this)"> Exterior</button>
-              <button class="damage-tab" onclick="switchDamageTab('interior',this)"> Interior</button>
-              <button class="damage-tab" onclick="switchDamageTab('mechanical',this)"> Mechanical</button>
+            <div class="v1-dots" style="display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:22px;">
+              <div class="v1-dot" id="v3-dot-1" style="width:18px;height:6px;border-radius:3px;background:#7c5cbf;transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v3-dot-2" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v3-dot-3" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v3-dot-4" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v3-dot-5" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v3-dot-6" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v3-dot-7" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
             </div>
             <div id="damage-exterior">
-<p style="font-size:14px;color:var(--g5);margin-bottom:16px;text-align:center">Click areas to mark damage.</p>
+            <div id="v3-step-1">
+            <div class="quick-start-eyebrow">Pre-filled — tap any that don't match</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Any exterior damage?</div>
+<p style="font-size:14px;color:var(--g5);margin-bottom:16px;text-align:center">Click areas on the diagram to mark specific damage (optional).</p>
 
               <div style="display:flex;gap:6px;justify-content:center;margin-bottom:14px;">
                 <button onclick="switchCarView('front',this)" id="cvtab-front" style="padding:6px 18px;border-radius:50px;border:1.5px solid rgba(124,92,191,0.5);background:rgba(124,92,191,0.10);color:#7c5cbf;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Front</button>
@@ -914,6 +921,10 @@ body::before {
                   <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Hail Damage</div>
                 </div>
               </div>
+            </div>
+            <div id="v3-step-2" style="display:none;">
+            <div class="quick-start-eyebrow">Pre-filled — tap any that don't match</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Tires replaced, and windshield condition?</div>
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Tires Replaced</label>
@@ -935,7 +946,10 @@ body::before {
                 </div>
               </div>
             </div>
-            <div id="damage-interior" class="hidden">
+            </div>
+            <div id="damage-interior" style="display:none;">
+            <div class="quick-start-eyebrow">Optional — tap any that apply</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Any interior issues?</div>
               <div class="damage-section-grid">
                 <div class="damage-area-card" id="area-odor" onclick="toggleAreaDamage(this,'odor')"><div class="damage-area-name"> Persistent Odor</div><div class="damage-area-desc">Smoke, pet, mildew, or other odors</div></div>
                 <div class="damage-area-card" id="area-stains" onclick="toggleAreaDamage(this,'stains')"><div class="damage-area-name"> Stains</div><div class="damage-area-desc">Seat, carpet, or headliner staining</div></div>
@@ -958,7 +972,10 @@ body::before {
                 </div>
               </div>
             </div>
-            <div id="damage-mechanical" class="hidden">
+            <div id="damage-mechanical">
+            <div id="v3-step-4" style="display:none;">
+            <div class="quick-start-eyebrow">Pre-filled — tap any that apply</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Warning lights or mechanical issues?</div>
               <div class="form-group">
                 <label class="form-label">Warning Lights On Dashboard?</label>
                 <div class="check-group" id="warning-lights-group">
@@ -980,6 +997,10 @@ body::before {
                   <div class="check-pill" onclick="togglePill(this)">Suspension/Steering</div>
                 </div>
               </div>
+            </div>
+            <div id="v3-step-5" style="display:none;">
+            <div class="quick-start-eyebrow">Pre-filled — tap any that don't match</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Is it driveable? Any accident history?</div>
               <div class="form-row mt-16">
                 <div class="form-group">
                   <label class="form-label">Is Your Vehicle Driveable?</label>
@@ -998,9 +1019,12 @@ body::before {
                 </div>
               </div>
             </div>
-            <div class="divider"></div>
+            </div>
+            <div id="v3-step-6" style="display:none;">
+            <div class="quick-start-eyebrow">Required</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Overall condition, and any notes?</div>
             <div class="form-group">
-              <label class="form-label">Overall Condition *</label>
+              <label class="form-label">Overall Condition</label>
               <div class="radio-group" id="overall-condition-group">
                 <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Like New')"> Like New</div>
                 <div class="radio-pill " onclick="selectRadio('overall-condition-group',this,'Pretty Great')"> Pretty Great</div>
@@ -1010,21 +1034,25 @@ body::before {
               </div>
             </div>
             <div class="form-group mt-16">
-              <label class="form-label">Additional Comments</label>
+              <label class="form-label">Additional Comments <span style="font-weight:400;color:var(--g5)">(optional)</span></label>
               <textarea class="form-textarea" id="f-comments" placeholder="e.g. Small dent on rear passenger door, new brakes 6mo ago..."></textarea>
             </div>
+            </div>
+            <div id="v3-step-7" style="display:none;">
+            <div class="quick-start-eyebrow">Last one — required</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Is all information above true and accurate?</div>
             <div class="form-group">
-              <label class="form-label" style="margin-bottom:12px">Is all information above true and accurate? *</label>
               <div class="radio-group" id="truthful-group">
                 <div class="radio-pill " onclick="selectRadio('truthful-group',this,'Yes')"> Yes, everything is accurate</div>
                 <div class="radio-pill" onclick="selectRadio('truthful-group',this,'No')">No</div>
               </div>
             </div>
+            </div>
+            <div class="flex-between" style="margin-top:24px;">
+              <button class="btn btn-secondary" id="v3-back-btn" onclick="v3Back()">← Back</button>
+              <button class="btn btn-primary" id="v3-next-btn" onclick="v3Next()">Next →</button>
+            </div>
           </div>
-        </div>
-        <div class="flex-between">
-          <button class="btn btn-secondary" onclick="damageTabBack()">← Back</button>
-          <button class="btn btn-primary" onclick="damageTabNext()">Continue →</button>
         </div>
       </div>
 
@@ -2105,7 +2133,7 @@ function sellerTab(tab, el) {
 
 function wizardGo(step) {
   S.wizardStep = step;
-  if(step === 3) currentDamageTab = 'exterior';
+  if(step === 3) { currentDamageTab = 'exterior'; v3ResetToStart(); }
   for(let i=1;i<=5;i++){
     document.getElementById(`wizard-step-${i}`).classList.toggle('hidden',i!==step);
     const ws = document.getElementById(`ws-${i}`);
@@ -2236,6 +2264,81 @@ function v1Next() {
 function v1Back() {
   if(v1CurrentStep <= 1) return;
   v1GoStep(v1CurrentStep - 1);
+}
+
+// ── replace the tabbed condition/damage form with a 7-question sequence ──
+const V3_STEP_IDS = ['v3-step-1','v3-step-2','damage-interior','v3-step-4','v3-step-5','v3-step-6','v3-step-7'];
+const V3_TOTAL_STEPS = V3_STEP_IDS.length;
+let v3CurrentStep = 1;
+
+function v3ResetToStart() {
+  v3CurrentStep = 1;
+  v3GoStep(1);
+}
+
+function v3GoStep(step) {
+  v3CurrentStep = step;
+  V3_STEP_IDS.forEach((id, idx) => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = (idx+1===step) ? 'block' : 'none';
+  });
+  for(let i=1;i<=V3_TOTAL_STEPS;i++){
+    const dot = document.getElementById(`v3-dot-${i}`);
+    if(dot){
+      if(i===step){ dot.style.width='18px'; dot.style.borderRadius='3px'; dot.style.background='#7c5cbf'; }
+      else if(i<step){ dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='#2a9e7c'; }
+      else { dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='rgba(0,0,0,0.14)'; }
+    }
+  }
+  const label = document.getElementById('v3-progress-label');
+  if(label) label.textContent = `Question ${step} of ${V3_TOTAL_STEPS}`;
+  saveDraftProgress();
+}
+
+function v3ValidateStep(step) {
+  if(step === 1) {
+    const extCond = document.querySelectorAll('#ext-condition-group .check-pill.selected');
+    if(!extCond.length) { showToast('⚠️','Required','Select at least one exterior condition.'); return false; }
+  }
+  if(step === 2) {
+    if(!getRadio('tires-group')) { showToast('⚠️','Required','Select tires replaced.'); return false; }
+    if(!getRadio('windshield-group')) { showToast('⚠️','Required','Select windshield condition.'); return false; }
+  }
+  if(step === 3) {
+    if(!getRadio('moonroof-group')) { showToast('⚠️','Required','Select moonroof status.'); return false; }
+    if(!getRadio('smoked-group')) { showToast('⚠️','Required','Select smoked-in status.'); return false; }
+  }
+  if(step === 4) {
+    const warnLights = document.querySelectorAll('#warning-lights-group .check-pill.selected');
+    if(!warnLights.length) { showToast('⚠️','Required','Select warning lights status.'); return false; }
+    const mechIssues = document.querySelectorAll('#mech-issues-group .check-pill.selected');
+    if(!mechIssues.length) { showToast('⚠️','Required','Select mechanical issues status.'); return false; }
+  }
+  if(step === 5) {
+    if(!getRadio('driveable-group')) { showToast('⚠️','Required','Is your vehicle driveable?'); return false; }
+    if(!getRadio('accident-group')) { showToast('⚠️','Required','Select accident history.'); return false; }
+  }
+  if(step === 6) {
+    if(!getRadio('overall-condition-group')) { showToast('⚠️','Required','Select overall condition.'); return false; }
+  }
+  if(step === 7) {
+    if(!getRadio('truthful-group')) { showToast('⚠️','Required','Confirm all information is accurate.'); return false; }
+  }
+  return true;
+}
+
+function v3Next() {
+  if(!v3ValidateStep(v3CurrentStep)) return;
+  if(v3CurrentStep >= V3_TOTAL_STEPS) {
+    wizardGo(4);
+    return;
+  }
+  v3GoStep(v3CurrentStep + 1);
+}
+
+function v3Back() {
+  if(v3CurrentStep <= 1) { wizardGo(2); return; }
+  v3GoStep(v3CurrentStep - 1);
 }
 
 function checkPhotosAndContinue() {

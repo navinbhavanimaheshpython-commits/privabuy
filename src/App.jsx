@@ -572,7 +572,7 @@ function HowItWorks() {
             List today.<br />Get paid today.
           </h2>
           <p style={{ color:"rgba(26,24,20,0.84)", fontSize:"1rem", maxWidth:480, margin:"0 auto" }}>
-            The whole process takes under an hour. Here's how we turn your unused car into a competitive bidding war.
+            The whole process takes under an hour. Here's how we turn your used car into a competitive bidding war.
           </p>
         </div>
 
