@@ -553,24 +553,21 @@ body::before {
 
       <div id="wizard-step-1" class="hidden">
         <div class="card mb-24">
-          <div class="card-header"><div class="card-title">Your Vehicle Details</div><span class="text-muted text-sm" id="v1-progress-label">Question 1 of 6</span></div>
+          <div class="card-header"><div class="card-title">Your Vehicle Details</div><span class="text-muted text-sm" id="v1-progress-label">Question 1 of 4</span></div>
           <div class="card-body">
             <div class="v1-dots" style="display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:22px;">
               <div class="v1-dot" id="v1-dot-1" style="width:18px;height:6px;border-radius:3px;background:#7c5cbf;transition:all 0.3s;"></div>
               <div class="v1-dot" id="v1-dot-2" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
               <div class="v1-dot" id="v1-dot-3" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
               <div class="v1-dot" id="v1-dot-4" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
-              <div class="v1-dot" id="v1-dot-5" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
-              <div class="v1-dot" id="v1-dot-6" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
             </div>
 
-            <!-- hidden fields already captured by the quick-start screen -->
             <input type="hidden" id="f-year"><input type="hidden" id="f-make"><input type="hidden" id="f-model">
 
-            <!-- Q1: VIN / Trim / Color (all optional) -->
+            <!-- Q1: VIN / Trim / Color / Add-ons (all optional) -->
             <div id="v1-step-1" class="v1-step">
               <div class="quick-start-eyebrow">Optional — speeds up review</div>
-              <div class="quick-start-title" style="text-align:left;font-size:24px;">Know the VIN, trim, or color?</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Know the VIN, trim, color, or upgrades?</div>
               <div class="form-group">
                 <label class="form-label">VIN Number</label>
                 <div class="vin-row">
@@ -583,28 +580,28 @@ body::before {
                 <div class="form-group"><label class="form-label">Trim</label><input class="form-input" id="f-trim" placeholder="EX-L"></div>
                 <div class="form-group"><label class="form-label">Color</label><input class="form-input" id="f-color" placeholder="Silver"></div>
               </div>
+              <div class="form-group">
+                <label class="form-label">Add-ons / Upgrades</label>
+                <input class="form-input" id="f-addons" placeholder="e.g. Remote start, tinted windows, N/A">
+              </div>
               <div class="quick-start-hint" style="text-align:left;">Don't know these? Skip ahead — dealers can still bid.</div>
             </div>
 
-            <!-- Q2: Mileage -->
+            <!-- Q2: Mileage + ZIP -->
             <div id="v1-step-2" class="v1-step" style="display:none;">
               <div class="quick-start-eyebrow">Required</div>
-              <div class="quick-start-title" style="text-align:left;font-size:24px;">How many miles are on it?</div>
-              <div class="form-group"><input class="form-input" id="f-mileage" type="number" placeholder="94200" style="font-size:20px;padding:16px;"></div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Mileage, and where's the car located?</div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Mileage</label><input class="form-input" id="f-mileage" type="number" placeholder="94200" style="font-size:18px;padding:14px;"></div>
+                <div class="form-group"><label class="form-label">ZIP Code</label><input class="form-input" id="f-zip" placeholder="60601" maxlength="5" type="number" style="font-size:18px;padding:14px;"></div>
+              </div>
+              <div class="quick-start-hint" style="text-align:left;">ZIP is how we match you with nearby dealers.</div>
             </div>
 
-            <!-- Q3: ZIP -->
+            <!-- Q3: Transmission + Drivetrain + Keys -->
             <div id="v1-step-3" class="v1-step" style="display:none;">
-              <div class="quick-start-eyebrow">Required</div>
-              <div class="quick-start-title" style="text-align:left;font-size:24px;">Where's the car located?</div>
-              <div class="form-group"><input class="form-input" id="f-zip" placeholder="ZIP code, e.g. 60601" maxlength="5" type="number" style="font-size:20px;padding:16px;"></div>
-              <div class="quick-start-hint" style="text-align:left;">This is how we match you with nearby dealers.</div>
-            </div>
-
-            <!-- Q4: Transmission & Drivetrain -->
-            <div id="v1-step-4" class="v1-step" style="display:none;">
               <div class="quick-start-eyebrow">Pre-filled with the most common answer</div>
-              <div class="quick-start-title" style="text-align:left;font-size:24px;">Transmission & drivetrain?</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Transmission, drivetrain, and keys?</div>
               <div class="form-group">
                 <label class="form-label">Transmission</label>
                 <div class="radio-group" id="transmission-group">
@@ -623,10 +620,17 @@ body::before {
                   <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'4WD')">4WD</div>
                 </div>
               </div>
+              <div class="form-group">
+                <label class="form-label">Two or More Keys?</label>
+                <div class="radio-group" id="keys-group">
+                  <div class="radio-pill " onclick="selectRadio('keys-group',this,'Yes')">Yes</div>
+                  <div class="radio-pill" onclick="selectRadio('keys-group',this,'No')">No — 1 Key</div>
+                </div>
+              </div>
             </div>
 
-            <!-- Q5: Title status & Loan/Lease (+ lien follow-up) -->
-            <div id="v1-step-5" class="v1-step" style="display:none;">
+            <!-- Q4: Title status & Loan/Lease (+ lien follow-up) -->
+            <div id="v1-step-4" class="v1-step" style="display:none;">
               <div class="quick-start-eyebrow">Required — affects your payout</div>
               <div class="quick-start-title" style="text-align:left;font-size:24px;">Title status, and any loan or lease?</div>
               <div class="form-group">
@@ -647,7 +651,6 @@ body::before {
                 </div>
               </div>
 
-              <!-- LIEN SECTION — shown when Loan or Lease selected -->
               <div id="lien-section" class="hidden" style="margin-top:4px;">
                 <div style="background:rgba(217,48,37,0.04);border:1px solid rgba(217,48,37,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:4px;">
                   <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(217,48,37,0.12);">
@@ -699,23 +702,6 @@ body::before {
                   </div>
                 </div>
               </div>
-            </div>
-
-            <!-- Q6: Add-ons & keys -->
-            <div id="v1-step-6" class="v1-step" style="display:none;">
-              <div class="quick-start-eyebrow">Last one</div>
-              <div class="quick-start-title" style="text-align:left;font-size:24px;">Any upgrades, and how many keys?</div>
-              <div class="form-group">
-                <label class="form-label">Add-ons / Upgrades <span style="font-weight:400;color:var(--g5)">(optional)</span></label>
-                <input class="form-input" id="f-addons" placeholder="e.g. Remote start, tinted windows, N/A">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Two or More Keys?</label>
-                <div class="radio-group" id="keys-group">
-                  <div class="radio-pill " onclick="selectRadio('keys-group',this,'Yes')">Yes</div>
-                  <div class="radio-pill" onclick="selectRadio('keys-group',this,'No')">No — 1 Key</div>
-                </div>
-              </div>
               <div id="eligibility-result"></div>
             </div>
 
@@ -726,6 +712,7 @@ body::before {
           </div>
         </div>
       </div>
+
 
       <div id="wizard-step-2" class="hidden">
         <div class="card mb-24">
@@ -756,7 +743,7 @@ body::before {
 
       <div id="wizard-step-3" class="hidden">
         <div class="card mb-24">
-          <div class="card-header"><div class="card-title">Condition & Damage Disclosure</div><span class="text-muted text-sm" id="v3-progress-label">Question 1 of 7</span></div>
+          <div class="card-header"><div class="card-title">Condition & Damage Disclosure</div><span class="text-muted text-sm" id="v3-progress-label">Question 1 of 5</span></div>
           <div class="card-body">
             <div class="v1-dots" style="display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:22px;">
               <div class="v1-dot" id="v3-dot-1" style="width:18px;height:6px;border-radius:3px;background:#7c5cbf;transition:all 0.3s;"></div>
@@ -764,8 +751,6 @@ body::before {
               <div class="v1-dot" id="v3-dot-3" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
               <div class="v1-dot" id="v3-dot-4" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
               <div class="v1-dot" id="v3-dot-5" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
-              <div class="v1-dot" id="v3-dot-6" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
-              <div class="v1-dot" id="v3-dot-7" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
             </div>
             <div id="damage-exterior">
             <div id="v3-step-1">
@@ -921,11 +906,7 @@ body::before {
                   <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Hail Damage</div>
                 </div>
               </div>
-            </div>
-            <div id="v3-step-2" style="display:none;">
-            <div class="quick-start-eyebrow">Pre-filled — tap any that don't match</div>
-            <div class="quick-start-title" style="text-align:left;font-size:24px;">Tires replaced, and windshield condition?</div>
-              <div class="form-row">
+            <div class="form-row mt-16">
                 <div class="form-group">
                   <label class="form-label">Tires Replaced</label>
                   <div class="radio-group" id="tires-group">
@@ -945,7 +926,6 @@ body::before {
                   </div>
                 </div>
               </div>
-            </div>
             </div>
             <div id="damage-interior" style="display:none;">
             <div class="quick-start-eyebrow">Optional — tap any that apply</div>
@@ -973,9 +953,9 @@ body::before {
               </div>
             </div>
             <div id="damage-mechanical">
-            <div id="v3-step-4" style="display:none;">
+            <div id="v3-step-3" style="display:none;">
             <div class="quick-start-eyebrow">Pre-filled — tap any that apply</div>
-            <div class="quick-start-title" style="text-align:left;font-size:24px;">Warning lights or mechanical issues?</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Warning lights, mechanical issues, driveability, and accidents?</div>
               <div class="form-group">
                 <label class="form-label">Warning Lights On Dashboard?</label>
                 <div class="check-group" id="warning-lights-group">
@@ -998,10 +978,7 @@ body::before {
                 </div>
               </div>
             </div>
-            <div id="v3-step-5" style="display:none;">
-            <div class="quick-start-eyebrow">Pre-filled — tap any that don't match</div>
-            <div class="quick-start-title" style="text-align:left;font-size:24px;">Is it driveable? Any accident history?</div>
-              <div class="form-row mt-16">
+            <div class="form-row mt-16">
                 <div class="form-group">
                   <label class="form-label">Is Your Vehicle Driveable?</label>
                   <div class="radio-group" id="driveable-group">
@@ -1020,7 +997,7 @@ body::before {
               </div>
             </div>
             </div>
-            <div id="v3-step-6" style="display:none;">
+            <div id="v3-step-4" style="display:none;">
             <div class="quick-start-eyebrow">Required</div>
             <div class="quick-start-title" style="text-align:left;font-size:24px;">Overall condition, and any notes?</div>
             <div class="form-group">
@@ -1038,7 +1015,7 @@ body::before {
               <textarea class="form-textarea" id="f-comments" placeholder="e.g. Small dent on rear passenger door, new brakes 6mo ago..."></textarea>
             </div>
             </div>
-            <div id="v3-step-7" style="display:none;">
+            <div id="v3-step-5" style="display:none;">
             <div class="quick-start-eyebrow">Last one — required</div>
             <div class="quick-start-title" style="text-align:left;font-size:24px;">Is all information above true and accurate?</div>
             <div class="form-group">
@@ -2196,8 +2173,8 @@ function applyLikelyDefaults(which) {
   }
 }
 
-// ── replace the giant vehicle-details form with a 6-question sequence ──
-const V1_TOTAL_STEPS = 6;
+// ── replace the giant vehicle-details form with a 4-question sequence ──
+const V1_TOTAL_STEPS = 4;
 let v1CurrentStep = 1;
 
 function v1ResetToStart() {
@@ -2230,12 +2207,10 @@ function v1ValidateStep(step) {
   if(step === 2) {
     const mileage = parseInt(document.getElementById('f-mileage')?.value) || 0;
     if(!mileage) { showToast('⚠️','Missing Field','Please enter the mileage.'); return false; }
-  }
-  if(step === 3) {
     const zip = document.getElementById('f-zip')?.value.trim() || '';
     if(!zip || zip.length < 5) { showToast('⚠️','Missing Field','Please enter a valid ZIP code.'); return false; }
   }
-  if(step === 5) {
+  if(step === 4) {
     if(!getRadio('title-group')) { showToast('⚠️','Missing Field','Select your title status.'); return false; }
     const loan = getRadio('loan-group');
     if(!loan) { showToast('⚠️','Missing Field','Let us know if you have a loan or lease.'); return false; }
@@ -2266,8 +2241,8 @@ function v1Back() {
   v1GoStep(v1CurrentStep - 1);
 }
 
-// ── replace the tabbed condition/damage form with a 7-question sequence ──
-const V3_STEP_IDS = ['v3-step-1','v3-step-2','damage-interior','v3-step-4','v3-step-5','v3-step-6','v3-step-7'];
+// ── replace the tabbed condition/damage form with a 5-question sequence ──
+const V3_STEP_IDS = ['v3-step-1','damage-interior','v3-step-3','v3-step-4','v3-step-5'];
 const V3_TOTAL_STEPS = V3_STEP_IDS.length;
 let v3CurrentStep = 1;
 
@@ -2299,29 +2274,25 @@ function v3ValidateStep(step) {
   if(step === 1) {
     const extCond = document.querySelectorAll('#ext-condition-group .check-pill.selected');
     if(!extCond.length) { showToast('⚠️','Required','Select at least one exterior condition.'); return false; }
-  }
-  if(step === 2) {
     if(!getRadio('tires-group')) { showToast('⚠️','Required','Select tires replaced.'); return false; }
     if(!getRadio('windshield-group')) { showToast('⚠️','Required','Select windshield condition.'); return false; }
   }
-  if(step === 3) {
+  if(step === 2) {
     if(!getRadio('moonroof-group')) { showToast('⚠️','Required','Select moonroof status.'); return false; }
     if(!getRadio('smoked-group')) { showToast('⚠️','Required','Select smoked-in status.'); return false; }
   }
-  if(step === 4) {
+  if(step === 3) {
     const warnLights = document.querySelectorAll('#warning-lights-group .check-pill.selected');
     if(!warnLights.length) { showToast('⚠️','Required','Select warning lights status.'); return false; }
     const mechIssues = document.querySelectorAll('#mech-issues-group .check-pill.selected');
     if(!mechIssues.length) { showToast('⚠️','Required','Select mechanical issues status.'); return false; }
-  }
-  if(step === 5) {
     if(!getRadio('driveable-group')) { showToast('⚠️','Required','Is your vehicle driveable?'); return false; }
     if(!getRadio('accident-group')) { showToast('⚠️','Required','Select accident history.'); return false; }
   }
-  if(step === 6) {
+  if(step === 4) {
     if(!getRadio('overall-condition-group')) { showToast('⚠️','Required','Select overall condition.'); return false; }
   }
-  if(step === 7) {
+  if(step === 5) {
     if(!getRadio('truthful-group')) { showToast('⚠️','Required','Confirm all information is accurate.'); return false; }
   }
   return true;
