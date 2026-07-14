@@ -173,6 +173,28 @@ body::before {
 .wizard-step.done .wizard-step-dot{border-color:rgba(42,158,124,0.5);background:rgba(42,158,124,0.10);color:var(--accent3);}
 .wizard-step-label{font-size:11px;color:var(--g5);font-weight:300;}
 .wizard-step.active .wizard-step-label{color:#1a1814;}
+.wizard-step-icon{font-size:16px;line-height:1;margin-bottom:2px;}
+.wizard-step.done .wizard-step-dot::after{content:'✓';font-size:14px;}
+.wizard-step.done .wizard-step-icon{display:none;}
+.momentum-bar-wrap{margin-bottom:8px;}
+.momentum-reward-note{text-align:center;font-size:12px;color:var(--accent3);font-weight:600;margin-bottom:18px;}
+
+/* ── Quick-start (Fix 2): single-question first screen ── */
+.quick-start-card{background:linear-gradient(160deg,#f8f6ff 0%,#eef2ff 100%);border:1.5px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:36px 28px;text-align:center;margin-bottom:24px;}
+.quick-start-eyebrow{font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.quick-start-title{font-family:var(--serif);font-size:26px;color:#1a1814;margin-bottom:22px;}
+.quick-start-row{display:flex;gap:10px;max-width:520px;margin:0 auto;flex-wrap:wrap;justify-content:center;}
+.quick-start-row .form-input{background:#fff;}
+.quick-start-row input#qs-year{max-width:100px;}
+.quick-start-row input#qs-make{max-width:160px;}
+.quick-start-row input#qs-model{max-width:160px;}
+.quick-start-submit{margin-top:18px;}
+.quick-start-hint{font-size:12px;color:var(--g5);margin-top:14px;}
+#quick-start-confirm{display:none;background:#fff;border:1.5px solid rgba(42,158,124,0.35);border-radius:var(--r);padding:16px 20px;margin-top:18px;text-align:left;align-items:center;gap:12px;}
+#quick-start-confirm.show{display:flex;}
+.concierge-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(194,124,42,0.06);border:1.5px solid rgba(194,124,42,0.28);border-radius:var(--r);padding:14px 18px;margin-bottom:20px;flex-wrap:wrap;}
+.concierge-banner-text{font-size:13px;color:#1a1814;line-height:1.5;}
+.concierge-banner-text strong{display:block;font-size:14px;margin-bottom:2px;}
 
 /* VIN */
 .vin-row{display:flex;gap:10px;}
@@ -495,49 +517,101 @@ body::before {
     </div>
 
     <div id="seller-tab-list">
-      <div class="wizard-steps">
-        <div class="wizard-step active" id="ws-1"><div class="wizard-step-dot">1</div><div class="wizard-step-label">Vehicle</div></div>
-        <div class="wizard-step" id="ws-2"><div class="wizard-step-dot">2</div><div class="wizard-step-label">Photos</div></div>
-        <div class="wizard-step" id="ws-3"><div class="wizard-step-dot">3</div><div class="wizard-step-label">Condition</div></div>
-        <div class="wizard-step" id="ws-4"><div class="wizard-step-dot">4</div><div class="wizard-step-label">Value & Price</div></div>
-        <div class="wizard-step" id="ws-5"><div class="wizard-step-dot">5</div><div class="wizard-step-label">Review</div></div>
+      <div class="momentum-bar-wrap">
+        <div class="wizard-steps">
+          <div class="wizard-step active" id="ws-1"><div class="wizard-step-dot"><span class="wizard-step-icon">🚗</span></div><div class="wizard-step-label">Your Car</div></div>
+          <div class="wizard-step" id="ws-2"><div class="wizard-step-dot"><span class="wizard-step-icon">📸</span></div><div class="wizard-step-label">Photos</div></div>
+          <div class="wizard-step" id="ws-3"><div class="wizard-step-dot"><span class="wizard-step-icon">📋</span></div><div class="wizard-step-label">Condition</div></div>
+          <div class="wizard-step" id="ws-4"><div class="wizard-step-dot"><span class="wizard-step-icon">💰</span></div><div class="wizard-step-label">Est. Value</div></div>
+          <div class="wizard-step" id="ws-5"><div class="wizard-step-dot"><span class="wizard-step-icon">✅</span></div><div class="wizard-step-label">Live to Dealers</div></div>
+        </div>
+        <div class="momentum-reward-note" id="dealer-waiting-note">🎯 Dealers in your area are checking new listings right now</div>
       </div>
 
-      <div id="wizard-step-1">
+      <!-- FIX 6: concierge fallback — visible at every stage of the flow -->
+      <div class="concierge-banner">
+        <div class="concierge-banner-text"><strong>Not in the mood to fill out a form?</strong>Call or text us and we'll build your listing with you over the phone — takes about 5 minutes.</div>
+        <a href="tel:+18005551234" class="btn btn-secondary" onclick="requestConcierge()" style="white-space:nowrap;">📞 Have us do it for you</a>
+      </div>
+
+      <!-- FIX 2: single-question quick start — under 15 seconds, instant reflection -->
+      <div id="quick-start-card" class="quick-start-card">
+        <div class="quick-start-eyebrow">Ready to see what your car is worth? answer these short questions!</div>
+        <div class="quick-start-title">What's your car?</div>
+        <div class="quick-start-row">
+          <input class="form-input" id="qs-year" type="number" placeholder="Year" min="2000" max="2026">
+          <input class="form-input" id="qs-make" placeholder="Make (e.g. Honda)">
+          <input class="form-input" id="qs-model" placeholder="Model (e.g. Accord)">
+        </div>
+        <div class="quick-start-submit"><button class="btn btn-primary btn-lg" onclick="quickStartSubmit()">Continue →</button></div>
+        <div class="quick-start-hint">Takes 15 seconds. No account details, no VIN needed yet.</div>
+        <div id="quick-start-confirm">
+          <div style="font-size:24px;">✅</div>
+          <div><strong id="quick-start-confirm-title" style="display:block;font-size:15px;color:#1a1814;margin-bottom:2px;"></strong><span style="font-size:13px;color:var(--g5);">Dealers are already able to bid on cars like this. Let's get a couple more details so we can get you live.</span></div>
+        </div>
+      </div>
+
+      <div id="wizard-step-1" class="hidden">
         <div class="card mb-24">
-          <div class="card-header"><div class="card-title">Your Vehicle Details</div><span class="text-muted text-sm">All fields required</span></div>
+          <div class="card-header"><div class="card-title">Your Vehicle Details</div><span class="text-muted text-sm" id="v1-progress-label">Question 1 of 3</span></div>
           <div class="card-body">
-            <div class="form-group">
-              <label class="form-label">VIN Number</label>
-              <div class="vin-row">
-                <input class="form-input" id="vin-input" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()">
-                <button class="btn btn-secondary" onclick="decodeVIN()">Decode VIN</button>
-              </div>
-              <div id="vin-result" class="hidden mt-8"></div>
+            <div class="v1-dots" style="display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:22px;">
+              <div class="v1-dot" id="v1-dot-1" style="width:18px;height:6px;border-radius:3px;background:#7c5cbf;transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v1-dot-2" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v1-dot-3" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
             </div>
-            <div class="divider"></div>
-            <div class="form-row-3">
-              <div class="form-group"><label class="form-label">Year *</label><input class="form-input" id="f-year" type="number" placeholder="2017" min="2010" max="2022"></div>
-              <div class="form-group"><label class="form-label">Make *</label><input class="form-input" id="f-make" placeholder="Honda"></div>
-              <div class="form-group"><label class="form-label">Model *</label><input class="form-input" id="f-model" placeholder="CR-V"></div>
-            </div>
-            <div class="form-row-3">
-              <div class="form-group"><label class="form-label">Trim *</label><input class="form-input" id="f-trim" placeholder="EX-L"></div>
-              <div class="form-group"><label class="form-label">Color *</label><input class="form-input" id="f-color" placeholder="Silver"></div>
-              <div class="form-group"><label class="form-label">Mileage *</label><input class="form-input" id="f-mileage" type="number" placeholder="94200"></div>
-            </div>
-            <div class="form-row">
+
+            <input type="hidden" id="f-year"><input type="hidden" id="f-make"><input type="hidden" id="f-model">
+
+            <!-- Q1: Basics -->
+            <div id="v1-step-1" class="v1-step">
+              <div class="quick-start-eyebrow">Basics — optional, speeds up review</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Know the VIN, trim, color, or upgrades?</div>
               <div class="form-group">
-                <label class="form-label">Transmission *</label>
+                <label class="form-label">VIN Number</label>
+                <div class="vin-row">
+                  <input class="form-input" id="vin-input" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()">
+                  <button class="btn btn-secondary" onclick="decodeVIN()">Decode VIN</button>
+                </div>
+                <div id="vin-result" class="hidden mt-8"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Trim</label><input class="form-input" id="f-trim" placeholder="EX-L"></div>
+                <div class="form-group"><label class="form-label">Color</label><input class="form-input" id="f-color" placeholder="Silver"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Add-ons / Upgrades</label>
+                <input class="form-input" id="f-addons" placeholder="e.g. Remote start, tinted windows, N/A">
+              </div>
+              <div class="quick-start-hint" style="text-align:left;">Don't know these? Skip ahead — dealers can still bid.</div>
+            </div>
+
+            <!-- Q2: Mileage & Location -->
+            <div id="v1-step-2" class="v1-step" style="display:none;">
+              <div class="quick-start-eyebrow">Mileage & Location — required</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Mileage, and where's the car located?</div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Mileage</label><input class="form-input" id="f-mileage" type="number" placeholder="94200" style="font-size:18px;padding:14px;"></div>
+                <div class="form-group"><label class="form-label">ZIP Code</label><input class="form-input" id="f-zip" placeholder="60601" maxlength="5" type="number" style="font-size:18px;padding:14px;"></div>
+              </div>
+              <div class="quick-start-hint" style="text-align:left;">ZIP is how we match you with nearby dealers.</div>
+            </div>
+
+            <!-- Q3: Ownership & Drivetrain -->
+            <div id="v1-step-3" class="v1-step" style="display:none;">
+              <div class="quick-start-eyebrow">Ownership & Drivetrain — required, affects your payout</div>
+              <div class="quick-start-title" style="text-align:left;font-size:24px;">Drivetrain, title, and financing?</div>
+              <div class="form-group">
+                <label class="form-label">Transmission</label>
                 <div class="radio-group" id="transmission-group">
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Automatic')">Automatic</div>
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Manual')">Manual</div>
-                  <div class="radio-pill" onclick="selectRadio('transmission-groutedp',this,'CVT')">CVT</div>
+                  <div class="radio-pill" onclick="selectRadio('transmission-group',this,'CVT')">CVT</div>
                   <div class="radio-pill" onclick="selectRadio('transmission-group',this,'Other')">Other</div>
                 </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Drivetrain *</label>
+                <label class="form-label">Drivetrain</label>
                 <div class="radio-group" id="drivetrain-group">
                   <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'FWD')">FWD</div>
                   <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'AWD')">AWD</div>
@@ -545,10 +619,16 @@ body::before {
                   <div class="radio-pill" onclick="selectRadio('drivetrain-group',this,'4WD')">4WD</div>
                 </div>
               </div>
-            </div>
-            <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Title Status *</label>
+                <label class="form-label">Two or More Keys?</label>
+                <div class="radio-group" id="keys-group">
+                  <div class="radio-pill " onclick="selectRadio('keys-group',this,'Yes')">Yes</div>
+                  <div class="radio-pill" onclick="selectRadio('keys-group',this,'No')">No — 1 Key</div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="form-group">
+                <label class="form-label">Title Status</label>
                 <div class="radio-group" id="title-group">
                   <div class="radio-pill" onclick="selectRadio('title-group',this,'Clean')">Clean</div>
                   <div class="radio-pill" onclick="selectRadio('title-group',this,'Salvage')">Salvage</div>
@@ -557,18 +637,16 @@ body::before {
                 </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Loan or Lease? *</label>
+                <label class="form-label">Loan or Lease?</label>
                 <div class="radio-group" id="loan-group">
-                <div class="radio-pill" onclick="selectRadio('loan-group',this,'None');toggleLienSection('None')">None — I own it outright</div>
-                <div class="radio-pill" onclick="selectRadio('loan-group',this,'Loan');toggleLienSection('Loan')">Loan</div>
-                <div class="radio-pill" onclick="selectRadio('loan-group',this,'Lease');toggleLienSection('Lease')">Lease</div>
+                  <div class="radio-pill" onclick="selectRadio('loan-group',this,'None');toggleLienSection('None')">None — I own it outright</div>
+                  <div class="radio-pill" onclick="selectRadio('loan-group',this,'Loan');toggleLienSection('Loan')">Loan</div>
+                  <div class="radio-pill" onclick="selectRadio('loan-group',this,'Lease');toggleLienSection('Lease')">Lease</div>
                 </div>
               </div>
 
-              <!-- LIEN SECTION — shown when Loan or Lease selected -->
               <div id="lien-section" class="hidden" style="margin-top:4px;">
                 <div style="background:rgba(217,48,37,0.04);border:1px solid rgba(217,48,37,0.18);border-radius:var(--r-lg);padding:20px;margin-bottom:4px;">
-                  
                   <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(217,48,37,0.12);">
                     <span style="font-size:20px;flex-shrink:0;">⚠️</span>
                     <div>
@@ -576,7 +654,6 @@ body::before {
                       <div style="font-size:12px;color:var(--g5);line-height:1.6;">If the winning bid is less than your payoff amount, <strong style="color:#1a1814;">you are responsible for the difference</strong>. PrivaBuy cannot cover shortfalls. Once your auction goes live, it cannot be cancelled.</div>
                     </div>
                   </div>
-
                   <div class="form-row">
                     <div class="form-group">
                       <label class="form-label">Lien Holder (Bank / Finance Co.) *</label>
@@ -591,28 +668,15 @@ body::before {
                       <div style="font-size:11px;color:var(--g5);margin-top:5px;">Call your lender for a 10-day payoff quote. This differs from your remaining balance.</div>
                     </div>
                   </div>
-
-                  <!-- Live gap calculator -->
                   <div id="lien-calc-block" class="hidden" style="background:#ffffff;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:16px;margin-bottom:16px;">
                     <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--g5);margin-bottom:12px;">If Top Bid Equals Your Market Value</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
-                      <div>
-                        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">Est. Top Bid</div>
-                        <div id="lien-est-bid" style="font-size:20px;font-weight:700;color:var(--accent);">—</div>
-                      </div>
-                      <div>
-                        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">Your Payoff</div>
-                        <div id="lien-payoff-display" style="font-size:20px;font-weight:700;color:var(--red);">—</div>
-                      </div>
-                      <div>
-                        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">You Walk Away With</div>
-                        <div id="lien-net-display" style="font-size:20px;font-weight:700;">—</div>
-                      </div>
+                      <div><div style="font-size:11px;color:var(--g5);margin-bottom:4px;">Est. Top Bid</div><div id="lien-est-bid" style="font-size:20px;font-weight:700;color:var(--accent);">—</div></div>
+                      <div><div style="font-size:11px;color:var(--g5);margin-bottom:4px;">Your Payoff</div><div id="lien-payoff-display" style="font-size:20px;font-weight:700;color:var(--red);">—</div></div>
+                      <div><div style="font-size:11px;color:var(--g5);margin-bottom:4px;">You Walk Away With</div><div id="lien-net-display" style="font-size:20px;font-weight:700;">—</div></div>
                     </div>
                     <div id="lien-gap-warning" class="hidden" style="margin-top:12px;padding:10px 12px;background:rgba(217,48,37,0.06);border:1px solid rgba(217,48,37,0.18);border-radius:var(--r-sm);font-size:12px;color:var(--red);line-height:1.5;"></div>
                   </div>
-
-                  <!-- Payoff statement upload -->
                   <div class="form-group">
                     <label class="form-label">Upload 10-Day Payoff Statement *</label>
                     <div id="payoff-upload-slot" onclick="uploadPayoffStatement()" style="background:#ffffff;border:1.5px dashed rgba(0,0,0,0.25);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:border-color 0.2s;">
@@ -622,8 +686,6 @@ body::before {
                     </div>
                     <div id="payoff-upload-status" style="font-size:12px;color:var(--g5);margin-top:6px;display:none;"></div>
                   </div>
-
-                  <!-- Hard acknowledgment -->
                   <div style="background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-top:4px;">
                     <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
                       <input type="checkbox" id="lien-ack-checkbox" onchange="checkLienAck()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
@@ -632,32 +694,19 @@ body::before {
                       </span>
                     </label>
                   </div>
+                </div>
+              </div>
+              <div id="eligibility-result"></div>
+            </div>
 
-                </div>
-              </div>
+            <div class="flex-between" style="margin-top:24px;">
+              <button class="btn btn-secondary" id="v1-back-btn" onclick="v1Back()" style="visibility:hidden;">← Back</button>
+              <button class="btn btn-primary" id="v1-next-btn" onclick="v1Next()">Next →</button>
             </div>
-            <div class="form-group">
-              <label class="form-label">Add-ons / Upgrades (list any, or N/A) *</label>
-              <input class="form-input" id="f-addons" placeholder="e.g. Remote start, tinted windows, N/A">
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">ZIP Code *</label>
-                <input class="form-input" id="f-zip" placeholder="60601" maxlength="5" type="number">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Two or More Keys? *</label>
-                <div class="radio-group" id="keys-group">
-                  <div class="radio-pill " onclick="selectRadio('keys-group',this,'Yes')">Yes</div>
-                  <div class="radio-pill" onclick="selectRadio('keys-group',this,'No')">No  1 Key</div>
-                </div>
-              </div>
-            </div>
-            <div id="eligibility-result"></div>
-       </div>
-          <div class="flex-between" style="padding:0 24px 24px;"><div></div><button class="btn btn-primary" onclick="checkEligibility()">Check Eligibility & Continue →</button></div>
+          </div>
         </div>
       </div>
+
 
       <div id="wizard-step-2" class="hidden">
         <div class="card mb-24">
@@ -688,15 +737,20 @@ body::before {
 
       <div id="wizard-step-3" class="hidden">
         <div class="card mb-24">
-          <div class="card-header"><div class="card-title">Condition & Damage Disclosure</div></div>
+          <div class="card-header"><div class="card-title">Condition & Damage Disclosure</div><span class="text-muted text-sm" id="v3-progress-label">Question 1 of 5</span></div>
           <div class="card-body">
-            <div class="damage-tabs">
-              <button class="damage-tab active" onclick="switchDamageTab('exterior',this)"> Exterior</button>
-              <button class="damage-tab" onclick="switchDamageTab('interior',this)"> Interior</button>
-              <button class="damage-tab" onclick="switchDamageTab('mechanical',this)"> Mechanical</button>
+            <div class="v1-dots" style="display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:22px;">
+              <div class="v1-dot" id="v3-dot-1" style="width:18px;height:6px;border-radius:3px;background:#7c5cbf;transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v3-dot-2" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v3-dot-3" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v3-dot-4" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
+              <div class="v1-dot" id="v3-dot-5" style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;"></div>
             </div>
             <div id="damage-exterior">
-<p style="font-size:14px;color:var(--g5);margin-bottom:16px;text-align:center">Click areas to mark damage.</p>
+            <div id="v3-step-1">
+            <div class="quick-start-eyebrow">Pre-filled — tap any that don't match</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Any exterior damage?</div>
+<p style="font-size:14px;color:var(--g5);margin-bottom:16px;text-align:center">Click areas on the diagram to mark specific damage (optional).</p>
 
               <div style="display:flex;gap:6px;justify-content:center;margin-bottom:14px;">
                 <button onclick="switchCarView('front',this)" id="cvtab-front" style="padding:6px 18px;border-radius:50px;border:1.5px solid rgba(124,92,191,0.5);background:rgba(124,92,191,0.10);color:#7c5cbf;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Front</button>
@@ -846,7 +900,7 @@ body::before {
                   <div class="check-pill" onclick="togglePill(this)"><input type="checkbox">Hail Damage</div>
                 </div>
               </div>
-              <div class="form-row">
+            <div class="form-row mt-16">
                 <div class="form-group">
                   <label class="form-label">Tires Replaced</label>
                   <div class="radio-group" id="tires-group">
@@ -867,7 +921,9 @@ body::before {
                 </div>
               </div>
             </div>
-            <div id="damage-interior" class="hidden">
+            <div id="damage-interior" style="display:none;">
+            <div class="quick-start-eyebrow">Optional — tap any that apply</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Any interior issues?</div>
               <div class="damage-section-grid">
                 <div class="damage-area-card" id="area-odor" onclick="toggleAreaDamage(this,'odor')"><div class="damage-area-name"> Persistent Odor</div><div class="damage-area-desc">Smoke, pet, mildew, or other odors</div></div>
                 <div class="damage-area-card" id="area-stains" onclick="toggleAreaDamage(this,'stains')"><div class="damage-area-name"> Stains</div><div class="damage-area-desc">Seat, carpet, or headliner staining</div></div>
@@ -890,7 +946,10 @@ body::before {
                 </div>
               </div>
             </div>
-            <div id="damage-mechanical" class="hidden">
+            <div id="damage-mechanical">
+            <div id="v3-step-3" style="display:none;">
+            <div class="quick-start-eyebrow">Pre-filled — tap any that apply</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Warning lights, mechanical issues, driveability, and accidents?</div>
               <div class="form-group">
                 <label class="form-label">Warning Lights On Dashboard?</label>
                 <div class="check-group" id="warning-lights-group">
@@ -912,7 +971,8 @@ body::before {
                   <div class="check-pill" onclick="togglePill(this)">Suspension/Steering</div>
                 </div>
               </div>
-              <div class="form-row mt-16">
+            </div>
+            <div class="form-row mt-16">
                 <div class="form-group">
                   <label class="form-label">Is Your Vehicle Driveable?</label>
                   <div class="radio-group" id="driveable-group">
@@ -930,9 +990,12 @@ body::before {
                 </div>
               </div>
             </div>
-            <div class="divider"></div>
+            </div>
+            <div id="v3-step-4" style="display:none;">
+            <div class="quick-start-eyebrow">Required</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Overall condition, and any notes?</div>
             <div class="form-group">
-              <label class="form-label">Overall Condition *</label>
+              <label class="form-label">Overall Condition</label>
               <div class="radio-group" id="overall-condition-group">
                 <div class="radio-pill" onclick="selectRadio('overall-condition-group',this,'Like New')"> Like New</div>
                 <div class="radio-pill " onclick="selectRadio('overall-condition-group',this,'Pretty Great')"> Pretty Great</div>
@@ -942,21 +1005,25 @@ body::before {
               </div>
             </div>
             <div class="form-group mt-16">
-              <label class="form-label">Additional Comments</label>
+              <label class="form-label">Additional Comments <span style="font-weight:400;color:var(--g5)">(optional)</span></label>
               <textarea class="form-textarea" id="f-comments" placeholder="e.g. Small dent on rear passenger door, new brakes 6mo ago..."></textarea>
             </div>
+            </div>
+            <div id="v3-step-5" style="display:none;">
+            <div class="quick-start-eyebrow">Last one — required</div>
+            <div class="quick-start-title" style="text-align:left;font-size:24px;">Is all information above true and accurate?</div>
             <div class="form-group">
-              <label class="form-label" style="margin-bottom:12px">Is all information above true and accurate? *</label>
               <div class="radio-group" id="truthful-group">
                 <div class="radio-pill " onclick="selectRadio('truthful-group',this,'Yes')"> Yes, everything is accurate</div>
                 <div class="radio-pill" onclick="selectRadio('truthful-group',this,'No')">No</div>
               </div>
             </div>
+            </div>
+            <div class="flex-between" style="margin-top:24px;">
+              <button class="btn btn-secondary" id="v3-back-btn" onclick="v3Back()">← Back</button>
+              <button class="btn btn-primary" id="v3-next-btn" onclick="v3Next()">Next →</button>
+            </div>
           </div>
-        </div>
-        <div class="flex-between">
-          <button class="btn btn-secondary" onclick="damageTabBack()">← Back</button>
-          <button class="btn btn-primary" onclick="damageTabNext()">Continue →</button>
         </div>
       </div>
 
@@ -1626,7 +1693,7 @@ body::before {
 //  ALL JAVASCRIPT BELOW IS UNTOUCHED FROM ORIGINAL
 // ─────────────────────────────────────────────
 const API = window.location.hostname.includes('privabuy-git-staging-navinbhavanimaheshpython-commits-projects.vercel.app')
-  ? 'https://privabuy-backend-staging.up.railway.app'
+  ? 'https://privabuy-staging-staging.up.railway.app'
   : 'https://privabuy-backend-production.up.railway.app';
   
 const STRIPE_PK = 'pk_live_51TNGzOPooe955nktS3X9HMO4xUU0gceM0XajI0KUEuYamGs6MY2QWLn0eiPb2HzOJO9OKdAUmIMcnN1UNuQPFqgb00fyoZL3LC';
@@ -1866,8 +1933,9 @@ function togglePasswordVisibility() {
 }
   
 function initSellerView() {
+  sellerTab('auction', document.querySelectorAll('#seller-tabs .tab-btn')[1]);
   loadSellerActiveAuction();
-  setTimeout(maybeShowSellerIntro, 800);
+  setTimeout(checkForResumableDraft, 400);
 }
 const SELLER_INTRO_KEY = 'privabuy_seen_seller_intro_v2';
 let siCurrentStep = 0;
@@ -2036,7 +2104,7 @@ function sellerTab(tab, el) {
 
 function wizardGo(step) {
   S.wizardStep = step;
-  if(step === 3) currentDamageTab = 'exterior';
+  if(step === 3) { currentDamageTab = 'exterior'; v3ResetToStart(); }
   for(let i=1;i<=5;i++){
     document.getElementById(`wizard-step-${i}`).classList.toggle('hidden',i!==step);
     const ws = document.getElementById(`ws-${i}`);
@@ -2044,8 +2112,195 @@ function wizardGo(step) {
     if(i<step) ws.classList.add('done');
     if(i===step) ws.classList.add('active');
   }
+  if(step===1) applyLikelyDefaults('step1');
+  if(step===3) applyLikelyDefaults('step3');
   if(step===4) buildValueEstimate();
   if(step===5) populateReview();
+  saveDraftProgress();
+}
+
+// ── FIX 3: pre-fill sensible "most common" defaults on non-legally-sensitive
+// single-tap fields so continuing through them costs zero taps unless the
+// seller's car is actually different. Title/loan status are deliberately left
+// un-defaulted since they drive the lien-disclosure and legal-accuracy flow.
+let defaultsApplied = {step1:false, step3:false};
+function defaultRadio(groupId, value) {
+  if(S.radioValues[groupId]) return; // don't override an explicit choice
+  const pills = document.querySelectorAll(`#${groupId} .radio-pill`);
+  for(const p of pills) { if(p.textContent.trim().toLowerCase().startsWith(value.toLowerCase())) { selectRadio(groupId, p, value); return; } }
+  if(pills[0]) selectRadio(groupId, pills[0], pills[0].textContent.trim());
+}
+function defaultCheckPillGroup(groupId, matchText) {
+  const group = document.getElementById(groupId);
+  if(!group) return;
+  const alreadySelected = group.querySelectorAll('.check-pill.selected').length > 0;
+  if(alreadySelected) return;
+  const pills = group.querySelectorAll('.check-pill');
+  for(const p of pills) {
+    if(p.textContent.trim().toLowerCase().includes(matchText.toLowerCase())) {
+      p.classList.add('selected');
+      const cb = p.querySelector('input[type="checkbox"]'); if(cb) cb.checked = true;
+      return;
+    }
+  }
+}
+function applyLikelyDefaults(which) {
+  if(defaultsApplied[which]) return;
+  defaultsApplied[which] = true;
+  if(which === 'step1') {
+    defaultRadio('transmission-group','Automatic');
+    defaultRadio('drivetrain-group','FWD');
+    defaultRadio('keys-group','Yes');
+  }
+  if(which === 'step3') {
+    defaultCheckPillGroup('ext-condition-group','none');
+    defaultRadio('tires-group','0');
+    defaultRadio('windshield-group','No Damage');
+    defaultRadio('moonroof-group','N/A');
+    defaultRadio('smoked-group','No');
+    defaultCheckPillGroup('warning-lights-group','none');
+    defaultCheckPillGroup('mech-issues-group','no issues');
+    defaultRadio('driveable-group','Yes');
+    defaultRadio('accident-group','None');
+    defaultRadio('overall-condition-group','Pretty Great');
+    defaultRadio('truthful-group','Yes');
+  }
+}
+
+// ── replace the giant vehicle-details form with a 4-question sequence ──
+const V1_TOTAL_STEPS = 3;
+
+let v1CurrentStep = 1;
+
+function v1ResetToStart() {
+  v1CurrentStep = 1;
+  v1GoStep(1);
+}
+
+function v1GoStep(step) {
+  v1CurrentStep = step;
+  for(let i=1;i<=V1_TOTAL_STEPS;i++){
+    const el = document.getElementById(`v1-step-${i}`);
+    if(el) el.style.display = i===step ? 'block' : 'none';
+    const dot = document.getElementById(`v1-dot-${i}`);
+    if(dot){
+      if(i===step){ dot.style.width='18px'; dot.style.borderRadius='3px'; dot.style.background='#7c5cbf'; }
+      else if(i<step){ dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='#2a9e7c'; }
+      else { dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='rgba(0,0,0,0.14)'; }
+    }
+  }
+  const label = document.getElementById('v1-progress-label');
+  if(label) label.textContent = `Question ${step} of ${V1_TOTAL_STEPS}`;
+  const backBtn = document.getElementById('v1-back-btn');
+  if(backBtn) backBtn.style.visibility = step===1 ? 'hidden' : 'visible';
+  const nextBtn = document.getElementById('v1-next-btn');
+  if(nextBtn) nextBtn.textContent = step===V1_TOTAL_STEPS ? 'Check Eligibility & Continue →' : 'Next →';
+  saveDraftProgress();
+}
+
+function v1ValidateStep(step) {
+  if(step === 2) {
+    const mileage = parseInt(document.getElementById('f-mileage')?.value) || 0;
+    if(!mileage) { showToast('⚠️','Missing Field','Please enter the mileage.'); return false; }
+    const zip = document.getElementById('f-zip')?.value.trim() || '';
+    if(!zip || zip.length < 5) { showToast('⚠️','Missing Field','Please enter a valid ZIP code.'); return false; }
+  }
+  if(step === 3) {
+    if(!getRadio('title-group')) { showToast('⚠️','Missing Field','Select your title status.'); return false; }
+    const loan = getRadio('loan-group');
+    if(!loan) { showToast('⚠️','Missing Field','Let us know if you have a loan or lease.'); return false; }
+    if(loan === 'Loan' || loan === 'Lease') {
+      const holder = document.getElementById('lien-holder-input')?.value.trim();
+      const payoff = parseInt(document.getElementById('lien-payoff-input')?.value) || 0;
+      const ack = document.getElementById('lien-ack-checkbox')?.checked;
+      if(!holder) { showToast('⚠️','Missing Field','Enter your lienholder name.'); return false; }
+      if(!payoff) { showToast('⚠️','Missing Field','Enter your 10-day payoff amount.'); return false; }
+      if(!S.lienPayoffUrl) { showToast('⚠️','Missing Upload','Upload your 10-day payoff statement.'); return false; }
+      if(!ack) { showToast('⚠️','Required','Check the lien acknowledgement box.'); return false; }
+    }
+  }
+  return true;
+}
+
+function v1Next() {
+  if(!v1ValidateStep(v1CurrentStep)) return;
+  if(v1CurrentStep >= V1_TOTAL_STEPS) {
+    checkEligibility();
+    return;
+  }
+  v1GoStep(v1CurrentStep + 1);
+}
+
+function v1Back() {
+  if(v1CurrentStep <= 1) return;
+  v1GoStep(v1CurrentStep - 1);
+}
+
+// ── replace the tabbed condition/damage form with a 7-question sequence ──
+const V3_STEP_IDS = ['v3-step-1','damage-interior','v3-step-3']
+const V3_TOTAL_STEPS = V3_STEP_IDS.length;
+let v3CurrentStep = 1;
+
+function v3ResetToStart() {
+  v3CurrentStep = 1;
+  v3GoStep(1);
+}
+
+function v3GoStep(step) {
+  v3CurrentStep = step;
+  V3_STEP_IDS.forEach((id, idx) => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = (idx+1===step) ? 'block' : 'none';
+  });
+  for(let i=1;i<=V3_TOTAL_STEPS;i++){
+    const dot = document.getElementById(`v3-dot-${i}`);
+    if(dot){
+      if(i===step){ dot.style.width='18px'; dot.style.borderRadius='3px'; dot.style.background='#7c5cbf'; }
+      else if(i<step){ dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='#2a9e7c'; }
+      else { dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='rgba(0,0,0,0.14)'; }
+    }
+  }
+  const label = document.getElementById('v3-progress-label');
+  if(label) label.textContent = `Question ${step} of ${V3_TOTAL_STEPS}`;
+  saveDraftProgress();
+}
+
+function v3ValidateStep(step) {
+  if(step === 1) {
+    const extCond = document.querySelectorAll('#ext-condition-group .check-pill.selected');
+    if(!extCond.length) { showToast('⚠️','Required','Select at least one exterior condition.'); return false; }
+    if(!getRadio('tires-group')) { showToast('⚠️','Required','Select tires replaced.'); return false; }
+    if(!getRadio('windshield-group')) { showToast('⚠️','Required','Select windshield condition.'); return false; }
+  }
+  if(step === 2) {
+    if(!getRadio('moonroof-group')) { showToast('⚠️','Required','Select moonroof status.'); return false; }
+    if(!getRadio('smoked-group')) { showToast('⚠️','Required','Select smoked-in status.'); return false; }
+    const warnLights = document.querySelectorAll('#warning-lights-group .check-pill.selected');
+    if(!warnLights.length) { showToast('⚠️','Required','Select warning lights status.'); return false; }
+    const mechIssues = document.querySelectorAll('#mech-issues-group .check-pill.selected');
+    if(!mechIssues.length) { showToast('⚠️','Required','Select mechanical issues status.'); return false; }
+    if(!getRadio('driveable-group')) { showToast('⚠️','Required','Is your vehicle driveable?'); return false; }
+    if(!getRadio('accident-group')) { showToast('⚠️','Required','Select accident history.'); return false; }
+  }
+  if(step === 3) {
+    if(!getRadio('overall-condition-group')) { showToast('⚠️','Required','Select overall condition.'); return false; }
+    if(!getRadio('truthful-group')) { showToast('⚠️','Required','Confirm all information is accurate.'); return false; }
+  }
+  return true;
+}
+
+function v3Next() {
+  if(!v3ValidateStep(v3CurrentStep)) return;
+  if(v3CurrentStep >= V3_TOTAL_STEPS) {
+    wizardGo(4);
+    return;
+  }
+  v3GoStep(v3CurrentStep + 1);
+}
+
+function v3Back() {
+  if(v3CurrentStep <= 1) { wizardGo(2); return; }
+  v3GoStep(v3CurrentStep - 1);
 }
 
 function checkPhotosAndContinue() {
@@ -2151,6 +2406,114 @@ async function addPhotoToListing(el, label) {
   input.click();
 }
 
+// ── FIX 2: single-question quick start ──
+function quickStartSubmit() {
+  const year = document.getElementById('qs-year').value.trim();
+  const make = document.getElementById('qs-make').value.trim();
+  const model = document.getElementById('qs-model').value.trim();
+  if(!year || !make || !model) { showToast('⚠️','Missing Info','Enter year, make, and model to continue.'); return; }
+  // Push into the (hidden, pre-filled) full form fields so nothing has to be re-typed
+  document.getElementById('f-year').value = year;
+  document.getElementById('f-make').value = make;
+  document.getElementById('f-model').value = model;
+  if(typeof gtag !== 'undefined') gtag('event', 'quick_start_submitted');
+  if(typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout');
+
+  const confirmBox = document.getElementById('quick-start-confirm');
+  document.getElementById('quick-start-confirm-title').textContent = `${year} ${make} ${model} — got it!`;
+  confirmBox.classList.add('show');
+  saveDraftProgress();
+
+  setTimeout(() => {
+    document.getElementById('quick-start-card').style.display = 'none';
+    document.getElementById('wizard-step-1').classList.remove('hidden');
+    v1ResetToStart();
+    document.getElementById('wizard-step-1').scrollIntoView({behavior:'smooth', block:'start'});
+  }, 1100);
+}
+
+// ── FIX 6: concierge fallback ──
+async function requestConcierge() {
+  if(typeof gtag !== 'undefined') gtag('event', 'concierge_requested');
+  showToast('📞','Call or text (800) 555-1234','We\'ll build your listing with you — usually takes about 5 minutes.');
+  try {
+    await fetch(`${API}/sellers/concierge-request`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        seller_id: S.seller_id || null,
+        seller_email: document.getElementById('seller-email-input')?.value.trim() || S.seller_email || '',
+        seller_phone: document.getElementById('seller-phone-input')?.value.trim() || '',
+        partial_vehicle: `${document.getElementById('f-year')?.value||document.getElementById('qs-year')?.value||''} ${document.getElementById('f-make')?.value||document.getElementById('qs-make')?.value||''} ${document.getElementById('f-model')?.value||document.getElementById('qs-model')?.value||''}`.trim(),
+      })
+    });
+  } catch(err) { console.warn('Concierge request logging failed (non-blocking):', err); }
+}
+
+// ── FIX 4: autosave progress + resume nudge (Resend-backed) ──
+function saveDraftProgress() {
+  try {
+    const draft = {
+      seller_id: S.seller_id || null,
+      wizardStep: S.wizardStep,
+      formData: {
+        year: document.getElementById('f-year')?.value || '',
+        make: document.getElementById('f-make')?.value || '',
+        model: document.getElementById('f-model')?.value || '',
+        trim: document.getElementById('f-trim')?.value || '',
+        mileage: document.getElementById('f-mileage')?.value || '',
+        zip: document.getElementById('f-zip')?.value || '',
+      },
+      savedAt: Date.now(),
+    };
+    localStorage.setItem('privabuy_draft_' + (S.seller_id || 'anon'), JSON.stringify(draft));
+    // Best-effort server-side draft upsert so we can email a resume link even if they close the tab.
+    // Non-blocking: if this endpoint isn't live yet, local resume still works on this device.
+    if(S.seller_id && draft.formData.year && draft.formData.make && draft.formData.model) {
+      fetch(`${API}/cars/draft`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({seller_id: S.seller_id, ...draft.formData})
+      }).catch(()=>{});
+    }
+  } catch(err) { console.warn('Draft autosave failed (non-blocking):', err); }
+}
+
+function checkForResumableDraft() {
+  try {
+    const raw = localStorage.getItem('privabuy_draft_' + (S.seller_id || 'anon'));
+    if(!raw) return;
+    const draft = JSON.parse(raw);
+    if(!draft.formData?.year || S.auctionActive) return;
+    const ageMinutes = (Date.now() - draft.savedAt) / 60000;
+    if(ageMinutes > 60 * 24 * 14) { localStorage.removeItem('privabuy_draft_' + (S.seller_id || 'anon')); return; }
+    const banner = document.createElement('div');
+    banner.className = 'alert alert-info mb-16';
+    banner.innerHTML = `You started listing a <strong>${draft.formData.year} ${draft.formData.make} ${draft.formData.model}</strong> — <a href="#" onclick="resumeDraft();return false;" style="color:var(--accent);font-weight:600;">pick up where you left off →</a>`;
+    const listTab = document.getElementById('seller-tab-list');
+    listTab.insertBefore(banner, listTab.firstChild);
+  } catch(err) { console.warn('Resume-draft check failed (non-blocking):', err); }
+}
+
+function resumeDraft() {
+  try {
+    const raw = localStorage.getItem('privabuy_draft_' + (S.seller_id || 'anon'));
+    if(!raw) return;
+    const draft = JSON.parse(raw);
+    document.getElementById('f-year').value = draft.formData.year || '';
+    document.getElementById('f-make').value = draft.formData.make || '';
+    document.getElementById('f-model').value = draft.formData.model || '';
+    document.getElementById('f-trim').value = draft.formData.trim || '';
+    document.getElementById('f-mileage').value = draft.formData.mileage || '';
+    document.getElementById('f-zip').value = draft.formData.zip || '';
+    document.getElementById('quick-start-card').style.display = 'none';
+    document.getElementById('wizard-step-1').classList.remove('hidden');
+    wizardGo(1);
+    v1ResetToStart();
+    document.getElementById('wizard-step-1').scrollIntoView({behavior:'smooth', block:'start'});
+  } catch(err) { console.warn('Resume-draft failed:', err); }
+}
+
 async function decodeVIN() {
   const vin = document.getElementById('vin-input').value.trim();
   if(vin.length < 17) { showToast( 'Invalid VIN','VIN must be exactly 17 characters.'); return; }
@@ -2193,20 +2556,21 @@ function checkEligibility() {
   const zip = document.getElementById('f-zip').value.trim();
   const addons = document.getElementById('f-addons').value.trim();
 
+  // FIX 3: only block on fields a dealer genuinely can't bid without.
+  // Trim, color, and add-ons are recommended (they help bids) but not required —
+  // they already have safe defaults in the submit payload.
   if(!year) { showToast('⚠️','Missing Field','Please enter the year.'); return; }
   if(!make) { showToast('⚠️','Missing Field','Please enter the make.'); return; }
   if(!model) { showToast('⚠️','Missing Field','Please enter the model.'); return; }
-  if(!trim) { showToast('⚠️','Missing Field','Please enter the trim level.'); return; }
-  if(!color) { showToast('⚠️','Missing Field','Please enter the color.'); return; }
   if(!mileage) { showToast('⚠️','Missing Field','Please enter the mileage.'); return; }
   if(!zip || zip.length < 5) { showToast('⚠️','Missing Field','Please enter a valid ZIP code.'); return; }
-  if(!addons) { showToast('⚠️','Missing Field','Please enter add-ons or N/A.'); return; }
 
   const age = 2025 - year;
   const isEligible = age >= 5 && age <= 10 && mileage >= 50000;
   const el = document.getElementById('eligibility-result');
-  S.formData = {year, make, model, trim, color, mileage, 
-    addons, zip,
+  saveDraftProgress();
+  S.formData = {year, make, model, trim: trim || '', color: color || '', mileage, 
+    addons: addons || 'N/A', zip,
     transmission: getRadio('transmission-group')||'Automatic',
     drivetrain: getRadio('drivetrain-group')||'FWD',
     title: getRadio('title-group')||'Clean',
@@ -5057,4 +5421,4 @@ loadDealFlow = async function(role) {
 };
 </script>
 </body>
-</html> 
+</html>
