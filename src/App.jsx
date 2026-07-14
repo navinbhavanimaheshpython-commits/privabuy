@@ -57,6 +57,12 @@ const FontLink = () => (
       pointer-events: none;
     }
 
+    @media (max-width: 860px) {
+      .nav-links { display: none !important; }
+    }
+    
+ 
+
     .lg-strong {
       background: rgba(26,24,20,0.88);
       backdrop-filter: blur(50px);
@@ -376,7 +382,7 @@ function Navbar() {
           </a>
         </div>
         {/* Nav links */}
-        <div style={{ display:"flex", gap:"1.75rem", flexShrink:0 }}>
+        <div className="nav-links" style={{ display:"flex", gap:"1.75rem", flexShrink:0 }}>
           {[["How It Works","#how-it-works"],["For Sellers","#for-sellers"],["For Dealers","#for-dealers"],["About","#about"],["FAQ","#faq"]].map(([l,h]) => (
             <a key={l} href={h}
               style={{ fontSize:"0.82rem", color:"rgba(26,24,20,0.88)", textDecoration:"none", fontWeight:400, transition:"color 0.2s" }}
