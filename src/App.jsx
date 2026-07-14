@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 /* ─── FONTS ─────────────────────────────────────────────────────────────── */
 const FontLink = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap');
+    
 
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -482,13 +482,13 @@ function AuctionDemo() {
         </div>
         <div style={{ marginLeft:"auto", textAlign:"right" }}>
           <div style={{ fontSize:"0.65rem", color:"rgba(26,24,20,0.88)", marginBottom:"0.2rem", textTransform:"uppercase", letterSpacing:"0.06em" }}>Top Bid</div>
-          <div style={{ fontFamily:"Instrument Serif, serif", fontStyle:"italic", fontSize:"1.65rem", color:"var(--accent)" }}>${bids[0]?.amount.toLocaleString()}</div>
+          <div style={{ fontFamily:"'Barlow', sans-serif", fontVariantNumeric:"tabular-nums", fontWeight:600, fontSize:"1.65rem", color:"var(--accent)" }}>${bids[0]?.amount.toLocaleString()}</div>
         </div>
       </div>
       <div style={{ marginBottom:"1rem" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"0.5rem" }}>
           <span style={{ fontSize:"0.72rem", color:"rgba(26,24,20,0.88)", textTransform:"uppercase", letterSpacing:"0.06em" }}>Time Remaining</span>
-          <span style={{ fontFamily:"'Barlow', monospace", fontSize:"1.05rem", fontWeight:500, color:timer < 120 ? "#c05a2a" : "rgba(26,24,20,0.80)", animation: timer < 120 ? "timerTick 1s infinite" : "none" }}>{mm}:{ss}</span>
+          <span style={{ fontFamily:"'Barlow', sans-serif", fontVariantNumeric:"tabular-nums", fontSize:"1.05rem", fontWeight:600, color:timer < 120 ? "#c05a2a" : "rgba(26,24,20,0.80)", animation: timer < 120 ? "timerTick 1s infinite" : "none" }}>{mm}:{ss}</span>
         </div>
         <div className="progress-bar"><div className="progress-bar-fill" style={{ width:`${100 - pct}%` }} /></div>
       </div>
@@ -502,7 +502,7 @@ function AuctionDemo() {
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:"0.75rem" }}>
               <span style={{ fontSize:"0.7rem", color:"rgba(26,24,20,0.86)" }}>{b.time}</span>
-              <span style={{ fontSize:"1rem", fontWeight: i===0 ? 500 : 400, color: i===0 ? b.color : "rgba(26,24,20,0.42)" }}>${b.amount.toLocaleString()}</span>
+              <span style={{ fontFamily:"'Barlow', sans-serif", fontVariantNumeric:"tabular-nums", fontSize:"1rem", fontWeight: i===0 ? 600 : 400, color: i===0 ? b.color : "rgba(26,24,20,0.42)" }}>${b.amount.toLocaleString()}</span>
             </div>
           </div>
         ))}
@@ -692,7 +692,7 @@ function ForSellers() {
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(180px, 1fr))", gap:"1rem" }} className="reveal">
           {stats.map((s, i) => (
             <div key={s.label} className="lg stat-shimmer" style={{ borderRadius:"1.25rem", padding:"1.5rem", position:"relative", overflow:"hidden", border:"1px solid rgba(26,24,20,0.14)", transitionDelay:`${i*0.1}s` }}>
-              <div className="serif-italic" style={{ fontSize:"2rem", color:s.color, lineHeight:1, marginBottom:"0.4rem" }}>{s.value}</div>
+              <div style={{ fontFamily:"'Barlow', sans-serif", fontVariantNumeric:"tabular-nums", fontWeight:600, fontSize:"2rem", color:s.color, lineHeight:1, marginBottom:"0.4rem" }}>{s.value}</div>
               <div style={{ fontSize:"0.78rem", color:"rgba(26,24,20,0.88)", fontWeight:300, lineHeight:1.4 }}>{s.label}</div>
             </div>
           ))}
