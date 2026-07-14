@@ -1933,8 +1933,8 @@ function togglePasswordVisibility() {
 }
   
 function initSellerView() {
+  sellerTab('auction', document.querySelectorAll('#seller-tabs .tab-btn')[1]);
   loadSellerActiveAuction();
-  setTimeout(maybeShowSellerIntro, 800);
   setTimeout(checkForResumableDraft, 400);
 }
 const SELLER_INTRO_KEY = 'privabuy_seen_seller_intro_v2';
