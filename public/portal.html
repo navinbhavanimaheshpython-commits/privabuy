@@ -81,6 +81,36 @@ body::before {
 .login-logo{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:28px;margin-bottom:8px;color:#1a1814;}
 .login-logo span{color:var(--accent);}
 .login-tagline{font-size:14px;color:var(--g5);margin-bottom:36px;font-weight:300;}
+.login-tagline-personalized{font-size:18px;color:var(--accent)!important;font-weight:700!important;line-height:1.5;}
+
+/* GUEST QUICK START — wide landscape card, one question at a time */
+#screen-guest-start{align-items:center;justify-content:center;background:#f8f8f8;padding:24px;min-height:100vh;}
+.guest-start-card{
+  background:#ffffff;
+  box-shadow:0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  border:1px solid rgba(0,0,0,0.16);
+  border-radius:var(--r-lg);padding:56px 72px;width:100%;max-width:840px;
+}
+.guest-start-inner{text-align:center;}
+.guest-start-card .login-logo,.guest-start-card .login-tagline{text-align:center;}
+.guest-start-card .login-logo{margin-bottom:14px;}
+.guest-start-card .login-tagline{color:#1a1814;font-size:19px;line-height:1.6;margin-bottom:32px;max-width:560px;margin-left:auto;margin-right:auto;}
+.guest-start-card .quick-start-eyebrow{margin-bottom:20px;}
+.guest-start-card .quick-start-hint{color:#1a1814;font-size:15px;margin-top:20px;}
+.guest-start-card .text-muted{color:#1a1814;font-size:14px;margin-top:16px;}
+.gs-dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:36px;}
+.gs-dot{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;}
+.gs-step{min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+.gs-big-title{font-size:52px;margin-bottom:32px;}
+.gs-big-input{
+  font-family:var(--serif);font-size:46px;text-align:center;
+  padding:26px 28px;max-width:520px;width:100%;margin:0 auto;
+}
+@media(max-width:640px){
+  .guest-start-card{padding:36px 24px;}
+  .gs-big-title{font-size:30px;}
+  .gs-big-input{font-size:28px;padding:16px 18px;}
+}
 
 /* Role buttons */
 .role-select{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:28px;}
@@ -451,6 +481,52 @@ body::before {
 </style>
 </head>
 <body>
+
+  <!-- GUEST QUICK START — asks about the car first, one question at a time, no account required yet -->
+<div id="screen-guest-start" class="screen">
+  <div class="guest-start-card">
+    <div class="guest-start-inner">
+      <div class="login-logo">Priva<span>Buy</span></div>
+      <div class="login-tagline">List your 6–8 year old vehicle and watch 5 local dealers compete for it.</div>
+
+      <div class="quick-start-eyebrow" style="text-align:center;">Free to list. No account needed yet.</div>
+
+      <div class="gs-dots">
+        <div class="gs-dot" id="gs-dot-1"></div>
+        <div class="gs-dot" id="gs-dot-2"></div>
+        <div class="gs-dot" id="gs-dot-3"></div>
+        <div class="gs-dot" id="gs-dot-4"></div>
+      </div>
+
+      <div id="gs-step-1" class="gs-step">
+        <div class="quick-start-title gs-big-title">What year is your car?</div>
+        <input class="form-input gs-big-input" id="gs-year" type="number" placeholder="e.g. 2018" min="2000" max="2026" onkeydown="if(event.key==='Enter') gsNext()">
+      </div>
+      <div id="gs-step-2" class="gs-step" style="display:none;">
+        <div class="quick-start-title gs-big-title">What make?</div>
+        <input class="form-input gs-big-input" id="gs-make" placeholder="e.g. Honda" onkeydown="if(event.key==='Enter') gsNext()">
+      </div>
+      <div id="gs-step-3" class="gs-step" style="display:none;">
+        <div class="quick-start-title gs-big-title">What model?</div>
+        <input class="form-input gs-big-input" id="gs-model" placeholder="e.g. Accord" onkeydown="if(event.key==='Enter') gsNext()">
+      </div>
+      <div id="gs-step-4" class="gs-step" style="display:none;">
+        <div class="quick-start-title gs-big-title">What's the mileage?</div>
+        <input class="form-input gs-big-input" id="gs-mileage" type="number" placeholder="e.g. 94200" onkeydown="if(event.key==='Enter') gsNext()">
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:30px;">
+        <button class="btn btn-secondary btn-lg" id="gs-back-btn" onclick="gsBack()" style="display:none;">← Back</button>
+        <button class="btn btn-primary btn-lg" id="gs-next-btn" onclick="gsNext()">Next →</button>
+      </div>
+      <div class="quick-start-hint" style="text-align:center;">Create your free account after you see what's next.</div>
+
+      <p class="text-muted mt-8" style="text-align:center;font-size:12px;">
+        Already have an account? <a href="#" onclick="showScreen('screen-login'); selectRole('seller', document.querySelector('.role-btn[data-role=&quot;seller&quot;]')); setSellerMode('login'); return false;" style="color:var(--accent);">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
 
 <!-- LOGIN -->
 <div id="screen-login" class="screen active">
@@ -1843,7 +1919,22 @@ async function login() {
     }
 
     showScreen(`screen-${selectedRole}`);
-    if(selectedRole==='seller') initSellerView();
+    if(selectedRole==='seller') {
+      initSellerView();
+      if(S.pendingGuestVehicle) {
+        const { year, make, model, mileage } = S.pendingGuestVehicle;
+        document.getElementById('f-year').value = year;
+        document.getElementById('f-make').value = make;
+        document.getElementById('f-model').value = model;
+        document.getElementById('quick-start-card').style.display = 'none';
+        document.getElementById('wizard-step-1').classList.remove('hidden');
+        v1ResetToStart();
+        setTimeout(() => { const mEl = document.getElementById('f-mileage'); if(mEl) mEl.value = mileage; }, 50);
+        saveDraftProgress();
+        delete S.pendingGuestVehicle;
+        setTimeout(() => document.getElementById('wizard-step-1').scrollIntoView({behavior:'smooth', block:'start'}), 300);
+      }
+    }
     else if(selectedRole==='dealer') initDealerView();
 
   } catch(err) {
@@ -2404,6 +2495,67 @@ async function addPhotoToListing(el, label) {
     }
   };
   input.click();
+}
+
+// ── Guest quick start: one question at a time, capture the car BEFORE asking for an account ──
+const GS_TOTAL_STEPS = 4;
+let gsCurrentStep = 1;
+const GS_FIELD_BY_STEP = {1:'gs-year', 2:'gs-make', 3:'gs-model', 4:'gs-mileage'};
+
+function gsGoStep(step) {
+  gsCurrentStep = step;
+  for(let i=1;i<=GS_TOTAL_STEPS;i++){
+    const el = document.getElementById(`gs-step-${i}`);
+    if(el) el.style.display = i===step ? 'flex' : 'none';
+    const dot = document.getElementById(`gs-dot-${i}`);
+    if(dot){
+      if(i===step){ dot.style.width='18px'; dot.style.borderRadius='3px'; dot.style.background='#7c5cbf'; }
+      else if(i<step){ dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='#2a9e7c'; }
+      else { dot.style.width='6px'; dot.style.borderRadius='50%'; dot.style.background='rgba(0,0,0,0.14)'; }
+    }
+  }
+  const backBtn = document.getElementById('gs-back-btn');
+  if(backBtn) backBtn.style.display = step===1 ? 'none' : 'inline-flex';
+  const nextBtn = document.getElementById('gs-next-btn');
+  if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Get My Offer →' : 'Next →';
+  setTimeout(() => document.getElementById(GS_FIELD_BY_STEP[step])?.focus(), 50);
+}
+
+function gsValidateStep(step) {
+  const labels = {1:'the year', 2:'the make', 3:'the model', 4:'the mileage'};
+  const val = document.getElementById(GS_FIELD_BY_STEP[step])?.value.trim();
+  if(!val) { showToast('⚠️','Missing Info',`Enter ${labels[step]} to continue.`); return false; }
+  return true;
+}
+
+function gsNext() {
+  if(!gsValidateStep(gsCurrentStep)) return;
+  if(gsCurrentStep >= GS_TOTAL_STEPS) { guestQuickStartSubmit(); return; }
+  gsGoStep(gsCurrentStep + 1);
+}
+
+function gsBack() {
+  if(gsCurrentStep <= 1) return;
+  gsGoStep(gsCurrentStep - 1);
+}
+
+function guestQuickStartSubmit() {
+  const year = document.getElementById('gs-year').value.trim();
+  const make = document.getElementById('gs-make').value.trim();
+  const model = document.getElementById('gs-model').value.trim();
+  const mileage = document.getElementById('gs-mileage').value.trim();
+  if(!year || !make || !model || !mileage) { showToast('⚠️','Missing Info','Enter year, make, model, and mileage to continue.'); return; }
+
+  S.pendingGuestVehicle = { year, make, model, mileage };
+  if(typeof gtag !== 'undefined') gtag('event', 'guest_quick_start_submitted');
+  if(typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout');
+
+showScreen('screen-login');
+  selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+  setSellerMode('register');
+  const taglineEl = document.getElementById('login-tagline');
+  taglineEl.textContent = `Nice — a ${year} ${make} ${model}. Create your free account to get it in front of dealers.`;
+  taglineEl.classList.add('login-tagline-personalized');
 }
 
 // ── FIX 2: single-question quick start ──
@@ -3933,9 +4085,13 @@ setTimeout(() => {
   if(urlRole === 'dealer') {
     selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
   } else if(urlRole === 'seller') {
-    selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
-    document.getElementById('login-tagline').textContent = 'List your car and get competitive offers.';
-    if(!hasSession) setSellerMode('register');
+    if(!hasSession) {
+      showScreen('screen-guest-start');
+      gsGoStep(1);
+    } else {
+      selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+      document.getElementById('login-tagline').textContent = 'List your car and get competitive offers.';
+    }
   }
 }, 0);
 
