@@ -95,9 +95,9 @@ body::before {
 .guest-start-card .login-tagline{color:#1a1814;font-size:19px;line-height:1.5;margin-bottom:28px;max-width:560px;margin-left:auto;margin-right:auto;}
 .guest-start-card .quick-start-hint{color:#1a1814;font-size:15px;}
 .guest-start-card .text-muted{color:#1a1814;font-size:14px;}
-.gs-dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:32px;}
+.gs-dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:16px;}
 .gs-dot{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;}
-.gs-step{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.gs-step{min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
 .gs-big-title{font-size:52px;margin-bottom:32px;}
 .gs-big-input{
   font-family:var(--serif);font-size:46px;text-align:center;
@@ -513,7 +513,7 @@ body::before {
       </div>
 
       <div style="display:flex;gap:10px;justify-content:center;margin-top:8px;">
-        <button class="btn btn-secondary btn-lg" id="gs-back-btn" onclick="gsBack()" style="visibility:hidden;">← Back</button>
+        <button class="btn btn-secondary btn-lg" id="gs-back-btn" onclick="gsBack()" style="display:none;">← Back</button>
         <button class="btn btn-primary btn-lg" id="gs-next-btn" onclick="gsNext()">Next →</button>
       </div>
       <div class="quick-start-hint" style="text-align:center;">Create your free account after you see what's next.</div>
@@ -2512,7 +2512,7 @@ function gsGoStep(step) {
     }
   }
   const backBtn = document.getElementById('gs-back-btn');
-  if(backBtn) backBtn.style.visibility = step===1 ? 'hidden' : 'visible';
+  if(backBtn) backBtn.style.display = step===1 ? 'none' : 'inline-flex';
   const nextBtn = document.getElementById('gs-next-btn');
   if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Get My Offer →' : 'Next →';
   setTimeout(() => document.getElementById(GS_FIELD_BY_STEP[step])?.focus(), 50);
