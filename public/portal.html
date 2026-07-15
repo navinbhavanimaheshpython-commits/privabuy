@@ -452,6 +452,31 @@ body::before {
 </head>
 <body>
 
+  <!-- GUEST QUICK START — asks about the car first, no account required yet -->
+<div id="screen-guest-start" class="screen">
+  <div class="login-card">
+    <div class="login-logo">Priva<span>Buy</span></div>
+    <div class="login-tagline">List your 6–8 year old vehicle and watch 5 local dealers compete for it.</div>
+    <div class="quick-start-card" style="margin-bottom:0;">
+      <div class="quick-start-eyebrow">Free to list. No account needed yet.</div>
+      <div class="quick-start-title">What's your car?</div>
+      <div class="quick-start-row">
+        <input class="form-input" id="gs-year" type="number" placeholder="Year" min="2000" max="2026">
+        <input class="form-input" id="gs-make" placeholder="Make (e.g. Honda)">
+        <input class="form-input" id="gs-model" placeholder="Model (e.g. Accord)">
+      </div>
+      <div class="quick-start-row" style="margin-top:10px;">
+        <input class="form-input" id="gs-mileage" type="number" placeholder="Mileage (e.g. 94200)" style="max-width:220px;">
+      </div>
+      <div class="quick-start-submit"><button class="btn btn-primary btn-lg" onclick="guestQuickStartSubmit()">Get My Offer →</button></div>
+      <div class="quick-start-hint">Takes 20 seconds. Create your free account after you see what's next.</div>
+    </div>
+    <p class="text-muted mt-8" style="text-align:center;font-size:12px;">
+      Already have an account? <a href="#" onclick="showScreen('screen-login'); selectRole('seller', document.querySelector('.role-btn[data-role=&quot;seller&quot;]')); setSellerMode('login'); return false;" style="color:var(--accent);">Sign in</a>
+    </p>
+  </div>
+</div>
+
 <!-- LOGIN -->
 <div id="screen-login" class="screen active">
   <div class="login-card">
@@ -1843,7 +1868,22 @@ async function login() {
     }
 
     showScreen(`screen-${selectedRole}`);
-    if(selectedRole==='seller') initSellerView();
+    if(selectedRole==='seller') {
+      initSellerView();
+      if(S.pendingGuestVehicle) {
+        const { year, make, model, mileage } = S.pendingGuestVehicle;
+        document.getElementById('f-year').value = year;
+        document.getElementById('f-make').value = make;
+        document.getElementById('f-model').value = model;
+        document.getElementById('quick-start-card').style.display = 'none';
+        document.getElementById('wizard-step-1').classList.remove('hidden');
+        v1ResetToStart();
+        setTimeout(() => { const mEl = document.getElementById('f-mileage'); if(mEl) mEl.value = mileage; }, 50);
+        saveDraftProgress();
+        delete S.pendingGuestVehicle;
+        setTimeout(() => document.getElementById('wizard-step-1').scrollIntoView({behavior:'smooth', block:'start'}), 300);
+      }
+    }
     else if(selectedRole==='dealer') initDealerView();
 
   } catch(err) {
@@ -2404,6 +2444,24 @@ async function addPhotoToListing(el, label) {
     }
   };
   input.click();
+}
+
+// ── Guest quick start: capture the car BEFORE asking for an account ──
+function guestQuickStartSubmit() {
+  const year = document.getElementById('gs-year').value.trim();
+  const make = document.getElementById('gs-make').value.trim();
+  const model = document.getElementById('gs-model').value.trim();
+  const mileage = document.getElementById('gs-mileage').value.trim();
+  if(!year || !make || !model || !mileage) { showToast('⚠️','Missing Info','Enter year, make, model, and mileage to continue.'); return; }
+
+  S.pendingGuestVehicle = { year, make, model, mileage };
+  if(typeof gtag !== 'undefined') gtag('event', 'guest_quick_start_submitted');
+  if(typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout');
+
+  showScreen('screen-login');
+  selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+  setSellerMode('register');
+  document.getElementById('login-tagline').textContent = `Nice — a ${year} ${make} ${model}. Create your free account to get it in front of dealers.`;
 }
 
 // ── FIX 2: single-question quick start ──
@@ -3933,9 +3991,13 @@ setTimeout(() => {
   if(urlRole === 'dealer') {
     selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
   } else if(urlRole === 'seller') {
-    selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
-    document.getElementById('login-tagline').textContent = 'List your car and get competitive offers.';
-    if(!hasSession) setSellerMode('register');
+    if(!hasSession) {
+      showScreen('screen-guest-start');
+      document.getElementById('gs-year')?.focus();
+    } else {
+      selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+      document.getElementById('login-tagline').textContent = 'List your car and get competitive offers.';
+    }
   }
 }, 0);
 
