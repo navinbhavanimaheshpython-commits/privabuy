@@ -496,6 +496,7 @@ body::before {
         <div class="gs-dot" id="gs-dot-2"></div>
         <div class="gs-dot" id="gs-dot-3"></div>
         <div class="gs-dot" id="gs-dot-4"></div>
+        <div class="gs-dot" id="gs-dot-5"></div>
       </div>
 
       <div id="gs-step-1" class="gs-step">
@@ -513,6 +514,14 @@ body::before {
       <div id="gs-step-4" class="gs-step" style="display:none;">
         <div class="quick-start-title gs-big-title">What's the mileage?</div>
         <input class="form-input gs-big-input" id="gs-mileage" type="number" placeholder="e.g. 94200" onkeydown="if(event.key==='Enter') gsNext()">
+      </div>
+      <div id="gs-step-5" class="gs-step" style="display:none;">
+        <div style="font-size:44px;margin-bottom:14px;">🎉</div>
+        <div class="quick-start-title" style="font-size:34px;margin-bottom:16px;">You're all set!</div>
+        <div style="font-size:18px;color:#1a1814;line-height:1.6;max-width:440px;margin:0 auto 10px;">
+          <strong style="color:var(--accent)">5 dealers</strong> in your area are ready to bid on your car.
+        </div>
+        <div style="font-size:15px;color:var(--g5);max-width:400px;margin:0 auto;">Log in to get access to their offers as they come in.</div>
       </div>
 
       <div style="display:flex;gap:10px;justify-content:center;margin-top:30px;">
@@ -2498,7 +2507,7 @@ async function addPhotoToListing(el, label) {
 }
 
 // ── Guest quick start: one question at a time, capture the car BEFORE asking for an account ──
-const GS_TOTAL_STEPS = 4;
+const GS_TOTAL_STEPS = 5;
 let gsCurrentStep = 1;
 const GS_FIELD_BY_STEP = {1:'gs-year', 2:'gs-make', 3:'gs-model', 4:'gs-mileage'};
 
@@ -2517,7 +2526,7 @@ function gsGoStep(step) {
   const backBtn = document.getElementById('gs-back-btn');
   if(backBtn) backBtn.style.display = step===1 ? 'none' : 'inline-flex';
   const nextBtn = document.getElementById('gs-next-btn');
-  if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Get My Offer →' : 'Next →';
+  if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Log In to See Offers →' : (step===4 ? 'Show Me My Dealers →' : 'Next →');
   setTimeout(() => document.getElementById(GS_FIELD_BY_STEP[step])?.focus(), 50);
 }
 
@@ -2529,7 +2538,7 @@ function gsValidateStep(step) {
 }
 
 function gsNext() {
-  if(!gsValidateStep(gsCurrentStep)) return;
+  if(gsCurrentStep <= 4 && !gsValidateStep(gsCurrentStep)) return;
   if(gsCurrentStep >= GS_TOTAL_STEPS) { guestQuickStartSubmit(); return; }
   gsGoStep(gsCurrentStep + 1);
 }
