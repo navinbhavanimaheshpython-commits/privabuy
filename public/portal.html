@@ -516,12 +516,11 @@ body::before {
         <input class="form-input gs-big-input" id="gs-mileage" type="number" placeholder="e.g. 94200" onkeydown="if(event.key==='Enter') gsNext()">
       </div>
       <div id="gs-step-5" class="gs-step" style="display:none;">
-        <div style="font-size:44px;margin-bottom:14px;">🎉</div>
-        <div class="quick-start-title" style="font-size:34px;margin-bottom:16px;">You're all set!</div>
-        <div style="font-size:18px;color:#1a1814;line-height:1.6;max-width:440px;margin:0 auto 10px;">
-          <strong style="color:var(--accent)">5 dealers</strong> in your area are ready to bid on your car.
+        <div style="font-size:40px;margin-bottom:12px;">🎉</div>
+        <div class="quick-start-title" style="font-size:32px;margin-bottom:12px;">You're all set</div>
+        <div style="font-size:16px;color:var(--g5);line-height:1.6;max-width:380px;margin:0 auto;">
+          <strong style="color:#1a1814">5 dealers</strong> are ready to bid — log in to see their offers.
         </div>
-        <div style="font-size:15px;color:var(--g5);max-width:400px;margin:0 auto;">Log in to get access to their offers as they come in.</div>
       </div>
 
       <div style="display:flex;gap:10px;justify-content:center;margin-top:30px;">
@@ -2527,6 +2526,8 @@ function gsGoStep(step) {
   if(backBtn) backBtn.style.display = step===1 ? 'none' : 'inline-flex';
   const nextBtn = document.getElementById('gs-next-btn');
   if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Log In to See Offers →' : (step===4 ? 'Show Me My Dealers →' : 'Next →');
+  const hintEl = document.querySelector('.guest-start-card .quick-start-hint');
+  if(hintEl) hintEl.style.display = step===GS_TOTAL_STEPS ? 'none' : '';
   setTimeout(() => document.getElementById(GS_FIELD_BY_STEP[step])?.focus(), 50);
 }
 
