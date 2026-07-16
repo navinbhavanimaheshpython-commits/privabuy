@@ -1957,7 +1957,29 @@ function initAdminView() {
   loadAdminOverview();
 }
 
-function logout() { clearAuction(); showScreen('screen-login'); }
+function logout() {
+  clearAuction();
+  // Full session reset — prevents stale car_id/transaction data from a
+  // previous login bleeding into the next account logged in on this tab.
+  S.seller_id = null;
+  S.dealer_id = null;
+  S.car_id = null;
+  S.auctionData = null;
+  S.currentTxn = null;
+  S.latest_offer_id = null;
+  S.photoUrls = [];
+  S.formData = {};
+  S.floorPrice = 0;
+  S.sellerAckSigned = null;
+  S.dealerAckSigned = null;
+  S.titleConfirmed = null;
+  S.titlePhotoUrls = null;
+  S.dealerInvoiceSent = null;
+  S.pendingGuestVehicle = null;
+  S.allTxns = null;
+  S.radioValues = {};
+  showScreen('screen-login');
+}
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => {
@@ -2643,6 +2665,9 @@ function saveDraftProgress() {
 
 function checkForResumableDraft() {
   try {
+    const existing = document.getElementById('resume-draft-banner');
+    if(existing) existing.remove();
+
     const raw = localStorage.getItem('privabuy_draft_' + (S.seller_id || 'anon'));
     if(!raw) return;
     const draft = JSON.parse(raw);
@@ -2650,6 +2675,7 @@ function checkForResumableDraft() {
     const ageMinutes = (Date.now() - draft.savedAt) / 60000;
     if(ageMinutes > 60 * 24 * 14) { localStorage.removeItem('privabuy_draft_' + (S.seller_id || 'anon')); return; }
     const banner = document.createElement('div');
+    banner.id = 'resume-draft-banner';
     banner.className = 'alert alert-info mb-16';
     banner.innerHTML = `You started listing a <strong>${draft.formData.year} ${draft.formData.make} ${draft.formData.model}</strong> — <a href="#" onclick="resumeDraft();return false;" style="color:var(--accent);font-weight:600;">pick up where you left off →</a>`;
     const listTab = document.getElementById('seller-tab-list');
