@@ -1887,6 +1887,8 @@ async function login() {
         }
         S.seller_id = data.seller_id;
         S.seller_name = data.name || email;
+        if(typeof fbq !== 'undefined') fbq('track', 'CompleteRegistration', {content_name: 'seller'});
+        if(typeof gtag !== 'undefined') gtag('event', 'seller_registration_completed');
         showToast('✓','Account Created', 'Welcome to PrivaBuy!');
       } else {
         const res = await fetch(`${API}/sellers/login`, {
