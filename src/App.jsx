@@ -901,7 +901,8 @@ function Footer() {
                 Priva<span style={{ color:"var(--accent)" }}>Buy</span>
               </span>
             </a>
-            <div style={{ fontSize:"0.72rem", color:"rgba(26,24,20,0.88)", marginTop:"0.3rem" }}>© 2026 PrivaBuy. All rights reserved.</div>
+            <div style={{ fontSize:"0.72rem", color:"rgba(26,24,20,0.88)", marginTop:"0.3rem" }}>© 2026 PrivaBuy LLC. All rights reserved.</div>
+            <div style={{ fontSize:"0.68rem", color:"rgba(26,24,20,0.56)", marginTop:"0.2rem" }}>navin@privabuy.com &nbsp;·&nbsp; Fort Wayne, IN</div>
             <div style={{ fontSize:"0.68rem", color:"rgba(26,24,20,0.48)", marginTop:"0.2rem" }}>Founded by automotive and tech entrepreneurs.</div>
           </div>
           <div style={{ display:"flex", gap:"1.5rem" }}>
