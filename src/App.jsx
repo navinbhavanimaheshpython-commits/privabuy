@@ -549,8 +549,9 @@ function Hero() {
         </div>
 
         <h1 className="serif-italic fade-up-2" style={{ fontSize:"clamp(3.5rem, 7.5vw, 8rem)", lineHeight:0.9, letterSpacing:"-0.04em", margin:"0 0 1.75rem", fontWeight:400, color:"#1a1814", maxWidth:"18ch" }}>
-          The <span style={{ color:"var(--accent)" }}>highest offer</span><br />
-          your car will ever get.<br />
+          Real dealers.<br />
+          <span style={{ color:"var(--accent)" }}>Real competition.</span><br />
+          Done in minutes.<br />
           Done in minutes.
         </h1>
 
@@ -904,7 +905,7 @@ function Footer() {
             <div style={{ fontSize:"0.68rem", color:"rgba(26,24,20,0.48)", marginTop:"0.2rem" }}>Founded by automotive and tech entrepreneurs.</div>
           </div>
           <div style={{ display:"flex", gap:"1.5rem" }}>
-            {[["Privacy","#"],["Terms","#"],["About","#about"],["For Dealers","#for-dealers"],["Contact","mailto:navin@privabuy.com"]].map(([l,h]) => (
+            {[["Privacy","YOUR_TERMLY_PRIVACY_URL"],["Terms","https://app.termly.io/policy-viewer/policy.html?policyUUID=6abbb706-fc72-4523-8ce5-653bf08b505e"],["About","#about"],["For Dealers","#for-dealers"],["Contact","mailto:navin@privabuy.com"]].map(([l,h]) => (
               <a key={l} href={h} style={{ fontSize:"0.75rem", color:"rgba(26,24,20,0.56)", textDecoration:"none", transition:"color 0.2s" }}
                 onMouseEnter={e=>e.target.style.color="rgba(26,24,20,0.80)"} onMouseLeave={e=>e.target.style.color="rgba(26,24,20,0.56)"}>
                 {l}
