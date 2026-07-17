@@ -906,7 +906,7 @@ function Footer() {
             <div style={{ fontSize:"0.68rem", color:"rgba(26,24,20,0.48)", marginTop:"0.2rem" }}>Founded by automotive and tech entrepreneurs.</div>
           </div>
           <div style={{ display:"flex", gap:"1.5rem" }}>
-            {[["Privacy","YOUR_TERMLY_PRIVACY_URL"],["Terms","https://app.termly.io/policy-viewer/policy.html?policyUUID=6abbb706-fc72-4523-8ce5-653bf08b505e"],["About","#about"],["For Dealers","#for-dealers"],["Contact","mailto:navin@privabuy.com"]].map(([l,h]) => (
+            {[["Privacy","https://app.termly.io/policy-viewer/policy.html?policyUUID=6abbb706-fc72-4523-8ce5-653bf08b505e"],["Terms","https://app.termly.io/policy-viewer/policy.html?policyUUID=0f5c651f-5bb7-493b-9c66-8bf612ba7eae"],["About","#about"],["For Dealers","#for-dealers"],["Contact","mailto:navin@privabuy.com"]].map(([l,h]) => (
               <a key={l} href={h} style={{ fontSize:"0.75rem", color:"rgba(26,24,20,0.56)", textDecoration:"none", transition:"color 0.2s" }}
                 onMouseEnter={e=>e.target.style.color="rgba(26,24,20,0.80)"} onMouseLeave={e=>e.target.style.color="rgba(26,24,20,0.56)"}>
                 {l}
