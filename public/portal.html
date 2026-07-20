@@ -4662,6 +4662,9 @@ async function dealFlowSendInvoice(txnId, winPrice) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Failed to send invoice');
+
+     // ── ADD THIS: advance the transaction to the next step ──
+    await fetch(`${API}/transactions/${txnId}/dealer-paid`, {method:'POST'});
  
     const invoiceNum = data.invoice_number;
     const dealerEmail = data.dealer_email || 'your dealership email';
