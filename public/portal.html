@@ -479,6 +479,31 @@ body::before {
   .spec-grid,.carfax-row,.docs-row{grid-template-columns:1fr 1fr;}
 }
 </style>
+
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1958235388393786');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1958235388393786&ev=PageView&noscript=1"/></noscript>
+
+<!-- Google tag -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18160958792"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'AW-18160958792');
+</script>
 </head>
 <body>
 
@@ -489,7 +514,7 @@ body::before {
       <div class="login-logo">Priva<span>Buy</span></div>
       <div class="login-tagline">List your 6–8 year old vehicle and watch 5 local dealers compete for it.</div>
 
-      <div class="quick-start-eyebrow" style="text-align:center;">Free to list. No account until you're ready..</div>
+      <div class="quick-start-eyebrow" style="text-align:center;">Free to list. No account until you're ready...</div>
 
       <div class="gs-dots">
         <div class="gs-dot" id="gs-dot-1"></div>
@@ -1859,6 +1884,8 @@ async function login() {
         S.seller_id = data.seller_id;
         S.seller_name = data.name || email;
         showToast('✓','Account Created', 'Welcome to PrivaBuy!');
+        if(typeof gtag !== 'undefined') gtag('event', 'account_created');
+        if(typeof fbq !== 'undefined') fbq('trackCustom', 'account_created');
       } else {
         const res = await fetch(`${API}/sellers/login`, {
           method: 'POST',
@@ -2559,6 +2586,8 @@ function guestQuickStartSubmit() {
   S.pendingGuestVehicle = { year, make, model, mileage };
   if(typeof gtag !== 'undefined') gtag('event', 'guest_quick_start_submitted');
   if(typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout');
+  if(typeof gtag !== 'undefined') gtag('event', 'guest_start_complete');
+  if(typeof fbq !== 'undefined') fbq('trackCustom', 'guest_start_complete');
 
 showScreen('screen-login');
   selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
@@ -3075,6 +3104,10 @@ async function startAuction() {
     const data = await res.json();
     if(!res.ok) throw new Error(data.detail || 'Failed to list car');
     if(typeof fbq !== 'undefined') fbq('track', 'Lead');
+    if(typeof gtag !== 'undefined') gtag('event', 'listing_submitted');
+    if(typeof fbq !== 'undefined') fbq('trackCustom', 'listing_submitted');
+    if(typeof gtag !== 'undefined') gtag('event', 'auction_live');
+    if(typeof fbq !== 'undefined') fbq('trackCustom', 'auction_live');
     S.car_id = data.car_id;
     S.auctionActive = true; S.bids = []; S.elapsedSeconds = 0;
     S.auctionStartTime = Date.now();
@@ -4081,6 +4114,8 @@ async function processSellerPayment() {
 // INIT
 document.getElementById('screen-login').classList.add('active');
 selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+if(typeof gtag !== 'undefined') gtag('event', 'landing_view');
+if(typeof fbq !== 'undefined') fbq('trackCustom', 'landing_view');
 
 setTimeout(() => {
   if(!document.querySelector('.screen.active')) {
