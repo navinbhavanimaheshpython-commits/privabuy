@@ -552,7 +552,6 @@ function Hero() {
           Real dealers.<br />
           <span style={{ color:"var(--accent)" }}>Real competition.</span><br />
           Done in minutes.<br />
-          Done in minutes.
         </h1>
 
         <p className="fade-up-3" style={{ color:"#1a1814", fontSize:"clamp(0.95rem, 1.1vw, 1.1rem)", lineHeight:1.65, maxWidth:"52ch", margin:"0 0 2.25rem", fontWeight:400 }}>
