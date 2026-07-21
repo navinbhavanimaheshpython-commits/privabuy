@@ -1110,7 +1110,6 @@ gtag('config', 'AW-18160958792');
                   <div class="check-pill" onclick="togglePill(this)">Suspension/Steering</div>
                 </div>
               </div>
-            </div>
             <div class="form-row mt-16">
                 <div class="form-group">
                   <label class="form-label">Is Your Vehicle Driveable?</label>
@@ -1837,6 +1836,7 @@ const API = window.location.hostname.includes('privabuy-git-staging-navinbhavani
   
 const STRIPE_PK = 'pk_live_51TNGzOPooe955nktS3X9HMO4xUU0gceM0XajI0KUEuYamGs6MY2QWLn0eiPb2HzOJO9OKdAUmIMcnN1UNuQPFqgb00fyoZL3LC';
 const stripeClient = Stripe(STRIPE_PK);
+const CURRENT_YEAR = new Date().getFullYear();
 const S = {
   role:'seller', auctionActive:false, auctionData:null,
   timerInterval:null, bidInterval:null, timeLeft:900,
@@ -1847,7 +1847,8 @@ const S = {
   seller_id: null, car_id: null, dealer_id: null,
   auctionStartTime: null,
   latest_offer_id: null, elapsedSeconds: 0,
-  photoUrls: [],  
+  photoUrls: [],
+  listingSubmitted: false,
 };
 
 const DEMO_DEALERS = ['Northside Auto Group','Lakeview Motors','Chicago Auto Exchange','Westside Pre-Owned','Lincoln Park Cars'];
@@ -2260,13 +2261,79 @@ function sellerTab(tab, el) {
     document.getElementById('no-auction-msg').classList.toggle('hidden', S.auctionActive);
     document.getElementById('live-auction-view').classList.toggle('hidden', !S.auctionActive);
   }
+  if(tab==='list' && S.listingSubmitted && !S.auctionActive) {
+    resetListingWizard();
+    S.listingSubmitted = false;
+  }
   if(tab==='history') loadSellerHistory();
   if(tab==='dealflow') loadDealFlow('seller');
 }
 
+// ── Clears every piece of per-listing state so a seller starting a second
+// listing doesn't inherit photos/damage/pills from the previous car ──
+function resetListingWizard() {
+  photoCount = 0; requiredFilled = 0;
+  Object.keys(damagePins).forEach(k => delete damagePins[k]);
+  Object.keys(areaDamage).forEach(k => delete areaDamage[k]);
+  defaultsApplied.step1 = false;
+  defaultsApplied.step3 = false;
+  S.radioValues = {};
+  S.photoUrls = [];
+  S.formData = {};
+  S.floorPrice = 0;
+  S.lienPayoffUrl = null;
+  S.lienPayoffAmount = 0;
+  S.lienHolder = '';
+
+  const photoGrid = document.getElementById('photo-grid');
+  if(photoGrid) {
+    photoGrid.innerHTML = `
+      <div class="photo-slot" onclick="simulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Front Exterior</div></div>
+      <div class="photo-slot" onclick="simulatePhoto(this,'Rear Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Rear Exterior</div></div>
+      <div class="photo-slot" onclick="simulatePhoto(this,'Driver Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Driver Side</div></div>
+      <div class="photo-slot" onclick="simulatePhoto(this,'Passenger Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Passenger Side</div></div>
+      <div class="photo-slot" onclick="simulatePhoto(this,'Interior / Dashboard',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Interior / Dash</div></div>
+      <div class="photo-slot" onclick="simulatePhoto(this,'Odometer',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Odometer Reading</div></div>
+      <div class="photo-slot" onclick="simulatePhoto(this,'Engine Bay',false)"><div class="photo-slot-icon">·</div><div class="photo-slot-label">Engine Bay</div></div>
+      <div class="photo-slot" onclick="simulatePhoto(this,'Any Damage',false)"><div class="photo-slot-icon">·</div><div class="photo-slot-label">Any Damage</div></div>`;
+  }
+  const photosCount = document.getElementById('photos-uploaded-count');
+  if(photosCount) photosCount.textContent = '0 of 8 photos uploaded (6 recommended)';
+
+  document.querySelectorAll('#wizard-step-1 .radio-pill.selected, #wizard-step-3 .radio-pill.selected').forEach(p=>p.classList.remove('selected'));
+  document.querySelectorAll('#wizard-step-3 .check-pill.selected').forEach(p=>p.classList.remove('selected'));
+  document.querySelectorAll('.damage-pin.has-damage').forEach(p=>{
+    p.classList.remove('has-damage');
+    const dot = p.querySelector('.damage-pin-dot'); if(dot) dot.textContent = '+';
+  });
+  document.querySelectorAll('.damage-area-card.has-damage').forEach(c=>c.classList.remove('has-damage'));
+
+  ['vin-input','f-trim','f-color','f-addons','f-mileage','f-zip','f-comments','lien-holder-input','lien-payoff-input','qs-year','qs-make','qs-model'].forEach(id=>{
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('f-year').value = '';
+  document.getElementById('f-make').value = '';
+  document.getElementById('f-model').value = '';
+  document.getElementById('vin-result')?.classList.add('hidden');
+  document.getElementById('lien-section')?.classList.add('hidden');
+  document.getElementById('quick-start-confirm')?.classList.remove('show');
+
+  const payoffSlot = document.getElementById('payoff-upload-slot');
+  if(payoffSlot) {
+    payoffSlot.innerHTML = `<div style="font-size:24px;margin-bottom:6px;">📄</div><div style="font-size:13px;color:var(--g5);">Click to upload your payoff statement</div><div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">PDF, JPG, or PNG · from your lender</div>`;
+    payoffSlot.style.borderColor = '';
+    payoffSlot.style.borderStyle = '';
+  }
+
+  document.getElementById('quick-start-card').style.display = '';
+  for(let i=1;i<=5;i++) document.getElementById(`wizard-step-${i}`).classList.add('hidden');
+  v1CurrentStep = 1;
+  v3CurrentStep = 1;
+}
+
 function wizardGo(step) {
   S.wizardStep = step;
-  if(step === 3) { currentDamageTab = 'exterior'; v3ResetToStart(); }
+  if(step === 3) { v3ResetToStart(); }
   for(let i=1;i<=5;i++){
     document.getElementById(`wizard-step-${i}`).classList.toggle('hidden',i!==step);
     const ws = document.getElementById(`ws-${i}`);
@@ -2337,6 +2404,7 @@ let v1CurrentStep = 1;
 function v1ResetToStart() {
   v1CurrentStep = 1;
   v1GoStep(1);
+  applyLikelyDefaults('step1');
 }
 
 function v1GoStep(step) {
@@ -2424,6 +2492,8 @@ function v3GoStep(step) {
   }
   const label = document.getElementById('v3-progress-label');
   if(label) label.textContent = `Question ${step} of ${V3_TOTAL_STEPS}`;
+  const v3NextBtn = document.getElementById('v3-next-btn');
+  if(v3NextBtn) v3NextBtn.textContent = step===V3_TOTAL_STEPS ? 'Continue →' : 'Next →';
   saveDraftProgress();
 }
 
@@ -2450,7 +2520,7 @@ function v3ValidateStep(step) {
     if(!getRadio('overall-condition-group')) { showToast('⚠️','Required','Select overall condition.'); return false; }
   }
   if(step === 5) {
-    if(!getRadio('truthful-group')) { showToast('⚠️','Required','Confirm all information is accurate.'); return false; }
+    if(getRadio('truthful-group') !== 'Yes') { showToast('⚠️','Required','Please confirm all information is accurate before continuing — or call the concierge line if something needs fixing.'); return false; }
   }
   return true;
 }
@@ -2856,8 +2926,12 @@ async function decodeVIN() {
     document.getElementById('f-make').value = make.charAt(0) + make.slice(1).toLowerCase();
     document.getElementById('f-model').value = model.charAt(0) + model.slice(1).toLowerCase();
     document.getElementById('f-trim').value = trim || '';
-    S.radioValues['transmission-group'] = transmission.includes('Manual') ? 'Manual' : transmission.includes('CVT') ? 'CVT' : 'Automatic';
-    S.radioValues['drivetrain-group'] = drivetrain.includes('AWD') || drivetrain.includes('All') ? 'AWD' : drivetrain.includes('4WD') || drivetrain.includes('4x4') ? '4WD' : drivetrain.includes('Rear') ? 'RWD' : 'FWD';
+    const decodedTransmission = transmission.includes('Manual') ? 'Manual' : transmission.includes('CVT') ? 'CVT' : 'Automatic';
+    const decodedDrivetrain = drivetrain.includes('AWD') || drivetrain.includes('All') ? 'AWD' : drivetrain.includes('4WD') || drivetrain.includes('4x4') ? '4WD' : drivetrain.includes('Rear') ? 'RWD' : 'FWD';
+    const transPill = [...document.querySelectorAll('#transmission-group .radio-pill')].find(p => p.textContent.trim() === decodedTransmission);
+    if(transPill) selectRadio('transmission-group', transPill, decodedTransmission);
+    const drivePill = [...document.querySelectorAll('#drivetrain-group .radio-pill')].find(p => p.textContent.trim() === decodedDrivetrain);
+    if(drivePill) selectRadio('drivetrain-group', drivePill, decodedDrivetrain);
     document.getElementById('vin-result').classList.remove('hidden');
     document.getElementById('vin-result').innerHTML = `<div class="alert alert-success"> VIN Decoded: ${year} ${make} ${model} ${trim}  ${bodyClass}  ${engine}  Drivetrain: ${S.radioValues['drivetrain-group']}</div>`;
     showToast('','VIN Decoded!',`${year} ${make} ${model} confirmed from NHTSA.`);
@@ -2885,7 +2959,7 @@ function checkEligibility() {
   if(!mileage) { showToast('⚠️','Missing Field','Please enter the mileage.'); return; }
   if(!zip || zip.length < 5) { showToast('⚠️','Missing Field','Please enter a valid ZIP code.'); return; }
 
-  const age = 2025 - year;
+  const age = CURRENT_YEAR - year;
   const isEligible = age >= 5 && age <= 10 && mileage >= 50000;
   const el = document.getElementById('eligibility-result');
   saveDraftProgress();
@@ -2916,6 +2990,15 @@ function toggleLienSection(val) {
     S.lienPayoffUrl = null;
     S.lienPayoffAmount = 0;
     S.lienHolder = '';
+    const payoffSlot = document.getElementById('payoff-upload-slot');
+    if(payoffSlot) {
+      payoffSlot.innerHTML = `<div style="font-size:24px;margin-bottom:6px;">📄</div><div style="font-size:13px;color:var(--g5);">Click to upload your payoff statement</div><div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">PDF, JPG, or PNG · from your lender</div>`;
+      payoffSlot.style.borderColor = '';
+      payoffSlot.style.borderStyle = '';
+    }
+    const holderInput = document.getElementById('lien-holder-input'); if(holderInput) holderInput.value = '';
+    const payoffInput = document.getElementById('lien-payoff-input'); if(payoffInput) payoffInput.value = '';
+    const ackCb = document.getElementById('lien-ack-checkbox'); if(ackCb) ackCb.checked = false;
   }
 }
 
@@ -3041,11 +3124,6 @@ function switchCarView(view) {
     }
   });
 }
-function switchDamageTab(tab, el) {
-  ['exterior','interior','mechanical'].forEach(t=>document.getElementById(`damage-${t}`).classList.toggle('hidden',t!==tab));
-  document.querySelectorAll('.damage-tab').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-}
 const damagePins = {};
 function togglePin(id, label) {
   const pin = document.getElementById(`pin-${id}`);
@@ -3058,50 +3136,6 @@ function toggleAreaDamage(el, id) {
   if(areaDamage[id]){delete areaDamage[id];el.classList.remove('has-damage');}
   else{areaDamage[id]=true;el.classList.add('has-damage');}
 }
-
-let currentDamageTab = 'exterior';
-
-function damageTabNext() {
-  if(currentDamageTab === 'exterior') {
-    // Validate exterior
-    const extCond = document.querySelectorAll('#ext-condition-group .check-pill.selected');
-    if(!extCond.length) { showToast('⚠️','Required','Select at least one exterior condition.'); return; }
-    if(!getRadio('tires-group')) { showToast('⚠️','Required','Select tires replaced.'); return; }
-    if(!getRadio('windshield-group')) { showToast('⚠️','Required','Select windshield condition.'); return; }
-    currentDamageTab = 'interior';
-    switchDamageTab('interior', document.querySelector('.damage-tab:nth-child(2)'));
-  } else if(currentDamageTab === 'interior') {
-    // Validate interior
-    if(!getRadio('moonroof-group')) { showToast('⚠️','Required','Select moonroof status.'); return; }
-    if(!getRadio('smoked-group')) { showToast('⚠️','Required','Select smoked in status.'); return; }
-    currentDamageTab = 'mechanical';
-    switchDamageTab('mechanical', document.querySelector('.damage-tab:nth-child(3)'));
-  } else if(currentDamageTab === 'mechanical') {
-    // Validate mechanical
-    const warnLights = document.querySelectorAll('#warning-lights-group .check-pill.selected');
-    if(!warnLights.length) { showToast('⚠️','Required','Select warning lights status.'); return; }
-    const mechIssues = document.querySelectorAll('#mech-issues-group .check-pill.selected');
-    if(!mechIssues.length) { showToast('⚠️','Required','Select mechanical issues status.'); return; }
-    if(!getRadio('driveable-group')) { showToast('⚠️','Required','Is your vehicle driveable?'); return; }
-    if(!getRadio('accident-group')) { showToast('⚠️','Required','Select accident history.'); return; }
-    if(!getRadio('overall-condition-group')) { showToast('⚠️','Required','Select overall condition.'); return; }
-    if(!getRadio('truthful-group')) { showToast('⚠️','Required','Confirm all information is accurate.'); return; }
-    wizardGo(4);
-  }
-}
-
-function damageTabBack() {
-  if(currentDamageTab === 'exterior') {
-    wizardGo(2);
-  } else if(currentDamageTab === 'interior') {
-    currentDamageTab = 'exterior';
-    switchDamageTab('exterior', document.querySelector('.damage-tab:nth-child(1)'));
-  } else if(currentDamageTab === 'mechanical') {
-    currentDamageTab = 'interior';
-    switchDamageTab('interior', document.querySelector('.damage-tab:nth-child(2)'));
-  }
-}
-
 
 async function buildValueEstimate() {
   const d = S.formData;
@@ -3121,7 +3155,7 @@ async function buildValueEstimate() {
     } else {
       const baseValues = {Honda:13500,Toyota:14200,Ford:13000,Chevrolet:11800,Nissan:10800,Hyundai:10000,Subaru:13000,Mazda:12200,BMW:17500,'Mercedes-Benz':19000,Volkswagen:11500,Kia:9800};
       const base = baseValues[d.make]||11000;
-      const ageDepr = (2026-d.year)*1300;
+      const ageDepr = (CURRENT_YEAR-d.year)*1300;
       const mileDepr = Math.max(0,(d.mileage-60000)/1000)*90;
       const rawValue = Math.max(3500, base - ageDepr - mileDepr);
       tradeIn = Math.round(rawValue*0.82/100)*100;
@@ -3241,6 +3275,7 @@ async function startAuction() {
     S.auctionActive = true; S.bids = []; S.elapsedSeconds = 0;
     S.auctionStartTime = Date.now();
     S.auctionData = {...S.formData};
+    S.listingSubmitted = true;
     resetAnon();
     sellerTab('auction', document.querySelectorAll('#seller-tabs .tab-btn')[1]);
     document.getElementById('no-auction-msg').classList.add('hidden');
