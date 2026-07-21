@@ -524,7 +524,6 @@ gtag('config', 'AW-18160958792');
         <div class="gs-dot" id="gs-dot-5"></div>
         <div class="gs-dot" id="gs-dot-6"></div>
         <div class="gs-dot" id="gs-dot-7"></div>
-        <div class="gs-dot" id="gs-dot-8"></div>
       </div>
 
       <div id="gs-step-1" class="gs-step">
@@ -544,11 +543,6 @@ gtag('config', 'AW-18160958792');
         <input class="form-input gs-big-input" id="gs-mileage" type="number" placeholder="e.g. 94200" onkeydown="if(event.key==='Enter') gsNext()">
       </div>
       <div id="gs-step-5" class="gs-step" style="display:none;">
-        <div class="quick-start-title" style="font-size:32px;margin-bottom:20px;">Where should we send your offer?</div>
-        <input class="form-input gs-big-input" id="gs-email" type="email" placeholder="you@example.com" style="font-size:28px;" onkeydown="if(event.key==='Enter') gsNext()">
-        <div class="quick-start-hint" style="text-align:center;">No password yet — just so we can save your progress.</div>
-      </div>
-      <div id="gs-step-6" class="gs-step" style="display:none;">
         <div class="quick-start-title" style="font-size:32px;margin-bottom:20px;">Know the VIN?</div>
         <div class="vin-row" style="max-width:520px;margin:0 auto;">
           <input class="form-input" id="gs-vin" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()" style="font-family:monospace;letter-spacing:2px;text-transform:uppercase;">
@@ -557,7 +551,7 @@ gtag('config', 'AW-18160958792');
         <div id="gs-vin-result" class="hidden mt-8" style="max-width:520px;margin:12px auto 0;"></div>
         <div class="quick-start-hint" style="text-align:center;">Optional — you can skip this and dealers can still bid.</div>
       </div>
-      <div id="gs-step-7" class="gs-step" style="display:none;">
+      <div id="gs-step-6" class="gs-step" style="display:none;">
         <div class="quick-start-title" style="font-size:32px;margin-bottom:20px;">Add a few photos</div>
         <div class="photo-grid" id="gs-photo-grid" style="max-width:600px;margin:0 auto;">
           <div class="photo-slot" onclick="gsSimulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Front Exterior</div></div>
@@ -570,7 +564,7 @@ gtag('config', 'AW-18160958792');
         <div id="gs-photos-count" class="text-muted mt-16" style="text-align:center;">0 of 6 photos uploaded</div>
         <div class="quick-start-hint" style="text-align:center;">Not near the car? Skip for now — you'll get a reminder to finish once you're live.</div>
       </div>
-      <div id="gs-step-8" class="gs-step" style="display:none;">
+      <div id="gs-step-7" class="gs-step" style="display:none;">
         <div style="font-size:40px;margin-bottom:12px;">🎉</div>
         <div class="quick-start-title" style="font-size:32px;margin-bottom:12px;">You're all set</div>
         <div style="font-size:16px;color:var(--g5);line-height:1.6;max-width:380px;margin:0 auto;">
@@ -1110,6 +1104,7 @@ gtag('config', 'AW-18160958792');
                   <div class="check-pill" onclick="togglePill(this)">Suspension/Steering</div>
                 </div>
               </div>
+            </div>
             <div class="form-row mt-16">
                 <div class="form-group">
                   <label class="form-label">Is Your Vehicle Driveable?</label>
@@ -1836,7 +1831,6 @@ const API = window.location.hostname.includes('privabuy-git-staging-navinbhavani
   
 const STRIPE_PK = 'pk_live_51TNGzOPooe955nktS3X9HMO4xUU0gceM0XajI0KUEuYamGs6MY2QWLn0eiPb2HzOJO9OKdAUmIMcnN1UNuQPFqgb00fyoZL3LC';
 const stripeClient = Stripe(STRIPE_PK);
-const CURRENT_YEAR = new Date().getFullYear();
 const S = {
   role:'seller', auctionActive:false, auctionData:null,
   timerInterval:null, bidInterval:null, timeLeft:900,
@@ -1847,8 +1841,7 @@ const S = {
   seller_id: null, car_id: null, dealer_id: null,
   auctionStartTime: null,
   latest_offer_id: null, elapsedSeconds: 0,
-  photoUrls: [],
-  listingSubmitted: false,
+  photoUrls: [],  
 };
 
 const DEMO_DEALERS = ['Northside Auto Group','Lakeview Motors','Chicago Auto Exchange','Westside Pre-Owned','Lincoln Park Cars'];
@@ -2261,79 +2254,13 @@ function sellerTab(tab, el) {
     document.getElementById('no-auction-msg').classList.toggle('hidden', S.auctionActive);
     document.getElementById('live-auction-view').classList.toggle('hidden', !S.auctionActive);
   }
-  if(tab==='list' && S.listingSubmitted && !S.auctionActive) {
-    resetListingWizard();
-    S.listingSubmitted = false;
-  }
   if(tab==='history') loadSellerHistory();
   if(tab==='dealflow') loadDealFlow('seller');
 }
 
-// ── Clears every piece of per-listing state so a seller starting a second
-// listing doesn't inherit photos/damage/pills from the previous car ──
-function resetListingWizard() {
-  photoCount = 0; requiredFilled = 0;
-  Object.keys(damagePins).forEach(k => delete damagePins[k]);
-  Object.keys(areaDamage).forEach(k => delete areaDamage[k]);
-  defaultsApplied.step1 = false;
-  defaultsApplied.step3 = false;
-  S.radioValues = {};
-  S.photoUrls = [];
-  S.formData = {};
-  S.floorPrice = 0;
-  S.lienPayoffUrl = null;
-  S.lienPayoffAmount = 0;
-  S.lienHolder = '';
-
-  const photoGrid = document.getElementById('photo-grid');
-  if(photoGrid) {
-    photoGrid.innerHTML = `
-      <div class="photo-slot" onclick="simulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Front Exterior</div></div>
-      <div class="photo-slot" onclick="simulatePhoto(this,'Rear Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Rear Exterior</div></div>
-      <div class="photo-slot" onclick="simulatePhoto(this,'Driver Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Driver Side</div></div>
-      <div class="photo-slot" onclick="simulatePhoto(this,'Passenger Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Passenger Side</div></div>
-      <div class="photo-slot" onclick="simulatePhoto(this,'Interior / Dashboard',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Interior / Dash</div></div>
-      <div class="photo-slot" onclick="simulatePhoto(this,'Odometer',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Odometer Reading</div></div>
-      <div class="photo-slot" onclick="simulatePhoto(this,'Engine Bay',false)"><div class="photo-slot-icon">·</div><div class="photo-slot-label">Engine Bay</div></div>
-      <div class="photo-slot" onclick="simulatePhoto(this,'Any Damage',false)"><div class="photo-slot-icon">·</div><div class="photo-slot-label">Any Damage</div></div>`;
-  }
-  const photosCount = document.getElementById('photos-uploaded-count');
-  if(photosCount) photosCount.textContent = '0 of 8 photos uploaded (6 recommended)';
-
-  document.querySelectorAll('#wizard-step-1 .radio-pill.selected, #wizard-step-3 .radio-pill.selected').forEach(p=>p.classList.remove('selected'));
-  document.querySelectorAll('#wizard-step-3 .check-pill.selected').forEach(p=>p.classList.remove('selected'));
-  document.querySelectorAll('.damage-pin.has-damage').forEach(p=>{
-    p.classList.remove('has-damage');
-    const dot = p.querySelector('.damage-pin-dot'); if(dot) dot.textContent = '+';
-  });
-  document.querySelectorAll('.damage-area-card.has-damage').forEach(c=>c.classList.remove('has-damage'));
-
-  ['vin-input','f-trim','f-color','f-addons','f-mileage','f-zip','f-comments','lien-holder-input','lien-payoff-input','qs-year','qs-make','qs-model'].forEach(id=>{
-    const el = document.getElementById(id); if(el) el.value = '';
-  });
-  document.getElementById('f-year').value = '';
-  document.getElementById('f-make').value = '';
-  document.getElementById('f-model').value = '';
-  document.getElementById('vin-result')?.classList.add('hidden');
-  document.getElementById('lien-section')?.classList.add('hidden');
-  document.getElementById('quick-start-confirm')?.classList.remove('show');
-
-  const payoffSlot = document.getElementById('payoff-upload-slot');
-  if(payoffSlot) {
-    payoffSlot.innerHTML = `<div style="font-size:24px;margin-bottom:6px;">📄</div><div style="font-size:13px;color:var(--g5);">Click to upload your payoff statement</div><div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">PDF, JPG, or PNG · from your lender</div>`;
-    payoffSlot.style.borderColor = '';
-    payoffSlot.style.borderStyle = '';
-  }
-
-  document.getElementById('quick-start-card').style.display = '';
-  for(let i=1;i<=5;i++) document.getElementById(`wizard-step-${i}`).classList.add('hidden');
-  v1CurrentStep = 1;
-  v3CurrentStep = 1;
-}
-
 function wizardGo(step) {
   S.wizardStep = step;
-  if(step === 3) { v3ResetToStart(); }
+  if(step === 3) { currentDamageTab = 'exterior'; v3ResetToStart(); }
   for(let i=1;i<=5;i++){
     document.getElementById(`wizard-step-${i}`).classList.toggle('hidden',i!==step);
     const ws = document.getElementById(`ws-${i}`);
@@ -2391,8 +2318,8 @@ function applyLikelyDefaults(which) {
     defaultCheckPillGroup('mech-issues-group','no issues');
     defaultRadio('driveable-group','Yes');
     defaultRadio('accident-group','None');
-    // Overall condition and truthfulness are legally/materially significant —
-    // the seller must see and explicitly tap these, not have them silently defaulted.
+    defaultRadio('overall-condition-group','Pretty Great');
+    defaultRadio('truthful-group','Yes');
   }
 }
 
@@ -2404,7 +2331,6 @@ let v1CurrentStep = 1;
 function v1ResetToStart() {
   v1CurrentStep = 1;
   v1GoStep(1);
-  applyLikelyDefaults('step1');
 }
 
 function v1GoStep(step) {
@@ -2467,7 +2393,7 @@ function v1Back() {
 }
 
 // ── replace the tabbed condition/damage form with a 7-question sequence ──
-const V3_STEP_IDS = ['v3-step-1','damage-interior','v3-step-3','v3-step-4','v3-step-5'];
+const V3_STEP_IDS = ['v3-step-1','damage-interior','v3-step-3']
 const V3_TOTAL_STEPS = V3_STEP_IDS.length;
 let v3CurrentStep = 1;
 
@@ -2492,8 +2418,6 @@ function v3GoStep(step) {
   }
   const label = document.getElementById('v3-progress-label');
   if(label) label.textContent = `Question ${step} of ${V3_TOTAL_STEPS}`;
-  const v3NextBtn = document.getElementById('v3-next-btn');
-  if(v3NextBtn) v3NextBtn.textContent = step===V3_TOTAL_STEPS ? 'Continue →' : 'Next →';
   saveDraftProgress();
 }
 
@@ -2507,8 +2431,6 @@ function v3ValidateStep(step) {
   if(step === 2) {
     if(!getRadio('moonroof-group')) { showToast('⚠️','Required','Select moonroof status.'); return false; }
     if(!getRadio('smoked-group')) { showToast('⚠️','Required','Select smoked-in status.'); return false; }
-  }
-  if(step === 3) {
     const warnLights = document.querySelectorAll('#warning-lights-group .check-pill.selected');
     if(!warnLights.length) { showToast('⚠️','Required','Select warning lights status.'); return false; }
     const mechIssues = document.querySelectorAll('#mech-issues-group .check-pill.selected');
@@ -2516,11 +2438,9 @@ function v3ValidateStep(step) {
     if(!getRadio('driveable-group')) { showToast('⚠️','Required','Is your vehicle driveable?'); return false; }
     if(!getRadio('accident-group')) { showToast('⚠️','Required','Select accident history.'); return false; }
   }
-  if(step === 4) {
+  if(step === 3) {
     if(!getRadio('overall-condition-group')) { showToast('⚠️','Required','Select overall condition.'); return false; }
-  }
-  if(step === 5) {
-    if(getRadio('truthful-group') !== 'Yes') { showToast('⚠️','Required','Please confirm all information is accurate before continuing — or call the concierge line if something needs fixing.'); return false; }
+    if(!getRadio('truthful-group')) { showToast('⚠️','Required','Confirm all information is accurate.'); return false; }
   }
   return true;
 }
@@ -2643,12 +2563,11 @@ async function addPhotoToListing(el, label) {
 }
 
 // ── Guest quick start: one question at a time, capture the car BEFORE asking for an account ──
-const GS_TOTAL_STEPS = 8;
+const GS_TOTAL_STEPS = 7;
 let gsCurrentStep = 1;
-const GS_FIELD_BY_STEP = {1:'gs-year', 2:'gs-make', 3:'gs-model', 4:'gs-mileage', 5:'gs-email'};
+const GS_FIELD_BY_STEP = {1:'gs-year', 2:'gs-make', 3:'gs-model', 4:'gs-mileage'};
 let gsPhotoCount = 0;
 let gsPhotoUrls = [];
-let gsLeadCaptured = false;
 
 function gsGoStep(step) {
   gsCurrentStep = step;
@@ -2665,52 +2584,24 @@ function gsGoStep(step) {
   const backBtn = document.getElementById('gs-back-btn');
   if(backBtn) backBtn.style.display = step===1 ? 'none' : 'inline-flex';
   const nextBtn = document.getElementById('gs-next-btn');
-  if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Log In to See Offers →' : (step===7 ? 'Continue →' : (step===6 ? 'Skip / Continue →' : (step===5 ? 'Get My Offer →' : 'Next →')));
+  if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Log In to See Offers →' : (step===6 ? 'Continue →' : (step===5 ? 'Skip / Continue →' : 'Next →'));
   const hintEl = document.querySelector('.guest-start-card .quick-start-hint');
   if(hintEl) hintEl.style.display = step===GS_TOTAL_STEPS ? 'none' : '';
   setTimeout(() => document.getElementById(GS_FIELD_BY_STEP[step])?.focus(), 50);
 }
 
 function gsValidateStep(step) {
-  const labels = {1:'the year', 2:'the make', 3:'the model', 4:'the mileage', 5:'your email'};
+  const labels = {1:'the year', 2:'the make', 3:'the model', 4:'the mileage'};
   const val = document.getElementById(GS_FIELD_BY_STEP[step])?.value.trim();
   if(!val) { showToast('⚠️','Missing Info',`Enter ${labels[step]} to continue.`); return false; }
-  if(step === 5 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { showToast('⚠️','Invalid Email','Enter a valid email address.'); return false; }
   return true;
 }
 
 function gsNext() {
-  if(gsCurrentStep <= 5 && !gsValidateStep(gsCurrentStep)) return;
-  // steps 6 (VIN) and 7 (photos) are optional — no blocking validation
-  if(gsCurrentStep === 5) { gsCaptureLead(); }
+  if(gsCurrentStep <= 4 && !gsValidateStep(gsCurrentStep)) return;
+  // steps 5 (VIN) and 6 (photos) are optional — no blocking validation
   if(gsCurrentStep >= GS_TOTAL_STEPS) { guestQuickStartSubmit(); return; }
   gsGoStep(gsCurrentStep + 1);
-}
-
-// Fire the moment we have an email — recoverable checkpoint, independent of
-// whether the seller ever finishes VIN/photos/password.
-async function gsCaptureLead() {
-  if(gsLeadCaptured) return;
-  gsLeadCaptured = true;
-  const year = document.getElementById('gs-year').value.trim();
-  const make = document.getElementById('gs-make').value.trim();
-  const model = document.getElementById('gs-model').value.trim();
-  const mileage = document.getElementById('gs-mileage').value.trim();
-  const email = document.getElementById('gs-email').value.trim();
-  if(typeof gtag !== 'undefined') gtag('event', 'guest_email_captured');
-  if(typeof fbq !== 'undefined') fbq('trackCustom', 'guest_email_captured');
-  try {
-    await fetch(`${API}/sellers/concierge-request`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        seller_id: null,
-        seller_email: email,
-        seller_phone: '',
-        partial_vehicle: `${year} ${make} ${model} — ${mileage} mi`,
-      })
-    });
-  } catch(err) { console.warn('Lead capture failed (non-blocking):', err); }
 }
 
 // ── VIN decode inside guest-start (mirrors decodeVIN(), but writes to gs-vin fields) ──
@@ -2777,9 +2668,8 @@ function guestQuickStartSubmit() {
   const make = document.getElementById('gs-make').value.trim();
   const model = document.getElementById('gs-model').value.trim();
   const mileage = document.getElementById('gs-mileage').value.trim();
-  const email = document.getElementById('gs-email')?.value.trim() || '';
   const vin = document.getElementById('gs-vin')?.value.trim() || '';
-  if(!year || !make || !model || !mileage || !email) { showToast('⚠️','Missing Info','Enter year, make, model, mileage, and email to continue.'); return; }
+  if(!year || !make || !model || !mileage) { showToast('⚠️','Missing Info','Enter year, make, model, and mileage to continue.'); return; }
 
   S.pendingGuestVehicle = { year, make, model, mileage, vin, photos: gsPhotoUrls };
   if(typeof gtag !== 'undefined') gtag('event', 'guest_quick_start_submitted');
@@ -2791,9 +2681,8 @@ showScreen('screen-login');
   selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
   setSellerMode('register');
   const taglineEl = document.getElementById('login-tagline');
-  taglineEl.textContent = `Nice — a ${year} ${make} ${model}. One last step: create a password to save it.`;
+  taglineEl.textContent = `Nice — a ${year} ${make} ${model}. Create your free account to get it in front of dealers.`;
   taglineEl.classList.add('login-tagline-personalized');
-  setTimeout(() => { const emailField = document.getElementById('seller-email-input'); if(emailField) emailField.value = email; }, 50);
 }
 
 // ── FIX 2: single-question quick start ──
@@ -2926,12 +2815,8 @@ async function decodeVIN() {
     document.getElementById('f-make').value = make.charAt(0) + make.slice(1).toLowerCase();
     document.getElementById('f-model').value = model.charAt(0) + model.slice(1).toLowerCase();
     document.getElementById('f-trim').value = trim || '';
-    const decodedTransmission = transmission.includes('Manual') ? 'Manual' : transmission.includes('CVT') ? 'CVT' : 'Automatic';
-    const decodedDrivetrain = drivetrain.includes('AWD') || drivetrain.includes('All') ? 'AWD' : drivetrain.includes('4WD') || drivetrain.includes('4x4') ? '4WD' : drivetrain.includes('Rear') ? 'RWD' : 'FWD';
-    const transPill = [...document.querySelectorAll('#transmission-group .radio-pill')].find(p => p.textContent.trim() === decodedTransmission);
-    if(transPill) selectRadio('transmission-group', transPill, decodedTransmission);
-    const drivePill = [...document.querySelectorAll('#drivetrain-group .radio-pill')].find(p => p.textContent.trim() === decodedDrivetrain);
-    if(drivePill) selectRadio('drivetrain-group', drivePill, decodedDrivetrain);
+    S.radioValues['transmission-group'] = transmission.includes('Manual') ? 'Manual' : transmission.includes('CVT') ? 'CVT' : 'Automatic';
+    S.radioValues['drivetrain-group'] = drivetrain.includes('AWD') || drivetrain.includes('All') ? 'AWD' : drivetrain.includes('4WD') || drivetrain.includes('4x4') ? '4WD' : drivetrain.includes('Rear') ? 'RWD' : 'FWD';
     document.getElementById('vin-result').classList.remove('hidden');
     document.getElementById('vin-result').innerHTML = `<div class="alert alert-success"> VIN Decoded: ${year} ${make} ${model} ${trim}  ${bodyClass}  ${engine}  Drivetrain: ${S.radioValues['drivetrain-group']}</div>`;
     showToast('','VIN Decoded!',`${year} ${make} ${model} confirmed from NHTSA.`);
@@ -2959,7 +2844,7 @@ function checkEligibility() {
   if(!mileage) { showToast('⚠️','Missing Field','Please enter the mileage.'); return; }
   if(!zip || zip.length < 5) { showToast('⚠️','Missing Field','Please enter a valid ZIP code.'); return; }
 
-  const age = CURRENT_YEAR - year;
+  const age = 2025 - year;
   const isEligible = age >= 5 && age <= 10 && mileage >= 50000;
   const el = document.getElementById('eligibility-result');
   saveDraftProgress();
@@ -2990,15 +2875,6 @@ function toggleLienSection(val) {
     S.lienPayoffUrl = null;
     S.lienPayoffAmount = 0;
     S.lienHolder = '';
-    const payoffSlot = document.getElementById('payoff-upload-slot');
-    if(payoffSlot) {
-      payoffSlot.innerHTML = `<div style="font-size:24px;margin-bottom:6px;">📄</div><div style="font-size:13px;color:var(--g5);">Click to upload your payoff statement</div><div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">PDF, JPG, or PNG · from your lender</div>`;
-      payoffSlot.style.borderColor = '';
-      payoffSlot.style.borderStyle = '';
-    }
-    const holderInput = document.getElementById('lien-holder-input'); if(holderInput) holderInput.value = '';
-    const payoffInput = document.getElementById('lien-payoff-input'); if(payoffInput) payoffInput.value = '';
-    const ackCb = document.getElementById('lien-ack-checkbox'); if(ackCb) ackCb.checked = false;
   }
 }
 
@@ -3124,6 +3000,11 @@ function switchCarView(view) {
     }
   });
 }
+function switchDamageTab(tab, el) {
+  ['exterior','interior','mechanical'].forEach(t=>document.getElementById(`damage-${t}`).classList.toggle('hidden',t!==tab));
+  document.querySelectorAll('.damage-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
 const damagePins = {};
 function togglePin(id, label) {
   const pin = document.getElementById(`pin-${id}`);
@@ -3136,6 +3017,50 @@ function toggleAreaDamage(el, id) {
   if(areaDamage[id]){delete areaDamage[id];el.classList.remove('has-damage');}
   else{areaDamage[id]=true;el.classList.add('has-damage');}
 }
+
+let currentDamageTab = 'exterior';
+
+function damageTabNext() {
+  if(currentDamageTab === 'exterior') {
+    // Validate exterior
+    const extCond = document.querySelectorAll('#ext-condition-group .check-pill.selected');
+    if(!extCond.length) { showToast('⚠️','Required','Select at least one exterior condition.'); return; }
+    if(!getRadio('tires-group')) { showToast('⚠️','Required','Select tires replaced.'); return; }
+    if(!getRadio('windshield-group')) { showToast('⚠️','Required','Select windshield condition.'); return; }
+    currentDamageTab = 'interior';
+    switchDamageTab('interior', document.querySelector('.damage-tab:nth-child(2)'));
+  } else if(currentDamageTab === 'interior') {
+    // Validate interior
+    if(!getRadio('moonroof-group')) { showToast('⚠️','Required','Select moonroof status.'); return; }
+    if(!getRadio('smoked-group')) { showToast('⚠️','Required','Select smoked in status.'); return; }
+    currentDamageTab = 'mechanical';
+    switchDamageTab('mechanical', document.querySelector('.damage-tab:nth-child(3)'));
+  } else if(currentDamageTab === 'mechanical') {
+    // Validate mechanical
+    const warnLights = document.querySelectorAll('#warning-lights-group .check-pill.selected');
+    if(!warnLights.length) { showToast('⚠️','Required','Select warning lights status.'); return; }
+    const mechIssues = document.querySelectorAll('#mech-issues-group .check-pill.selected');
+    if(!mechIssues.length) { showToast('⚠️','Required','Select mechanical issues status.'); return; }
+    if(!getRadio('driveable-group')) { showToast('⚠️','Required','Is your vehicle driveable?'); return; }
+    if(!getRadio('accident-group')) { showToast('⚠️','Required','Select accident history.'); return; }
+    if(!getRadio('overall-condition-group')) { showToast('⚠️','Required','Select overall condition.'); return; }
+    if(!getRadio('truthful-group')) { showToast('⚠️','Required','Confirm all information is accurate.'); return; }
+    wizardGo(4);
+  }
+}
+
+function damageTabBack() {
+  if(currentDamageTab === 'exterior') {
+    wizardGo(2);
+  } else if(currentDamageTab === 'interior') {
+    currentDamageTab = 'exterior';
+    switchDamageTab('exterior', document.querySelector('.damage-tab:nth-child(1)'));
+  } else if(currentDamageTab === 'mechanical') {
+    currentDamageTab = 'interior';
+    switchDamageTab('interior', document.querySelector('.damage-tab:nth-child(2)'));
+  }
+}
+
 
 async function buildValueEstimate() {
   const d = S.formData;
@@ -3155,7 +3080,7 @@ async function buildValueEstimate() {
     } else {
       const baseValues = {Honda:13500,Toyota:14200,Ford:13000,Chevrolet:11800,Nissan:10800,Hyundai:10000,Subaru:13000,Mazda:12200,BMW:17500,'Mercedes-Benz':19000,Volkswagen:11500,Kia:9800};
       const base = baseValues[d.make]||11000;
-      const ageDepr = (CURRENT_YEAR-d.year)*1300;
+      const ageDepr = (2026-d.year)*1300;
       const mileDepr = Math.max(0,(d.mileage-60000)/1000)*90;
       const rawValue = Math.max(3500, base - ageDepr - mileDepr);
       tradeIn = Math.round(rawValue*0.82/100)*100;
@@ -3275,7 +3200,6 @@ async function startAuction() {
     S.auctionActive = true; S.bids = []; S.elapsedSeconds = 0;
     S.auctionStartTime = Date.now();
     S.auctionData = {...S.formData};
-    S.listingSubmitted = true;
     resetAnon();
     sellerTab('auction', document.querySelectorAll('#seller-tabs .tab-btn')[1]);
     document.getElementById('no-auction-msg').classList.add('hidden');
