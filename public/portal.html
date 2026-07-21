@@ -522,9 +522,6 @@ gtag('config', 'AW-18160958792');
         <div class="gs-dot" id="gs-dot-3"></div>
         <div class="gs-dot" id="gs-dot-4"></div>
         <div class="gs-dot" id="gs-dot-5"></div>
-        <div class="gs-dot" id="gs-dot-6"></div>
-        <div class="gs-dot" id="gs-dot-7"></div>
-        <div class="gs-dot" id="gs-dot-8"></div>
       </div>
 
       <div id="gs-step-1" class="gs-step">
@@ -544,33 +541,6 @@ gtag('config', 'AW-18160958792');
         <input class="form-input gs-big-input" id="gs-mileage" type="number" placeholder="e.g. 94200" onkeydown="if(event.key==='Enter') gsNext()">
       </div>
       <div id="gs-step-5" class="gs-step" style="display:none;">
-        <div class="quick-start-title" style="font-size:32px;margin-bottom:20px;">Where should we send your offer?</div>
-        <input class="form-input gs-big-input" id="gs-email" type="email" placeholder="you@example.com" style="font-size:28px;" onkeydown="if(event.key==='Enter') gsNext()">
-        <div class="quick-start-hint" style="text-align:center;">No password yet — just so we can save your progress.</div>
-      </div>
-      <div id="gs-step-6" class="gs-step" style="display:none;">
-        <div class="quick-start-title" style="font-size:32px;margin-bottom:20px;">Know the VIN?</div>
-        <div class="vin-row" style="max-width:520px;margin:0 auto;">
-          <input class="form-input" id="gs-vin" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()" style="font-family:monospace;letter-spacing:2px;text-transform:uppercase;">
-          <button class="btn btn-secondary" onclick="gsDecodeVIN()">Decode</button>
-        </div>
-        <div id="gs-vin-result" class="hidden mt-8" style="max-width:520px;margin:12px auto 0;"></div>
-        <div class="quick-start-hint" style="text-align:center;">Optional — you can skip this and dealers can still bid.</div>
-      </div>
-      <div id="gs-step-7" class="gs-step" style="display:none;">
-        <div class="quick-start-title" style="font-size:32px;margin-bottom:20px;">Add a few photos</div>
-        <div class="photo-grid" id="gs-photo-grid" style="max-width:600px;margin:0 auto;">
-          <div class="photo-slot" onclick="gsSimulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Front Exterior</div></div>
-          <div class="photo-slot" onclick="gsSimulatePhoto(this,'Rear Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Rear Exterior</div></div>
-          <div class="photo-slot" onclick="gsSimulatePhoto(this,'Driver Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Driver Side</div></div>
-          <div class="photo-slot" onclick="gsSimulatePhoto(this,'Passenger Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Passenger Side</div></div>
-          <div class="photo-slot" onclick="gsSimulatePhoto(this,'Interior / Dashboard',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Interior / Dash</div></div>
-          <div class="photo-slot" onclick="gsSimulatePhoto(this,'Odometer',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Odometer</div></div>
-        </div>
-        <div id="gs-photos-count" class="text-muted mt-16" style="text-align:center;">0 of 6 photos uploaded</div>
-        <div class="quick-start-hint" style="text-align:center;">Not near the car? Skip for now — you'll get a reminder to finish once you're live.</div>
-      </div>
-      <div id="gs-step-8" class="gs-step" style="display:none;">
         <div style="font-size:40px;margin-bottom:12px;">🎉</div>
         <div class="quick-start-title" style="font-size:32px;margin-bottom:12px;">You're all set</div>
         <div style="font-size:16px;color:var(--g5);line-height:1.6;max-width:380px;margin:0 auto;">
@@ -1987,16 +1957,10 @@ async function login() {
     if(selectedRole==='seller') {
       initSellerView();
       if(S.pendingGuestVehicle) {
-        const { year, make, model, mileage, vin, photos } = S.pendingGuestVehicle;
+        const { year, make, model, mileage } = S.pendingGuestVehicle;
         document.getElementById('f-year').value = year;
         document.getElementById('f-make').value = make;
         document.getElementById('f-model').value = model;
-        if(vin) document.getElementById('vin-input').value = vin;
-        if(photos && photos.length) {
-          S.photoUrls = photos;
-          photoCount = photos.length;
-          requiredFilled = photos.filter(p => ['Front Exterior','Rear Exterior','Driver Side','Passenger Side','Interior / Dashboard','Odometer'].includes(p.label)).length;
-        }
         document.getElementById('quick-start-card').style.display = 'none';
         document.getElementById('wizard-step-1').classList.remove('hidden');
         v1ResetToStart();
@@ -2569,12 +2533,9 @@ async function addPhotoToListing(el, label) {
 }
 
 // ── Guest quick start: one question at a time, capture the car BEFORE asking for an account ──
-const GS_TOTAL_STEPS = 8;
+const GS_TOTAL_STEPS = 5;
 let gsCurrentStep = 1;
-const GS_FIELD_BY_STEP = {1:'gs-year', 2:'gs-make', 3:'gs-model', 4:'gs-mileage', 5:'gs-email'};
-let gsPhotoCount = 0;
-let gsPhotoUrls = [];
-let gsLeadCaptured = false;
+const GS_FIELD_BY_STEP = {1:'gs-year', 2:'gs-make', 3:'gs-model', 4:'gs-mileage'};
 
 function gsGoStep(step) {
   gsCurrentStep = step;
@@ -2591,106 +2552,23 @@ function gsGoStep(step) {
   const backBtn = document.getElementById('gs-back-btn');
   if(backBtn) backBtn.style.display = step===1 ? 'none' : 'inline-flex';
   const nextBtn = document.getElementById('gs-next-btn');
-  if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Log In to See Offers →' : (step===7 ? 'Continue →' : (step===6 ? 'Skip / Continue →' : (step===5 ? 'Get My Offer →' : 'Next →')));
+  if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Log In to See Offers →' : (step===4 ? 'Show Me My Dealers →' : 'Next →');
   const hintEl = document.querySelector('.guest-start-card .quick-start-hint');
   if(hintEl) hintEl.style.display = step===GS_TOTAL_STEPS ? 'none' : '';
   setTimeout(() => document.getElementById(GS_FIELD_BY_STEP[step])?.focus(), 50);
 }
 
 function gsValidateStep(step) {
-  const labels = {1:'the year', 2:'the make', 3:'the model', 4:'the mileage', 5:'your email'};
+  const labels = {1:'the year', 2:'the make', 3:'the model', 4:'the mileage'};
   const val = document.getElementById(GS_FIELD_BY_STEP[step])?.value.trim();
   if(!val) { showToast('⚠️','Missing Info',`Enter ${labels[step]} to continue.`); return false; }
-  if(step === 5 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { showToast('⚠️','Invalid Email','Enter a valid email address.'); return false; }
   return true;
 }
 
 function gsNext() {
-  if(gsCurrentStep <= 5 && !gsValidateStep(gsCurrentStep)) return;
-  // steps 6 (VIN) and 7 (photos) are optional — no blocking validation
-  if(gsCurrentStep === 5) { gsCaptureLead(); }
+  if(gsCurrentStep <= 4 && !gsValidateStep(gsCurrentStep)) return;
   if(gsCurrentStep >= GS_TOTAL_STEPS) { guestQuickStartSubmit(); return; }
   gsGoStep(gsCurrentStep + 1);
-}
-
-// Fire the moment we have an email — recoverable checkpoint, independent of
-// whether the seller ever finishes VIN/photos/password.
-async function gsCaptureLead() {
-  if(gsLeadCaptured) return;
-  gsLeadCaptured = true;
-  const year = document.getElementById('gs-year').value.trim();
-  const make = document.getElementById('gs-make').value.trim();
-  const model = document.getElementById('gs-model').value.trim();
-  const mileage = document.getElementById('gs-mileage').value.trim();
-  const email = document.getElementById('gs-email').value.trim();
-  if(typeof gtag !== 'undefined') gtag('event', 'guest_email_captured');
-  if(typeof fbq !== 'undefined') fbq('trackCustom', 'guest_email_captured');
-  try {
-    await fetch(`${API}/sellers/concierge-request`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        seller_id: null,
-        seller_email: email,
-        seller_phone: '',
-        partial_vehicle: `${year} ${make} ${model} — ${mileage} mi`,
-      })
-    });
-  } catch(err) { console.warn('Lead capture failed (non-blocking):', err); }
-}
-
-// ── VIN decode inside guest-start (mirrors decodeVIN(), but writes to gs-vin fields) ──
-async function gsDecodeVIN() {
-  const vin = document.getElementById('gs-vin').value.trim();
-  if(vin.length < 17) { showToast('⚠️','Invalid VIN','VIN must be exactly 17 characters.'); return; }
-  showToast('','Looking up VIN...','Checking NHTSA database...');
-  try {
-    const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
-    const data = await res.json();
-    const results = data.Results;
-    const get = (var_) => results.find(r => r.Variable === var_)?.Value || '';
-    const year = get('Model Year');
-    const make = get('Make');
-    const model = get('Model');
-    if(!make || make === 'null') { showToast('','VIN Not Found','Could not decode this VIN. Check and try again.'); return; }
-    document.getElementById('gs-vin-result').classList.remove('hidden');
-    document.getElementById('gs-vin-result').innerHTML = `<div class="alert alert-success">VIN Decoded: ${year} ${make} ${model}</div>`;
-    showToast('✓','VIN Decoded!',`${year} ${make} ${model} confirmed from NHTSA.`);
-  } catch(err) {
-    showToast('','Decode Failed','Could not reach NHTSA. Check your connection.');
-  }
-}
-
-// ── Guest photo upload — same Cloudinary path as the logged-in wizard, held in browser state only ──
-async function gsSimulatePhoto(el, label, required) {
-  if(el.classList.contains('filled')) return;
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    el.innerHTML = `<div style="font-size:12px;color:var(--g5);padding:8px">Uploading...</div>`;
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', 'privabuy_photos');
-      formData.append('cloud_name', 'dptom0qr7');
-      const res = await fetch(`https://api.cloudinary.com/v1_1/dptom0qr7/image/upload`, { method: 'POST', body: formData });
-      const data = await res.json();
-      if(!data.secure_url) throw new Error('Upload failed');
-      gsPhotoUrls.push({label, url: data.secure_url});
-      el.classList.add('filled');
-      gsPhotoCount++;
-      el.innerHTML = `<div class="photo-required-badge" style="background:rgba(42,158,124,0.12);color:var(--accent3)">✓</div><img src="${data.secure_url}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:var(--r);"><div class="photo-slot-label" style="position:absolute;bottom:6px;z-index:1;background:rgba(255,255,255,0.85);padding:2px 8px;border-radius:4px;font-size:10px;color:#1a1814">✓ ${label}</div>`;
-      document.getElementById('gs-photos-count').textContent = `${gsPhotoCount} of 6 photos uploaded`;
-      showToast('✓','Photo Uploaded', `${label} saved.`);
-    } catch(err) {
-      el.innerHTML = `<div class="photo-slot-icon">📷</div><div class="photo-slot-label" style="color:var(--red)">Upload failed — tap to retry</div>`;
-      showToast('❌','Upload Failed', err.message);
-    }
-  };
-  input.click();
 }
 
 function gsBack() {
@@ -2703,11 +2581,9 @@ function guestQuickStartSubmit() {
   const make = document.getElementById('gs-make').value.trim();
   const model = document.getElementById('gs-model').value.trim();
   const mileage = document.getElementById('gs-mileage').value.trim();
-  const email = document.getElementById('gs-email')?.value.trim() || '';
-  const vin = document.getElementById('gs-vin')?.value.trim() || '';
-  if(!year || !make || !model || !mileage || !email) { showToast('⚠️','Missing Info','Enter year, make, model, mileage, and email to continue.'); return; }
+  if(!year || !make || !model || !mileage) { showToast('⚠️','Missing Info','Enter year, make, model, and mileage to continue.'); return; }
 
-  S.pendingGuestVehicle = { year, make, model, mileage, vin, photos: gsPhotoUrls };
+  S.pendingGuestVehicle = { year, make, model, mileage };
   if(typeof gtag !== 'undefined') gtag('event', 'guest_quick_start_submitted');
   if(typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout');
   if(typeof gtag !== 'undefined') gtag('event', 'guest_start_complete');
@@ -2717,9 +2593,8 @@ showScreen('screen-login');
   selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
   setSellerMode('register');
   const taglineEl = document.getElementById('login-tagline');
-  taglineEl.textContent = `Nice — a ${year} ${make} ${model}. One last step: create a password to save it.`;
+  taglineEl.textContent = `Nice — a ${year} ${make} ${model}. Create your free account to get it in front of dealers.`;
   taglineEl.classList.add('login-tagline-personalized');
-  setTimeout(() => { const emailField = document.getElementById('seller-email-input'); if(emailField) emailField.value = email; }, 50);
 }
 
 // ── FIX 2: single-question quick start ──
