@@ -2324,8 +2324,8 @@ function applyLikelyDefaults(which) {
     defaultCheckPillGroup('mech-issues-group','no issues');
     defaultRadio('driveable-group','Yes');
     defaultRadio('accident-group','None');
-    defaultRadio('overall-condition-group','Pretty Great');
-    defaultRadio('truthful-group','Yes');
+    // Overall condition and truthfulness are legally/materially significant —
+    // the seller must see and explicitly tap these, not have them silently defaulted.
   }
 }
 
@@ -2399,7 +2399,7 @@ function v1Back() {
 }
 
 // ── replace the tabbed condition/damage form with a 7-question sequence ──
-const V3_STEP_IDS = ['v3-step-1','damage-interior','v3-step-3']
+const V3_STEP_IDS = ['v3-step-1','damage-interior','v3-step-3','v3-step-4','v3-step-5'];
 const V3_TOTAL_STEPS = V3_STEP_IDS.length;
 let v3CurrentStep = 1;
 
@@ -2437,6 +2437,8 @@ function v3ValidateStep(step) {
   if(step === 2) {
     if(!getRadio('moonroof-group')) { showToast('⚠️','Required','Select moonroof status.'); return false; }
     if(!getRadio('smoked-group')) { showToast('⚠️','Required','Select smoked-in status.'); return false; }
+  }
+  if(step === 3) {
     const warnLights = document.querySelectorAll('#warning-lights-group .check-pill.selected');
     if(!warnLights.length) { showToast('⚠️','Required','Select warning lights status.'); return false; }
     const mechIssues = document.querySelectorAll('#mech-issues-group .check-pill.selected');
@@ -2444,8 +2446,10 @@ function v3ValidateStep(step) {
     if(!getRadio('driveable-group')) { showToast('⚠️','Required','Is your vehicle driveable?'); return false; }
     if(!getRadio('accident-group')) { showToast('⚠️','Required','Select accident history.'); return false; }
   }
-  if(step === 3) {
+  if(step === 4) {
     if(!getRadio('overall-condition-group')) { showToast('⚠️','Required','Select overall condition.'); return false; }
+  }
+  if(step === 5) {
     if(!getRadio('truthful-group')) { showToast('⚠️','Required','Confirm all information is accurate.'); return false; }
   }
   return true;
