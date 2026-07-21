@@ -83,33 +83,60 @@ body::before {
 .login-tagline{font-size:14px;color:var(--g5);margin-bottom:36px;font-weight:300;}
 .login-tagline-personalized{font-size:18px;color:var(--accent)!important;font-weight:700!important;line-height:1.5;}
 
-/* GUEST QUICK START — wide landscape card, one question at a time */
-#screen-guest-start{align-items:center;justify-content:center;background:#f8f8f8;padding:24px;min-height:100vh;}
+/* GUEST QUICK START — editorial two-column layout: quiet context rail + focused question column */
+#screen-guest-start{align-items:center;justify-content:center;background:#f8f8f8;padding:32px 24px;min-height:100vh;}
 .guest-start-card{
   background:#ffffff;
   box-shadow:0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
-  border:1px solid rgba(0,0,0,0.16);
-  border-radius:var(--r-lg);padding:56px 72px;width:100%;max-width:840px;
+  border:1px solid rgba(0,0,0,0.14);
+  border-radius:var(--r-lg);
+  width:100%;max-width:960px;
+  display:grid;grid-template-columns:250px 1fr;
+  min-height:520px;
 }
-.guest-start-inner{text-align:center;}
-.guest-start-card .login-logo,.guest-start-card .login-tagline{text-align:center;}
-.guest-start-card .login-logo{margin-bottom:14px;}
-.guest-start-card .login-tagline{color:#1a1814;font-size:19px;line-height:1.6;margin-bottom:32px;max-width:560px;margin-left:auto;margin-right:auto;}
-.guest-start-card .quick-start-eyebrow{margin-bottom:20px;}
-.guest-start-card .quick-start-hint{color:#1a1814;font-size:15px;margin-top:20px;}
-.guest-start-card .text-muted{color:#1a1814;font-size:14px;margin-top:16px;}
-.gs-dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:36px;}
+.gs-rail{
+  padding:48px 36px;border-right:1px solid rgba(0,0,0,0.08);
+  display:flex;flex-direction:column;background:#fbfaf9;border-radius:var(--r-lg) 0 0 var(--r-lg);
+}
+.gs-rail .login-logo{margin-bottom:6px;font-size:22px;}
+.gs-rail-tagline{font-size:13px;color:var(--g5);line-height:1.6;margin-bottom:36px;}
+.gs-rail-steps{display:flex;flex-direction:column;gap:0;margin-bottom:auto;}
+.gs-rail-step{display:flex;align-items:baseline;gap:10px;padding:8px 0 8px 14px;font-size:13px;color:rgba(0,0,0,0.32);border-left:2px solid rgba(0,0,0,0.08);margin-left:1px;}
+.gs-rail-step-num{font-family:var(--serif);font-size:13px;color:rgba(0,0,0,0.28);}
+.gs-rail-note{font-size:11px;color:rgba(0,0,0,0.34);line-height:1.6;margin-top:28px;padding-top:20px;border-top:1px solid rgba(0,0,0,0.08);}
+
+.gs-content{padding:48px 56px;display:flex;flex-direction:column;min-width:0;}
+.gs-dots{display:flex;gap:5px;align-items:center;margin-bottom:28px;}
 .gs-dot{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.14);transition:all 0.3s;}
-.gs-step{min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
-.gs-big-title{font-size:52px;margin-bottom:32px;}
+
+.gs-step{min-height:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;flex:1;}
+.gs-eyebrow{font-family:var(--ui);font-size:12px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:flex;align-items:baseline;gap:8px;}
+.gs-eyebrow .gs-eyebrow-num{font-family:var(--serif);font-size:14px;color:rgba(0,0,0,0.30);font-style:italic;text-transform:none;letter-spacing:0;}
+
+.gs-big-title{font-size:40px;line-height:1.15;margin-bottom:28px;text-align:left;max-width:480px;color:#1a1814;}
 .gs-big-input{
-  font-family:var(--serif);font-size:46px;text-align:center;
-  padding:26px 28px;max-width:520px;width:100%;margin:0 auto;
+  font-family:var(--serif);font-size:34px;text-align:left;color:#1a1814;
+  padding:6px 2px 14px;max-width:420px;width:100%;margin:0;
+  background:transparent;border:none;border-bottom:2px solid rgba(0,0,0,0.16);border-radius:0;
+  outline:none;transition:border-color 0.2s;
+}
+.gs-big-input::placeholder{color:rgba(0,0,0,0.25);}
+.gs-big-input:focus{border-bottom-color:var(--accent);}
+.guest-start-card .quick-start-hint{color:var(--g5);font-size:13px;margin-top:16px;text-align:left;}
+.guest-start-card .text-muted{color:var(--g5);font-size:12px;text-align:left;}
+#screen-guest-start .photo-grid{margin:0;max-width:520px;}
+
+.gs-nav{display:flex;align-items:center;gap:16px;margin-top:36px;padding-top:24px;border-top:1px solid rgba(0,0,0,0.08);}
+
+@media(max-width:880px){
+  .guest-start-card{grid-template-columns:1fr;max-width:520px;}
+  .gs-rail{display:none;}
+  .gs-content{padding:40px 28px;}
 }
 @media(max-width:640px){
-  .guest-start-card{padding:36px 24px;}
-  .gs-big-title{font-size:30px;}
-  .gs-big-input{font-size:28px;padding:16px 18px;}
+  .gs-content{padding:32px 22px;}
+  .gs-big-title{font-size:28px;max-width:none;}
+  .gs-big-input{font-size:26px;}
 }
 
 /* Role buttons */
@@ -510,12 +537,22 @@ gtag('config', 'AW-18160958792');
   <!-- GUEST QUICK START — asks about the car first, one question at a time, no account required yet -->
 <div id="screen-guest-start" class="screen">
   <div class="guest-start-card">
-    <div class="guest-start-inner">
+    <div class="gs-rail">
       <div class="login-logo">Priva<span>Buy</span></div>
-      <div class="login-tagline">List your 6–8 year old vehicle and watch 5 local dealers compete for it.</div>
+      <div class="gs-rail-tagline">List your 6–8 year old vehicle and watch 5 local dealers compete for it.</div>
+      <div class="gs-rail-steps">
+        <div class="gs-rail-step"><span class="gs-rail-step-num">01</span> Year</div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">02</span> Make</div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">03</span> Model</div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">04</span> Mileage</div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">05</span> VIN <span style="opacity:.6">(optional)</span></div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">06</span> Photos <span style="opacity:.6">(optional)</span></div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">07</span> Done</div>
+      </div>
+      <div class="gs-rail-note">Free to list. No account until you're ready to see your offers.</div>
+    </div>
 
-      <div class="quick-start-eyebrow" style="text-align:center;">Free to list. No account until you're ready...</div>
-
+    <div class="gs-content">
       <div class="gs-dots">
         <div class="gs-dot" id="gs-dot-1"></div>
         <div class="gs-dot" id="gs-dot-2"></div>
@@ -527,33 +564,39 @@ gtag('config', 'AW-18160958792');
       </div>
 
       <div id="gs-step-1" class="gs-step">
-        <div class="quick-start-title gs-big-title">What year is your car?</div>
-        <input class="form-input gs-big-input" id="gs-year" type="number" placeholder="e.g. 2018" min="2000" max="2026" onkeydown="if(event.key==='Enter') gsNext()">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">01</span> Vehicle Year</div>
+        <div class="gs-big-title">What year is your car?</div>
+        <input class="gs-big-input" id="gs-year" type="number" placeholder="e.g. 2018" min="2000" max="2026" onkeydown="if(event.key==='Enter') gsNext()">
       </div>
       <div id="gs-step-2" class="gs-step" style="display:none;">
-        <div class="quick-start-title gs-big-title">What make?</div>
-        <input class="form-input gs-big-input" id="gs-make" placeholder="e.g. Honda" onkeydown="if(event.key==='Enter') gsNext()">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">02</span> Make</div>
+        <div class="gs-big-title">What make?</div>
+        <input class="gs-big-input" id="gs-make" placeholder="e.g. Honda" onkeydown="if(event.key==='Enter') gsNext()">
       </div>
       <div id="gs-step-3" class="gs-step" style="display:none;">
-        <div class="quick-start-title gs-big-title">What model?</div>
-        <input class="form-input gs-big-input" id="gs-model" placeholder="e.g. Accord" onkeydown="if(event.key==='Enter') gsNext()">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">03</span> Model</div>
+        <div class="gs-big-title">What model?</div>
+        <input class="gs-big-input" id="gs-model" placeholder="e.g. Accord" onkeydown="if(event.key==='Enter') gsNext()">
       </div>
       <div id="gs-step-4" class="gs-step" style="display:none;">
-        <div class="quick-start-title gs-big-title">What's the mileage?</div>
-        <input class="form-input gs-big-input" id="gs-mileage" type="number" placeholder="e.g. 94200" onkeydown="if(event.key==='Enter') gsNext()">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">04</span> Mileage</div>
+        <div class="gs-big-title">What's the mileage?</div>
+        <input class="gs-big-input" id="gs-mileage" type="number" placeholder="e.g. 94200" onkeydown="if(event.key==='Enter') gsNext()">
       </div>
       <div id="gs-step-5" class="gs-step" style="display:none;">
-        <div class="quick-start-title" style="font-size:32px;margin-bottom:20px;">Know the VIN?</div>
-        <div class="vin-row" style="max-width:520px;margin:0 auto;">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">05</span> VIN — Optional</div>
+        <div class="gs-big-title" style="font-size:32px;margin-bottom:20px;">Know the VIN?</div>
+        <div class="vin-row" style="max-width:460px;">
           <input class="form-input" id="gs-vin" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()" style="font-family:monospace;letter-spacing:2px;text-transform:uppercase;">
           <button class="btn btn-secondary" onclick="gsDecodeVIN()">Decode</button>
         </div>
-        <div id="gs-vin-result" class="hidden mt-8" style="max-width:520px;margin:12px auto 0;"></div>
-        <div class="quick-start-hint" style="text-align:center;">Optional — you can skip this and dealers can still bid.</div>
+        <div id="gs-vin-result" class="hidden mt-8" style="max-width:460px;"></div>
+        <div class="quick-start-hint">Optional — you can skip this and dealers can still bid.</div>
       </div>
       <div id="gs-step-6" class="gs-step" style="display:none;">
-        <div class="quick-start-title" style="font-size:32px;margin-bottom:20px;">Add a few photos</div>
-        <div class="photo-grid" id="gs-photo-grid" style="max-width:600px;margin:0 auto;">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">06</span> Photos — Optional</div>
+        <div class="gs-big-title" style="font-size:32px;margin-bottom:20px;">Add a few photos</div>
+        <div class="photo-grid" id="gs-photo-grid">
           <div class="photo-slot" onclick="gsSimulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Front Exterior</div></div>
           <div class="photo-slot" onclick="gsSimulatePhoto(this,'Rear Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Rear Exterior</div></div>
           <div class="photo-slot" onclick="gsSimulatePhoto(this,'Driver Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Driver Side</div></div>
@@ -561,24 +604,25 @@ gtag('config', 'AW-18160958792');
           <div class="photo-slot" onclick="gsSimulatePhoto(this,'Interior / Dashboard',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Interior / Dash</div></div>
           <div class="photo-slot" onclick="gsSimulatePhoto(this,'Odometer',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Odometer</div></div>
         </div>
-        <div id="gs-photos-count" class="text-muted mt-16" style="text-align:center;">0 of 6 photos uploaded</div>
-        <div class="quick-start-hint" style="text-align:center;">Not near the car? Skip for now — you'll get a reminder to finish once you're live.</div>
+        <div id="gs-photos-count" class="text-muted mt-16">0 of 6 photos uploaded</div>
+        <div class="quick-start-hint">Not near the car? Skip for now — you'll get a reminder to finish once you're live.</div>
       </div>
       <div id="gs-step-7" class="gs-step" style="display:none;">
-        <div style="font-size:40px;margin-bottom:12px;">🎉</div>
-        <div class="quick-start-title" style="font-size:32px;margin-bottom:12px;">You're all set</div>
-        <div style="font-size:16px;color:var(--g5);line-height:1.6;max-width:380px;margin:0 auto;">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">07</span> Done</div>
+        <div style="font-size:36px;margin-bottom:8px;">🎉</div>
+        <div class="gs-big-title" style="font-size:32px;margin-bottom:12px;">You're all set</div>
+        <div style="font-size:16px;color:var(--g5);line-height:1.6;max-width:380px;">
           <strong style="color:#1a1814">5 dealers</strong> are ready to bid — log in to see their offers.
         </div>
       </div>
 
-      <div style="display:flex;gap:10px;justify-content:center;margin-top:30px;">
+      <div class="gs-nav">
         <button class="btn btn-secondary btn-lg" id="gs-back-btn" onclick="gsBack()" style="display:none;">← Back</button>
         <button class="btn btn-primary btn-lg" id="gs-next-btn" onclick="gsNext()">Next →</button>
       </div>
-      <div class="quick-start-hint" style="text-align:center;">Create your free account after you see what's next.</div>
+      <div class="quick-start-hint">Create your free account after you see what's next.</div>
 
-      <p class="text-muted mt-8" style="text-align:center;font-size:12px;">
+      <p class="text-muted mt-8" style="font-size:12px;">
         Already have an account? <a href="#" onclick="showScreen('screen-login'); selectRole('seller', document.querySelector('.role-btn[data-role=&quot;seller&quot;]')); setSellerMode('login'); return false;" style="color:var(--accent);">Sign in</a>
       </p>
     </div>
