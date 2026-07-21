@@ -2627,7 +2627,7 @@ function gsGoStep(step) {
   const backBtn = document.getElementById('gs-back-btn');
   if(backBtn) backBtn.style.display = step===1 ? 'none' : 'inline-flex';
   const nextBtn = document.getElementById('gs-next-btn');
-  if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Log In to See Offers →' : (step===6 ? 'Continue →' : (step===5 ? 'Skip / Continue →' : 'Next →'));
+  if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Log In to See Offers →' : (step===6 ? 'Continue →' : (step===5 ? 'Continue →' : 'Next →'));
   const hintEl = document.querySelector('.guest-start-card .quick-start-hint');
   if(hintEl) hintEl.style.display = step===GS_TOTAL_STEPS ? 'none' : '';
   setTimeout(() => document.getElementById(GS_FIELD_BY_STEP[step])?.focus(), 50);
