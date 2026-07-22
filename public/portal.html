@@ -4737,7 +4737,7 @@ function dealFlowActionHTML(txn, role) {
         <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
       </div>
       <div style="font-size:13px;color:#1a1814;line-height:1.6;padding:12px 14px;background:rgba(42,158,124,0.06);border:1px solid rgba(42,158,124,0.18);border-radius:var(--r);">
-        Once the dealer pays you <strong>$${(rawAmt - SELLER_FEE).toLocaleString()}</strong>, hand over the title.
+         Next, you'll confirm the title transfer to the dealer. Once they have it in hand, they'll pay you <strong>$${(rawAmt - SELLER_FEE).toLocaleString()}</strong>.
       </div>`;
  
     if (status === 'awaiting_dealer_payment') return ack + `
