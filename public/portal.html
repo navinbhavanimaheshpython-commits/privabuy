@@ -4730,7 +4730,7 @@ function dealFlowActionHTML(txn, role) {
   if (role === 'seller') {
  
     if (status === 'inspection_period') return ack + `
-      <div class="alert alert-warning" style="margin-bottom:12px;">🔍 The dealer is inspecting the vehicle. <strong>Do not hand over the title until you receive payment.</strong></div>
+      <div class="alert alert-warning" style="margin-bottom:12px;">🔍 The dealer is inspecting the vehicle. <strong>Have your signed title ready — you'll hand it over next, before the dealer pays you.</strong></div>
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:16px;margin-bottom:12px;">
         <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">You will receive</div>
         <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
