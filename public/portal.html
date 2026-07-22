@@ -1847,7 +1847,7 @@ gtag('config', 'AW-18160958792');
           <li><strong>Pickup Day:</strong> On the scheduled day, the dealer confirms the vehicle matches your listing (or flags a discrepancy).</li>
           <li><strong>24hr Inspection:</strong> If the vehicle has disclosed accident history, the dealer may take extra time to inspect before paying.</li>
           <li><strong>Title Transfer:</strong> The dealer must upload a photo of the signed title before they're allowed to pay you — this protects you from handing over the car without payment.</li>
-          <li><strong>Seller Confirms Payment:</strong> Once the dealer pays, you confirm receipt and hand over the title.</li>
+          <li><strong>Seller Confirms Payment:</strong> Once you've received payment, you confirm receipt to close out the deal.</li>
           <li><strong>Complete:</strong> The deal is finished.</li>
         </ol>
         <div style="background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.18);border-radius:14px;padding:16px 18px;margin-top:20px;">
@@ -4626,7 +4626,7 @@ function dealFlowActionHTML(txn, role) {
       <div style="font-size:22px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
       <div style="font-size:11px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
     </div>
-    <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;"><strong style="color:#1a1814;">Important:</strong> Seller will not hand over the title until payment is received. Pay the seller the full bid amount of <strong style="color:#1a1814;">$${rawAmt.toLocaleString()}</strong> — PrivaBuy deducts our $${SELLER_FEE} fee from that automatically.</div>
+    <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;"><strong style="color:#1a1814;">Important:</strong> You'll confirm the title in hand at the next step before paying. Pay the seller the full bid amount of <strong style="color:#1a1814;">$${rawAmt.toLocaleString()}</strong> — PrivaBuy deducts our $${SELLER_FEE} fee from that automatically.</div>
     <button class="btn btn-success btn-full mb-16" onclick="inspectionAccept('${txnId}')">✓ Vehicle Matches Listing — Continue</button>
   </div>`;
     }
@@ -4779,7 +4779,7 @@ function dealFlowActionHTML(txn, role) {
           <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
         </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you have the funds in hand, confirm below and hand over the title.</div>
-        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Received $${(rawAmt - SELLER_FEE).toLocaleString()} — Hand Over Title</button>
+        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Confirm That I Have Received $${(rawAmt - SELLER_FEE).toLocaleString()}</button>
       </div>`;
  
     if (status === 'awaiting_seller_fee') return ack + `
