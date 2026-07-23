@@ -607,11 +607,11 @@ gtag('config', 'AW-18160958792');
         <div class="quick-start-hint">Not near the car? Skip for now — you'll get a reminder to finish once you're live.</div>
       </div>
       <div id="gs-step-7" class="gs-step" style="display:none;">
-        <div class="gs-eyebrow"><span class="gs-eyebrow-num">07</span> Done</div>
-        <div style="font-size:36px;margin-bottom:8px;">🎉</div>
-        <div class="gs-big-title" style="font-size:32px;margin-bottom:12px;">You're all set</div>
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">07</span> Almost there</div>
+        <div style="font-size:36px;margin-bottom:8px;">🚗</div>
+        <div class="gs-big-title" style="font-size:32px;margin-bottom:12px;">2 minutes left to go live</div>
         <div style="font-size:16px;color:var(--g5);line-height:1.6;max-width:380px;">
-          <strong style="color:#1a1814">5 dealers</strong> are ready to bid — log in to see their offers.
+          Create your free account, confirm a few condition details, and <strong style="color:#1a1814">5 dealers</strong> start bidding.
         </div>
       </div>
 
@@ -710,22 +710,7 @@ gtag('config', 'AW-18160958792');
         <a href="tel:+19292890668" class="btn btn-secondary" onclick="requestConcierge()" style="white-space:nowrap;">📞 Have us do it for you</a>
       </div>
 
-      <!-- FIX 2: single-question quick start — under 15 seconds, instant reflection -->
-      <div id="quick-start-card" class="quick-start-card">
-        <div class="quick-start-eyebrow">Ready to see what your car is worth? answer these short questions!</div>
-        <div class="quick-start-title">What's your car?</div>
-        <div class="quick-start-row">
-          <input class="form-input" id="qs-year" type="number" placeholder="Year" min="2000" max="2026">
-          <input class="form-input" id="qs-make" placeholder="Make (e.g. Honda)">
-          <input class="form-input" id="qs-model" placeholder="Model (e.g. Accord)">
-        </div>
-        <div class="quick-start-submit"><button class="btn btn-primary btn-lg" onclick="quickStartSubmit()">Continue →</button></div>
-        <div class="quick-start-hint">Takes 15 seconds. No account details, no VIN needed yet.</div>
-        <div id="quick-start-confirm">
-          <div style="font-size:24px;">✅</div>
-          <div><strong id="quick-start-confirm-title" style="display:block;font-size:15px;color:#1a1814;margin-bottom:2px;"></strong><span style="font-size:13px;color:var(--g5);">Dealers are already able to bid on cars like this. Let's get a couple more details so we can get you live.</span></div>
-        </div>
-      </div>
+      
 
       <div id="wizard-step-1" class="hidden">
         <div class="card mb-24">
@@ -2034,7 +2019,6 @@ async function login() {
           photoCount = photos.length;
           requiredFilled = photos.filter(p => ['Front Exterior','Rear Exterior','Driver Side','Passenger Side','Interior / Dashboard','Odometer'].includes(p.label)).length;
         }
-        document.getElementById('quick-start-card').style.display = 'none';
         document.getElementById('wizard-step-1').classList.remove('hidden');
         v1ResetToStart();
         setTimeout(() => { const mEl = document.getElementById('f-mileage'); if(mEl) mEl.value = mileage; }, 50);
@@ -2312,10 +2296,31 @@ function wizardGo(step) {
     if(i===step) ws.classList.add('active');
   }
   if(step===1) applyLikelyDefaults('step1');
+  if(step===2) hydratePhotoGridFromState();
   if(step===3) applyLikelyDefaults('step3');
   if(step===4) buildValueEstimate();
   if(step===5) populateReview();
   saveDraftProgress();
+}
+
+function hydratePhotoGridFromState() {
+  if(!S.photoUrls || !S.photoUrls.length) return;
+  const grid = document.getElementById('photo-grid');
+  S.photoUrls.forEach(p => {
+    const slots = grid.querySelectorAll('.photo-slot');
+    for(const slot of slots) {
+      if(slot.classList.contains('filled')) continue;
+      const label = slot.querySelector('.photo-slot-label')?.textContent;
+      if(label === p.label) {
+        slot.classList.add('filled');
+        const isReq = !!slot.querySelector('.photo-required-badge');
+        if(isReq) requiredFilled++;
+        photoCount++;
+        slot.innerHTML = `${isReq?'<div class="photo-required-badge" style="background:rgba(42,158,124,0.12);color:var(--accent3)">✓</div>':''}<img src="${p.url}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:var(--r);"><div class="photo-slot-label" style="position:absolute;bottom:6px;z-index:1;background:rgba(255,255,255,0.85);padding:2px 8px;border-radius:4px;font-size:10px;color:#1a1814">✓ ${p.label}</div>`;
+      }
+    }
+  });
+  document.getElementById('photos-uploaded-count').textContent = `${photoCount} of 8 uploaded • ${requiredFilled}/6 required complete`;
 }
 
 // ── FIX 3: pre-fill sensible "most common" defaults on non-legally-sensitive
@@ -2490,6 +2495,16 @@ function v3ValidateStep(step) {
 
 function v3Next() {
   if(!v3ValidateStep(v3CurrentStep)) return;
+  if(v3CurrentStep === 1) {
+    const extCond = [...document.querySelectorAll('#ext-condition-group .check-pill.selected')].map(p=>p.textContent.trim());
+    const isCleanExterior = extCond.length===1 && extCond[0]==='None';
+    if(isCleanExterior) {
+      defaultRadio('moonroof-group','N/A');
+      defaultRadio('smoked-group','No');
+      v3GoStep(3);
+      return;
+    }
+  }
   if(v3CurrentStep >= V3_TOTAL_STEPS) {
     wizardGo(4);
     return;
@@ -2728,31 +2743,7 @@ showScreen('screen-login');
   taglineEl.classList.add('login-tagline-personalized');
 }
 
-// ── FIX 2: single-question quick start ──
-function quickStartSubmit() {
-  const year = document.getElementById('qs-year').value.trim();
-  const make = document.getElementById('qs-make').value.trim();
-  const model = document.getElementById('qs-model').value.trim();
-  if(!year || !make || !model) { showToast('⚠️','Missing Info','Enter year, make, and model to continue.'); return; }
-  // Push into the (hidden, pre-filled) full form fields so nothing has to be re-typed
-  document.getElementById('f-year').value = year;
-  document.getElementById('f-make').value = make;
-  document.getElementById('f-model').value = model;
-  if(typeof gtag !== 'undefined') gtag('event', 'quick_start_submitted');
-  if(typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout');
 
-  const confirmBox = document.getElementById('quick-start-confirm');
-  document.getElementById('quick-start-confirm-title').textContent = `${year} ${make} ${model} — got it!`;
-  confirmBox.classList.add('show');
-  saveDraftProgress();
-
-  setTimeout(() => {
-    document.getElementById('quick-start-card').style.display = 'none';
-    document.getElementById('wizard-step-1').classList.remove('hidden');
-    v1ResetToStart();
-    document.getElementById('wizard-step-1').scrollIntoView({behavior:'smooth', block:'start'});
-  }, 1100);
-}
 
 // ── FIX 6: concierge fallback ──
 async function requestConcierge() {
@@ -2828,7 +2819,6 @@ function resumeDraft() {
     document.getElementById('f-trim').value = draft.formData.trim || '';
     document.getElementById('f-mileage').value = draft.formData.mileage || '';
     document.getElementById('f-zip').value = draft.formData.zip || '';
-    document.getElementById('quick-start-card').style.display = 'none';
     document.getElementById('wizard-step-1').classList.remove('hidden');
     wizardGo(1);
     v1ResetToStart();
@@ -4260,14 +4250,12 @@ setTimeout(() => {
 
   if(urlRole === 'dealer') {
     selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
-  } else if(urlRole === 'seller') {
-    if(!hasSession) {
-      showScreen('screen-guest-start');
-      gsGoStep(1);
-    } else {
-      selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
-      document.getElementById('login-tagline').textContent = 'List your car and get competitive offers.';
-    }
+  } else if(!hasSession) {
+    showScreen('screen-guest-start');
+    gsGoStep(1);
+  } else {
+    selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+    document.getElementById('login-tagline').textContent = 'List your car and get competitive offers.';
   }
 }, 0);
 
