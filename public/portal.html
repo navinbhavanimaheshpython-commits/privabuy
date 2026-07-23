@@ -890,14 +890,14 @@ gtag('config', 'AW-18160958792');
           <div class="card-body">
             <div class="alert alert-info"> <strong>Better photos = higher bids.</strong> Recommended shots marked in red — but you can finish this step later from your phone if you're not near the car right now.</div>
             <div class="photo-grid" id="photo-grid">
-              <div class="photo-slot" onclick="simulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Front Exterior</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Rear Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Rear Exterior</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Driver Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Driver Side</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Passenger Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Passenger Side</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Interior / Dashboard',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Interior / Dash</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Odometer',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Odometer Reading</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Engine Bay',false)"><div class="photo-slot-icon">·</div><div class="photo-slot-label">Engine Bay</div></div>
-              <div class="photo-slot" onclick="simulatePhoto(this,'Any Damage',false)"><div class="photo-slot-icon">·</div><div class="photo-slot-label">Any Damage</div></div>
+              <div class="photo-slot" data-photo-label="Front Exterior" onclick="simulatePhoto(this,'Front Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Front Exterior</div></div>
+              <div class="photo-slot" data-photo-label="Rear Exterior" onclick="simulatePhoto(this,'Rear Exterior',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Rear Exterior</div></div>
+              <div class="photo-slot" data-photo-label="Driver Side" onclick="simulatePhoto(this,'Driver Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Driver Side</div></div>
+              <div class="photo-slot" data-photo-label="Passenger Side" onclick="simulatePhoto(this,'Passenger Side',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Passenger Side</div></div>
+              <div class="photo-slot" data-photo-label="Interior / Dashboard" onclick="simulatePhoto(this,'Interior / Dashboard',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Interior / Dash</div></div>
+              <div class="photo-slot" data-photo-label="Odometer" onclick="simulatePhoto(this,'Odometer',true)"><div class="photo-required-badge">REQ</div><div class="photo-slot-icon">·</div><div class="photo-slot-label">Odometer Reading</div></div>
+              <div class="photo-slot" data-photo-label="Engine Bay" onclick="simulatePhoto(this,'Engine Bay',false)"><div class="photo-slot-icon">·</div><div class="photo-slot-label">Engine Bay</div></div>
+              <div class="photo-slot" data-photo-label="Any Damage" onclick="simulatePhoto(this,'Any Damage',false)"><div class="photo-slot-icon">·</div><div class="photo-slot-label">Any Damage</div></div>
             </div>
             <div id="photos-uploaded-count" class="text-muted mt-16 text-sm">0 of 8 photos uploaded (6 recommended)</div>
           </div>
@@ -2031,8 +2031,6 @@ async function login() {
         if(vin) document.getElementById('vin-input').value = vin;
         if(photos && photos.length) {
           S.photoUrls = photos;
-          photoCount = photos.length;
-          requiredFilled = photos.filter(p => ['Front Exterior','Rear Exterior','Driver Side','Passenger Side','Interior / Dashboard','Odometer'].includes(p.label)).length;
         }
         document.getElementById('quick-start-card').style.display = 'none';
         document.getElementById('wizard-step-1').classList.remove('hidden');
