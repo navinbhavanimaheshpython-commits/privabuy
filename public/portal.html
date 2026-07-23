@@ -2324,7 +2324,7 @@ function hydratePhotoGridFromState() {
     const slots = grid.querySelectorAll('.photo-slot');
     for(const slot of slots) {
       if(slot.classList.contains('filled')) continue;
-      const label = slot.querySelector('.photo-slot-label')?.textContent;
+      const label = slot.dataset.photoLabel;
       if(label === p.label) {
         slot.classList.add('filled');
         const isReq = !!slot.querySelector('.photo-required-badge');
