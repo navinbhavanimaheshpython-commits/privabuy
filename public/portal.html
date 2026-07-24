@@ -541,11 +541,11 @@ gtag('config', 'AW-18160958792');
       <div class="login-logo">Priva<span>Buy</span></div>
       <div class="gs-rail-tagline">List your 6–8 year old vehicle and watch 5 local dealers compete for it.</div>
       <div class="gs-rail-steps">
-        <div class="gs-rail-step"><span class="gs-rail-step-num">01</span> Year</div>
-        <div class="gs-rail-step"><span class="gs-rail-step-num">02</span> Make</div>
-        <div class="gs-rail-step"><span class="gs-rail-step-num">03</span> Model</div>
-        <div class="gs-rail-step"><span class="gs-rail-step-num">04</span> Mileage</div>
-        <div class="gs-rail-step"><span class="gs-rail-step-num">05</span> VIN </div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">01</span> VIN (fastest)</div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">02</span> Year</div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">03</span> Make</div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">04</span> Model</div>
+        <div class="gs-rail-step"><span class="gs-rail-step-num">05</span> Mileage</div>
         <div class="gs-rail-step"><span class="gs-rail-step-num">06</span> Photos <span style="opacity:.6">(optional)</span></div>
         <div class="gs-rail-step"><span class="gs-rail-step-num">07</span> Done</div>
       </div>
@@ -562,35 +562,41 @@ gtag('config', 'AW-18160958792');
         <div class="gs-dot" id="gs-dot-6"></div>
         <div class="gs-dot" id="gs-dot-7"></div>
       </div>
+      <div id="gs-progress-label" style="font-size:12px;color:var(--g5);margin-bottom:20px;">About 90 seconds · scan your VIN to skip most of this</div>
 
       <div id="gs-step-1" class="gs-step">
-        <div class="gs-eyebrow"><span class="gs-eyebrow-num">01</span> Vehicle Year</div>
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">01</span> Fastest way to start</div>
+        <div class="gs-big-title">What's your VIN?</div>
+        <div class="vin-row" style="max-width:460px;">
+          <input class="form-input" id="gs-vin" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()" style="font-family:monospace;letter-spacing:2px;text-transform:uppercase;" onkeydown="if(event.key==='Enter') gsDecodeVIN()">
+          <button class="btn btn-primary" onclick="gsDecodeVIN()">Decode →</button>
+        </div>
+        <div id="gs-vin-result" class="hidden mt-8" style="max-width:460px;"></div>
+        <div class="quick-start-hint">Dashboard (driver's side, visible through windshield) or driver-door jamb.</div>
+        <p class="text-muted mt-16" style="font-size:13px;">
+          <a href="#" onclick="gsGoStep(2);return false;" style="color:var(--accent);">Don't have it handy — enter details manually →</a>
+        </p>
+      </div>
+      <div id="gs-step-2" class="gs-step" style="display:none;">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">02</span> Vehicle Year</div>
         <div class="gs-big-title">What year is your car?</div>
         <input class="gs-big-input" id="gs-year" type="number" placeholder="e.g. 2018" min="2000" max="2026" onkeydown="if(event.key==='Enter') gsNext()">
       </div>
-      <div id="gs-step-2" class="gs-step" style="display:none;">
-        <div class="gs-eyebrow"><span class="gs-eyebrow-num">02</span> Make</div>
+      <div id="gs-step-3" class="gs-step" style="display:none;">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">03</span> Make</div>
         <div class="gs-big-title">What make?</div>
         <input class="gs-big-input" id="gs-make" placeholder="e.g. Honda" onkeydown="if(event.key==='Enter') gsNext()">
       </div>
-      <div id="gs-step-3" class="gs-step" style="display:none;">
-        <div class="gs-eyebrow"><span class="gs-eyebrow-num">03</span> Model</div>
+      <div id="gs-step-4" class="gs-step" style="display:none;">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">04</span> Model</div>
         <div class="gs-big-title">What model?</div>
         <input class="gs-big-input" id="gs-model" placeholder="e.g. Accord" onkeydown="if(event.key==='Enter') gsNext()">
       </div>
-      <div id="gs-step-4" class="gs-step" style="display:none;">
-        <div class="gs-eyebrow"><span class="gs-eyebrow-num">04</span> Mileage</div>
+      <div id="gs-step-5" class="gs-step" style="display:none;">
+        <div class="gs-eyebrow"><span class="gs-eyebrow-num">05</span> Mileage</div>
         <div class="gs-big-title">What's the mileage?</div>
         <input class="gs-big-input" id="gs-mileage" type="number" placeholder="e.g. 94200" onkeydown="if(event.key==='Enter') gsNext()">
-      </div>
-      <div id="gs-step-5" class="gs-step" style="display:none;">
-        <div class="gs-eyebrow"><span class="gs-eyebrow-num">05</span> VIN</div>
-        <div class="gs-big-title" style="font-size:32px;margin-bottom:20px;">Know the VIN?</div>
-        <div class="vin-row" style="max-width:460px;">
-          <input class="form-input" id="gs-vin" placeholder="e.g. 1HGBH41JXMN109186" maxlength="17" oninput="this.value=this.value.toUpperCase()" style="font-family:monospace;letter-spacing:2px;text-transform:uppercase;">
-          <button class="btn btn-secondary" onclick="gsDecodeVIN()">Decode</button>
-        </div>
-        <div id="gs-vin-result" class="hidden mt-8" style="max-width:460px;"></div>
+        <div id="gs-value-teaser" class="hidden mt-16"></div>
       </div>
       <div id="gs-step-6" class="gs-step" style="display:none;">
         <div class="gs-eyebrow"><span class="gs-eyebrow-num">06</span> Photos — Optional</div>
@@ -2629,7 +2635,8 @@ async function addPhotoToListing(el, label) {
 // ── Guest quick start: one question at a time, capture the car BEFORE asking for an account ──
 const GS_TOTAL_STEPS = 7;
 let gsCurrentStep = 1;
-const GS_FIELD_BY_STEP = {1:'gs-year', 2:'gs-make', 3:'gs-model', 4:'gs-mileage'};
+const GS_FIELD_BY_STEP = {2:'gs-year', 3:'gs-make', 4:'gs-model', 5:'gs-mileage'};
+const GS_TIME_LEFT = {1:'About 90 seconds · scan your VIN to skip most of this',2:'About 75 seconds left',3:'About 60 seconds left',4:'About 45 seconds left',5:'About 30 seconds left',6:'About 15 seconds left — photos are optional',7:'Almost done'};
 let gsPhotoCount = 0;
 let gsPhotoUrls = [];
 
@@ -2648,46 +2655,88 @@ function gsGoStep(step) {
   const backBtn = document.getElementById('gs-back-btn');
   if(backBtn) backBtn.style.display = step===1 ? 'none' : 'inline-flex';
   const nextBtn = document.getElementById('gs-next-btn');
-  if(nextBtn) nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Log In to See Offers →' : (step===6 ? 'Continue →' : (step===5 ? 'Continue →' : 'Next →'));
-  const hintEl = document.querySelector('.guest-start-card .quick-start-hint');
-  if(hintEl) hintEl.style.display = step===GS_TOTAL_STEPS ? 'none' : '';
+  nextBtn.textContent = step===GS_TOTAL_STEPS ? 'Log In to See Offers →' : (step===1 ? 'Enter manually →' : (step===6 ? 'Continue →' : 'Next →'));
+  const label = document.getElementById('gs-progress-label');
+  if(label) label.textContent = GS_TIME_LEFT[step] || '';
   setTimeout(() => document.getElementById(GS_FIELD_BY_STEP[step])?.focus(), 50);
 }
 
 function gsValidateStep(step) {
-  const labels = {1:'the year', 2:'the make', 3:'the model', 4:'the mileage'};
+  const labels = {2:'the year', 3:'the make', 4:'the model', 5:'the mileage'};
+  if(!GS_FIELD_BY_STEP[step]) return true; // step 1 (VIN) and step 6 (photos) aren't blocking
   const val = document.getElementById(GS_FIELD_BY_STEP[step])?.value.trim();
   if(!val) { showToast('⚠️','Missing Info',`Enter ${labels[step]} to continue.`); return false; }
   return true;
 }
 
 function gsNext() {
-  if(gsCurrentStep <= 4 && !gsValidateStep(gsCurrentStep)) return;
-  // steps 5 (VIN) and 6 (photos) are optional — no blocking validation
+  if(!gsValidateStep(gsCurrentStep)) return;
+  if(gsCurrentStep === 5) { gsSaveGuestDraft(); gsShowValueTeaser(); }
   if(gsCurrentStep >= GS_TOTAL_STEPS) { guestQuickStartSubmit(); return; }
   gsGoStep(gsCurrentStep + 1);
+}
+
+async function gsShowValueTeaser() {
+  const year = document.getElementById('gs-year').value.trim();
+  const make = document.getElementById('gs-make').value.trim();
+  const model = document.getElementById('gs-model').value.trim();
+  const mileage = document.getElementById('gs-mileage').value.trim();
+  const teaser = document.getElementById('gs-value-teaser');
+  if(!teaser || !year || !make || !model || !mileage) return;
+  teaser.classList.remove('hidden');
+  teaser.innerHTML = '<div class="text-muted" style="font-size:13px;">Checking what similar cars are getting...</div>';
+  try {
+    const res = await fetch(`${API}/cars/market-value?year=${year}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}&mileage=${mileage}&zip=60601`);
+    const market = await res.json();
+    if(market.found) {
+      teaser.innerHTML = `<div class="alert alert-info" style="margin-top:0;">Cars like yours are getting <strong>$${market.min_price.toLocaleString()}–$${market.max_price.toLocaleString()}</strong> from local dealers. Add a few photos to get your exact number.</div>`;
+    } else {
+      teaser.innerHTML = '';
+    }
+  } catch(e) { teaser.innerHTML = ''; }
 }
 
 // ── VIN decode inside guest-start (mirrors decodeVIN(), but writes to gs-vin fields) ──
 async function gsDecodeVIN() {
   const vin = document.getElementById('gs-vin').value.trim();
   if(vin.length < 17) { showToast('⚠️','Invalid VIN','VIN must be exactly 17 characters.'); return; }
-  showToast('','Looking up VIN...','Checking NHTSA database...');
+  const resultEl = document.getElementById('gs-vin-result');
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = '<div class="text-muted" style="padding:8px 0;">Decoding...</div>';
   try {
     const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
     const data = await res.json();
     const results = data.Results;
-    const get = (var_) => results.find(r => r.Variable === var_)?.Value || '';
+    const get = (v) => results.find(r => r.Variable === v)?.Value || '';
     const year = get('Model Year');
     const make = get('Make');
     const model = get('Model');
-    if(!make || make === 'null') { showToast('','VIN Not Found','Could not decode this VIN. Check and try again.'); return; }
-    document.getElementById('gs-vin-result').classList.remove('hidden');
-    document.getElementById('gs-vin-result').innerHTML = `<div class="alert alert-success">VIN Decoded: ${year} ${make} ${model}</div>`;
-    showToast('✓','VIN Decoded!',`${year} ${make} ${model} confirmed from NHTSA.`);
+    const trim = get('Trim');
+    if(!make || make === 'null') {
+      resultEl.innerHTML = '<div class="alert alert-warning">Could not decode this VIN — check it and try again, or enter manually.</div>';
+      return;
+    }
+    S.gsDecoded = { year, make: make.charAt(0)+make.slice(1).toLowerCase(), model: model.charAt(0)+model.slice(1).toLowerCase(), trim, vin };
+    resultEl.innerHTML = `
+      <div style="background:linear-gradient(160deg,#f8f6ff,#eef2ff);border:1.5px solid rgba(124,92,191,0.25);border-radius:var(--r);padding:16px;">
+        <div style="font-family:var(--serif);font-size:20px;margin-bottom:10px;">${year} ${S.gsDecoded.make} ${S.gsDecoded.model} ${trim||''}</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary btn-sm" onclick="gsConfirmDecoded()">Yes, that's it →</button>
+          <button class="btn btn-secondary btn-sm" onclick="gsGoStep(2)">Not quite — let me fix it</button>
+        </div>
+      </div>`;
+    if(typeof gtag !== 'undefined') gtag('event', 'guest_vin_decoded');
   } catch(err) {
-    showToast('','Decode Failed','Could not reach NHTSA. Check your connection.');
+    resultEl.innerHTML = '<div class="alert alert-warning">Couldn\'t reach the VIN database. Try again or enter manually.</div>';
   }
+}
+
+function gsConfirmDecoded() {
+  const d = S.gsDecoded;
+  document.getElementById('gs-year').value = d.year;
+  document.getElementById('gs-make').value = d.make;
+  document.getElementById('gs-model').value = d.model;
+  gsGoStep(5); // straight to mileage — year/make/model already filled
 }
 
 // ── Guest photo upload — same Cloudinary path as the logged-in wizard, held in browser state only ──
@@ -2822,6 +2871,32 @@ function saveDraftProgress() {
       }).catch(()=>{});
     }
   } catch(err) { console.warn('Draft autosave failed (non-blocking):', err); }
+}
+
+async function gsSaveGuestDraft() {
+  try {
+    const draft = {
+      vin: S.gsDecoded?.vin || document.getElementById('gs-vin')?.value.trim() || '',
+      year: document.getElementById('gs-year')?.value || '',
+      make: document.getElementById('gs-make')?.value || '',
+      model: document.getElementById('gs-model')?.value || '',
+      mileage: document.getElementById('gs-mileage')?.value || '',
+      session_id: gsGetSessionId(),
+    };
+    localStorage.setItem('privabuy_guest_draft', JSON.stringify({...draft, savedAt: Date.now()}));
+    await fetch(`${API}/cars/draft-guest`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(draft)
+    }).catch(()=>{});
+    if(typeof gtag !== 'undefined') gtag('event', 'guest_draft_saved');
+  } catch(err) { console.warn('Guest draft save failed (non-blocking):', err); }
+}
+
+function gsGetSessionId() {
+  let id = localStorage.getItem('privabuy_guest_session');
+  if(!id) { id = 'gs_' + Date.now() + '_' + Math.random().toString(36).slice(2,10); localStorage.setItem('privabuy_guest_session', id); }
+  return id;
 }
 
 function checkForResumableDraft() {
