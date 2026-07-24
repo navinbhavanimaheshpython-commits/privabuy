@@ -1943,6 +1943,14 @@ async function login() {
           showToast('⚠️','Missing Info','Enter your name and phone number.');
           return;
         }
+        const gsSessionId = localStorage.getItem('privabuy_guest_session');
+        if(gsSessionId) {
+          fetch(`${API}/cars/draft-guest/attach-email`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ session_id: gsSessionId, email })
+          }).catch(()=>{});
+        }
         const res = await fetch(`${API}/sellers/register`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -1959,6 +1967,13 @@ async function login() {
         showToast('✓','Account Created', 'Welcome to PrivaBuy!');
         if(typeof gtag !== 'undefined') gtag('event', 'account_created');
         if(typeof fbq !== 'undefined') fbq('trackCustom', 'account_created');
+        if(gsSessionId) {
+          fetch(`${API}/cars/draft-guest/mark-converted`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ session_id: gsSessionId, seller_id: S.seller_id })
+          }).catch(()=>{});
+        }
       } else {
         const res = await fetch(`${API}/sellers/login`, {
           method: 'POST',
