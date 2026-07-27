@@ -394,7 +394,7 @@ function Navbar() {
         {/* CTA */}
         <div style={{ flex:1, display:"flex", justifyContent:"flex-end" }}>
           <button onClick={() => { trackLead('seller_nav'); window.location.href='/portal?role=seller'; }} style={{ background:"#1a1814", color:"#f5f3ef", border:"none", borderRadius:"9999px", padding:"0.4rem 1.1rem", fontSize:"0.82rem", fontWeight:500, cursor:"pointer", display:"flex", alignItems:"center", gap:"0.3rem", fontFamily:"Barlow, sans-serif" }}>
-            List Your Car <span style={{ fontSize:"0.85rem" }}>↗</span>
+            See Dealer Offers <span style={{ fontSize:"0.85rem" }}>↗</span>
           </button>
         </div>
       </div>
