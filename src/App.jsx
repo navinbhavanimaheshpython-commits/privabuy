@@ -560,7 +560,7 @@ function Hero() {
 
         <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"2.75rem" }}>
           <button className="lg-strong" onClick={() => { trackLead('seller_hero'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
-            List Your Car ↗
+            See Dealer Offers ↗
           </button>
           <button className="lg" onClick={() => { trackLead('dealer_hero'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
             I'm a Dealer →
