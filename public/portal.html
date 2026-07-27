@@ -4444,7 +4444,9 @@ let _dealerWinsRemaining = DEALER_FREE_WIN_THRESHOLD;
 function dealFlowAckSection(txn, role) {
   const bid   = parseFloat(txn.amount);
   const txnId = txn.transaction_id;
-  const net   = bid - SELLER_FEE;
+  const referralCredit = parseFloat(txn.referral_credit_applied) || 0;
+  const effectiveFee = SELLER_FEE - referralCredit;
+  const net   = bid - effectiveFee;
  
   if (role === 'dealer') {
     const acked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
@@ -4485,7 +4487,8 @@ function dealFlowAckSection(txn, role) {
             </div>
             <div style="padding:12px 14px;border-right:1px solid rgba(0,0,0,0.08);background:rgba(217,48,37,0.03);">
               <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">PB Seller Fee</div>
-              <div style="font-size:18px;font-weight:700;color:var(--red);">−$${SELLER_FEE}</div>
+              <div style="font-size:18px;font-weight:700;color:var(--red);">−$${effectiveFee.toLocaleString()}</div>
+              ${referralCredit > 0 ? `<div style="font-size:10px;color:var(--accent3);margin-top:2px;">$${referralCredit} referral credit applied</div>` : ''}
             </div>
             <div style="padding:12px 14px;background:rgba(42,158,124,0.04);">
               <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Seller Receives</div>
