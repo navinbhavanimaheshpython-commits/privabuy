@@ -422,7 +422,7 @@ function CarMarquee() {
     <div style={{ padding:"5rem 0", background:"#edeae4", overflow:"hidden" }}>
       <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
         <span className="section-badge">Real Vehicles. Real Auctions.</span>
-        <h2 className="serif-italic reveal" style={{ fontSize:"clamp(1.8rem,3.5vw,2.5rem)", letterSpacing:"-0.03em", margin:"0.5rem 0 0", fontWeight:400, color:"#ffffff" }}>
+        <h2 className="serif-italic reveal" style={{ fontSize:"clamp(1.8rem,3.5vw,2.5rem)", letterSpacing:"-0.03em", margin:"0.5rem 0 0", fontWeight:400, color:"#000000" }}>
           Vehicles like yours, sold every day.
         </h2>
       </div>
