@@ -1974,6 +1974,16 @@ async function login() {
         S.seller_name = data.name || email;
         showToast('✓','Welcome Back', data.name || email);
         document.getElementById('seller-topbar-user').textContent = S.seller_name + ' Seller';
+
+        if(S.resumeSellerId) {
+          try {
+            const dRes = await fetch(`${API}/cars/draft/${S.resumeSellerId}`);
+            const draft = await dRes.json();
+            if(draft.found && !draft.completed) {
+              S.pendingResumeDraft = draft;
+            }
+          } catch(e) { console.warn('Could not load resume draft:', e); }
+        }
       }
     }
 
@@ -2028,7 +2038,25 @@ async function login() {
     showScreen(`screen-${selectedRole}`);
     if(selectedRole==='seller') {
       initSellerView();
+      if(S.pendingResumeDraft) {
+        const d = S.pendingResumeDraft;
+        document.getElementById('quick-start-card').style.display = 'none';
+        document.getElementById('wizard-step-1').classList.remove('hidden');
+        v1ResetToStart();
+        setTimeout(() => {
+          document.getElementById('f-year').value = d.year || '';
+          document.getElementById('f-make').value = d.make || '';
+          document.getElementById('f-model').value = d.model || '';
+          document.getElementById('f-trim').value = d.trim || '';
+          document.getElementById('f-mileage').value = d.mileage || '';
+          document.getElementById('f-zip').value = d.zip || '';
+        }, 50);
+        showToast('✓','Draft Restored', `Picking up your ${d.year} ${d.make} ${d.model}.`);
+        delete S.pendingResumeDraft;
+        setTimeout(() => document.getElementById('wizard-step-1').scrollIntoView({behavior:'smooth', block:'start'}), 300);
+      }
       if(S.pendingGuestVehicle) {
+
         const { year, make, model, mileage, vin, photos } = S.pendingGuestVehicle;
         document.getElementById('f-year').value = year;
         document.getElementById('f-make').value = make;
@@ -4354,10 +4382,18 @@ setTimeout(() => {
 }, 500);
 
 setTimeout(() => {
-  const urlRole = new URLSearchParams(window.location.search).get('role');
+  const params = new URLSearchParams(window.location.search);
+  const urlRole = params.get('role');
+  const resumeSellerId = params.get('resume_seller_id');
   const hasSession = !!(localStorage.getItem('pb_seller_session') || localStorage.getItem('pb_dealer_session'));
 
-  if(urlRole === 'dealer') {
+  if(resumeSellerId) {
+    S.resumeSellerId = resumeSellerId;
+    showScreen('screen-login');
+    selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
+    setSellerMode('login');
+    document.getElementById('login-tagline').textContent = 'Log in to finish your listing — we saved your progress.';
+  } else if(urlRole === 'dealer') {
     selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));
   } else if(urlRole === 'seller') {
     if(!hasSession) {
