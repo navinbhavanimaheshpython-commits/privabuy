@@ -630,7 +630,7 @@ function HowItWorks() {
                   <div style={{ width:42, height:42, borderRadius:"0.875rem", background:"linear-gradient(135deg, rgba(26,24,20,0.06), rgba(26,24,20,0.02))", border:"1px solid rgba(26,24,20,0.08)", display:"flex", alignItems:"center", justifyContent:"center" }}><StepIcon name={s.icon} color={s.color} /></div>
                   <span style={{ fontFamily:"Barlow", fontWeight:300, fontSize:"0.7rem", color:"rgba(26,24,20,0.86)", letterSpacing:"0.08em" }}>{s.n}</span>
                 </div>
-                <div style={{ fontSize:"0.95rem", fontWeight:500, marginBottom:"0.6rem", color:"#1a1814", letterSpacing:"-0.01em" }}>{s.title}</div>
+                <div style={{ fontSize:"1.15rem", fontWeight:500, marginBottom:"0.6rem", color:"#1a1814", letterSpacing:"-0.01em" }}>{s.title}</div>
                 <div style={{ fontSize:"0.85rem", color:"rgba(26,24,20,0.82)", lineHeight:1.65, fontWeight:300 }}>{s.body}</div>
                 <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"2px", background:`linear-gradient(to right, transparent, ${s.color}55, transparent)`, borderRadius:"0 0 1.5rem 1.5rem" }} />
               </div>
