@@ -4444,9 +4444,7 @@ let _dealerWinsRemaining = DEALER_FREE_WIN_THRESHOLD;
 function dealFlowAckSection(txn, role) {
   const bid   = parseFloat(txn.amount);
   const txnId = txn.transaction_id;
-  const referralCredit = parseFloat(txn.referral_credit_applied) || 0;
-  const effectiveFee = SELLER_FEE - referralCredit;
-  const net   = bid - effectiveFee;
+  const net   = bid - SELLER_FEE;
  
   if (role === 'dealer') {
     const acked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
@@ -4487,8 +4485,7 @@ function dealFlowAckSection(txn, role) {
             </div>
             <div style="padding:12px 14px;border-right:1px solid rgba(0,0,0,0.08);background:rgba(217,48,37,0.03);">
               <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">PB Seller Fee</div>
-              <div style="font-size:18px;font-weight:700;color:var(--red);">−$${effectiveFee.toLocaleString()}</div>
-              ${referralCredit > 0 ? `<div style="font-size:10px;color:var(--accent3);margin-top:2px;">$${referralCredit} referral credit applied</div>` : ''}
+              <div style="font-size:18px;font-weight:700;color:var(--red);">−$${SELLER_FEE}</div>
             </div>
             <div style="padding:12px 14px;background:rgba(42,158,124,0.04);">
               <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Seller Receives</div>
@@ -5017,8 +5014,9 @@ async function dealFlowSendInvoice(txnId, winPrice) {
           </div>
         </div>
         <div style="font-size:12px;color:var(--g5);line-height:1.6;">
-          Write a check for <strong style="color:#1a1814;">$${DEALER_FEE}</strong> payable to <strong style="color:#1a1814;">PrivaBuy LLC</strong>.<br>
-          Navin will collect it on the next pickup date (5th, 15th, or 20th).
+          Write a check for <strong style="color:#1a1814;">$${DEALER_FEE}</strong> payable to <strong style="color:#1a1814;">PrivaBuy LLC</strong> and mail to:<br>
+          <strong style="color:#1a1814;">PrivaBuy LLC<br>51 Front Street, Building A<br>Cumberland, RI 02864</strong><br><br>
+          Please mail within 3 business days of your win. Questions? <span style="color:var(--accent);">support@privabuy.com</span>
         </div>
       </div>`;
   }
