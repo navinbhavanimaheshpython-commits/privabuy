@@ -1,0 +1,74 @@
+[33mcommit 5f63927759958dd536b0beb15a017774ca8a4dbe[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mstaging[m[33m, [m[1;31morigin/staging[m[33m)[m
+Author: navinbhavanimaheshpython-commits <navinbhavanimaheshpython@gmail.com>
+Date:   Tue Jul 28 09:22:26 2026 -0400
+
+    lein and title deal flow chnage
+
+[1mdiff --git a/public/portal.html b/public/portal.html[m
+[1mindex bbcaf5e..4eac061 100644[m
+[1m--- a/public/portal.html[m
+[1m+++ b/public/portal.html[m
+[36m@@ -1974,6 +1974,16 @@[m [masync function login() {[m
+         S.seller_name = data.name || email;[m
+         showToast('✓','Welcome Back', data.name || email);[m
+         document.getElementById('seller-topbar-user').textContent = S.seller_name + ' Seller';[m
+[32m+[m
+[32m+[m[32m        if(S.resumeSellerId) {[m
+[32m+[m[32m          try {[m
+[32m+[m[32m            const dRes = await fetch(`${API}/cars/draft/${S.resumeSellerId}`);[m
+[32m+[m[32m            const draft = await dRes.json();[m
+[32m+[m[32m            if(draft.found && !draft.completed) {[m
+[32m+[m[32m              S.pendingResumeDraft = draft;[m
+[32m+[m[32m            }[m
+[32m+[m[32m          } catch(e) { console.warn('Could not load resume draft:', e); }[m
+[32m+[m[32m        }[m
+       }[m
+     }[m
+ [m
+[36m@@ -2028,7 +2038,25 @@[m [masync function login() {[m
+     showScreen(`screen-${selectedRole}`);[m
+     if(selectedRole==='seller') {[m
+       initSellerView();[m
+[32m+[m[32m      if(S.pendingResumeDraft) {[m
+[32m+[m[32m        const d = S.pendingResumeDraft;[m
+[32m+[m[32m        document.getElementById('quick-start-card').style.display = 'none';[m
+[32m+[m[32m        document.getElementById('wizard-step-1').classList.remove('hidden');[m
+[32m+[m[32m        v1ResetToStart();[m
+[32m+[m[32m        setTimeout(() => {[m
+[32m+[m[32m          document.getElementById('f-year').value = d.year || '';[m
+[32m+[m[32m          document.getElementById('f-make').value = d.make || '';[m
+[32m+[m[32m          document.getElementById('f-model').value = d.model || '';[m
+[32m+[m[32m          document.getElementById('f-trim').value = d.trim || '';[m
+[32m+[m[32m          document.getElementById('f-mileage').value = d.mileage || '';[m
+[32m+[m[32m          document.getElementById('f-zip').value = d.zip || '';[m
+[32m+[m[32m        }, 50);[m
+[32m+[m[32m        showToast('✓','Draft Restored', `Picking up your ${d.year} ${d.make} ${d.model}.`);[m
+[32m+[m[32m        delete S.pendingResumeDraft;[m
+[32m+[m[32m        setTimeout(() => document.getElementById('wizard-step-1').scrollIntoView({behavior:'smooth', block:'start'}), 300);[m
+[32m+[m[32m      }[m
+       if(S.pendingGuestVehicle) {[m
+[32m+[m
+         const { year, make, model, mileage, vin, photos } = S.pendingGuestVehicle;[m
+         document.getElementById('f-year').value = year;[m
+         document.getElementById('f-make').value = make;[m
+[36m@@ -4354,10 +4382,18 @@[m [msetTimeout(() => {[m
+ }, 500);[m
+ [m
+ setTimeout(() => {[m
+[31m-  const urlRole = new URLSearchParams(window.location.search).get('role');[m
+[32m+[m[32m  const params = new URLSearchParams(window.location.search);[m
+[32m+[m[32m  const urlRole = params.get('role');[m
+[32m+[m[32m  const resumeSellerId = params.get('resume_seller_id');[m
+   const hasSession = !!(localStorage.getItem('pb_seller_session') || localStorage.getItem('pb_dealer_session'));[m
+ [m
+[31m-  if(urlRole === 'dealer') {[m
+[32m+[m[32m  if(resumeSellerId) {[m
+[32m+[m[32m    S.resumeSellerId = resumeSellerId;[m
+[32m+[m[32m    showScreen('screen-login');[m
+[32m+[m[32m    selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));[m
+[32m+[m[32m    setSellerMode('login');[m
+[32m+[m[32m    document.getElementById('login-tagline').textContent = 'Log in to finish your listing — we saved your progress.';[m
+[32m+[m[32m  } else if(urlRole === 'dealer') {[m
+     selectRole('dealer', document.querySelector('.role-btn[data-role="dealer"]'));[m
+   } else if(urlRole === 'seller') {[m
+     if(!hasSession) {[m
