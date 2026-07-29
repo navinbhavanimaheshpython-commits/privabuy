@@ -3987,9 +3987,7 @@ async function acceptTopBid() {
   document.getElementById('accepted-amount').textContent='$'+top.amount.toLocaleString();
   const elapsed=document.getElementById('seller-elapsed'); if(elapsed) elapsed.textContent='SOLD';
   S._accepting = false;
-  if(top.isReal) showRealDealerStatus(top.amount,true);
-  showToast('','Offer Accepted!',`You accepted $${top.amount.toLocaleString()}.`);
-  // Show deal flow tab
+  showToast('','Offer Accepted!',`You accepted $${top.amount.toLocaleString()}.`);  // Show deal flow tab
   document.getElementById('seller-dealflow-tab').style.display = '';
   sellerTab('dealflow', document.getElementById('seller-dealflow-tab'));
 }
@@ -4038,6 +4036,11 @@ async function checkDealerHasTransaction() {
       list.forEach(txn => {
         if(txn.status === 'awaiting_dealer_payment' && !txn.dealer_fee_paid) {
           const vehicle = `${txn.year||''} ${txn.make||''} ${txn.model||''}`.trim();
+          const seenKey = 'pb_win_popup_shown_' + txn.transaction_id;
+          if(!localStorage.getItem(seenKey)) {
+            localStorage.setItem(seenKey, '1');
+            showDealerWinPopup(vehicle, parseFloat(txn.amount));
+          }
           // Avoid duplicates
           const exists = D_pendingFees.find(f => f.transaction_id === txn.transaction_id);
           if(!exists) {
