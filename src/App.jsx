@@ -525,7 +525,7 @@ function AuctionDemo() {
           </div>
           <span style={{ fontSize:"0.75rem", color:"rgba(26,24,20,0.80)" }}>5 dealers bidding</span>
         </div>
-        <div style={{ marginTop:"0.75rem", textAlign:"center" }}>
+        <div style={{ marginTop:"0.73rem", textAlign:"center" }}>
           <span style={{ fontSize:"0.78rem", color:"var(--accent)", fontWeight:500 }}>See what your car could get →</span>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:"0.35rem" }}>
