@@ -580,17 +580,18 @@ function Hero() {
         </div>
 
         {/* Hero car image strip */}
-        <div style={{ flex:"1 1 320px", display:"grid", gridTemplateColumns:"1fr 1fr", gridTemplateRows:"180px 180px", gap:"0.75rem" }} className="reveal">
-            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ gridRow:"1 / 3", cursor:"pointer" }}>
-              <img src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=400&q=80" alt="SUV" loading="lazy" />
+        <div className="fade-up-4" style={{ display:"flex", gap:"1rem", marginBottom:"3rem", justifyContent:"center", width:"100%", maxWidth:"900px", height:140 }}>
+          {[
+            { url:"https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&q=80", flex:1.2 },
+            { url:"https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&q=80", flex:1 },
+            { url:"https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&q=80", flex:1.2 },
+          ].map((img, i) => (
+            <div key={i} className="car-img-card" style={{ flex:img.flex, height:"100%", minWidth:0 }}>
+              <img src={img.url} alt="vehicle" loading="lazy" />
+              <div style={{ position:"absolute", inset:0, background:"linear-gradient(to bottom, transparent 40%, rgba(26,24,20,0.3))" }} />
             </div>
-            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ cursor:"pointer" }}>
-              <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&q=80" alt="Sedan" loading="lazy" />
-            </div>
-            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ cursor:"pointer" }}>
-              <img src="https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=400&q=80" alt="Truck" loading="lazy" />
-            </div>
-          </div>
+          ))}
+        </div>
 
         <div className="fade-up-4" style={{ width:"100%", maxWidth:"680px" }}>
           <AuctionDemo />
@@ -684,13 +685,13 @@ function ForSellers() {
 
           {/* Photo collage */}
           <div style={{ flex:"1 1 320px", display:"grid", gridTemplateColumns:"1fr 1fr", gridTemplateRows:"180px 180px", gap:"0.75rem" }} className="reveal">
-            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ gridRow:"1 / 3", cursor:"pointer" }}>
+            <div className="car-img-card" style={{ gridRow:"1 / 3" }}>
               <img src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=400&q=80" alt="SUV" loading="lazy" />
             </div>
-            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ cursor:"pointer" }}>
+            <div className="car-img-card">
               <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&q=80" alt="Sedan" loading="lazy" />
             </div>
-            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ cursor:"pointer" }}>
+            <div className="car-img-card">
               <img src="https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=400&q=80" alt="Truck" loading="lazy" />
             </div>
           </div>
