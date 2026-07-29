@@ -509,7 +509,9 @@ function AuctionDemo() {
   const pct = Math.min(100, (900-timer)/900*100);
 
   return (
-    <div className="lg" onClick={() => { trackEvent('seller_auction_demo_clicked'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"1.75rem", padding:"2.25rem", width:"100%", border:"1px solid rgba(26,24,20,0.08)", cursor:"pointer" }}>
+    <div className="lg" onClick={() => { trackEvent('seller_auction_demo_clicked'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"1.75rem", padding:"2.25rem", width:"100%", border:"1px solid rgba(26,24,20,0.08)", cursor:"pointer", transition:"transform 0.3s, box-shadow 0.3s" }}
+      onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-5px)"; e.currentTarget.style.boxShadow="0 20px 60px rgba(26,24,20,0.18)"; }}
+      onMouseLeave={e=>{ e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow=""; }}>
       <div style={{ display:"flex", gap:"1rem", marginBottom:"1.25rem", alignItems:"center" }}>
         <div style={{ width:56, height:56, borderRadius:"0.875rem", overflow:"hidden", border:"1px solid rgba(26,24,20,0.10)", flexShrink:0 }}>
           <img src="https://images.unsplash.com/photo-1634737581963-5a22ba471961?w=120&q=80" alt="2019 Honda Accord" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
@@ -671,9 +673,7 @@ function HowItWorks() {
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(240px, 1fr))", gap:"1.25rem" }}>
           {steps.map((s, i) => (
             <div key={s.n} className="reveal" style={{ transitionDelay:`${i*0.12}s` }}>
-              <div className="lg" style={{ borderRadius:"1.5rem", padding:"1.75rem", height:"100%", position:"relative", overflow:"hidden", border:"1px solid rgba(26,24,20,0.14)", transition:"transform 0.3s, box-shadow 0.3s", cursor:"default" }}
-                onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-6px)"; e.currentTarget.style.boxShadow=`0 20px 60px ${s.color}33, 0 8px 24px rgba(26,24,20,0.14)`; }}
-                onMouseLeave={e=>{ e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow=""; }}>
+              <div className="lg" style={{ borderRadius:"1.5rem", padding:"1.75rem", height:"100%", position:"relative", overflow:"hidden", border:"1px solid rgba(26,24,20,0.14)" }}>
                 <div style={{ position:"absolute", top:0, left:"1.5rem", right:"1.5rem", height:"1px", background:"linear-gradient(to right, transparent, rgba(255,255,255,0.9), transparent)" }} />
                 <div style={{ display:"flex", alignItems:"center", gap:"0.75rem", marginBottom:"1rem" }}>
                   <div style={{ width:42, height:42, borderRadius:"0.875rem", background:"linear-gradient(135deg, rgba(26,24,20,0.06), rgba(26,24,20,0.02))", border:"1px solid rgba(26,24,20,0.08)", display:"flex", alignItems:"center", justifyContent:"center" }}><StepIcon name={s.icon} color={s.color} /></div>
