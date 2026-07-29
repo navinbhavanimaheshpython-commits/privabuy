@@ -422,9 +422,12 @@ function CarMarquee() {
     <div style={{ padding:"5rem 0", background:"#edeae4", overflow:"hidden" }}>
       <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
         <span className="section-badge">Real Vehicles. Real Auctions.</span>
-        <h2 className="serif-italic reveal" style={{ fontSize:"clamp(1.8rem,3.5vw,2.5rem)", letterSpacing:"-0.03em", margin:"0.5rem 0 0", fontWeight:400, color:"#000000" }}>
+        <h2 className="serif-italic reveal" style={{ fontSize:"clamp(1.8rem,3.5vw,2.5rem)", letterSpacing:"-0.03em", margin:"0.5rem 0 0.75rem", fontWeight:400, color:"#000000" }}>
           Vehicles like yours, sold every day.
         </h2>
+        <button className="lg-strong reveal" onClick={() => { trackLead('seller_marquee'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.75rem 1.75rem", fontSize:"0.9rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"inline-flex", alignItems:"center", gap:"0.4rem" }}>
+          See Dealer Offers ↗
+        </button>
       </div>
       <div className="marquee-wrap">
         <div className="marquee-track">
