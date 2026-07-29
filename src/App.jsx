@@ -536,6 +536,14 @@ function AuctionDemo() {
 
 /* ─── HERO ──────────────────────────────────────────────────────────────── */
 function Hero() {
+  const processSteps = [
+    { icon:"clipboard",   color:"var(--accent)",  label:"List your VIN",       sub:"3 minutes" },
+    { icon:"broadcast",   color:"var(--accent2)", label:"5 dealers notified",  sub:"instantly" },
+    { icon:"timer",       color:"var(--accent3)", label:"Live auction opens",  sub:"they compete" },
+    { icon:"checkCircle", color:"var(--accent)",  label:"Accept & get paid",   sub:"$2,400 more, avg." },
+  ];
+  const trustSignals = ["Licensed dealers only", "Free to list", "No obligation to accept"];
+
   return (
     <section style={{ minHeight:"100dvh", background:"#f5f3ef", overflow:"hidden", position:"relative", display:"flex", alignItems:"flex-start" }}>
       <div style={{ position:"absolute", inset:0, zIndex:1, overflow:"hidden", pointerEvents:"none" }}>
@@ -557,40 +565,46 @@ function Hero() {
           Done in minutes.<br />
         </h1>
 
-        <p className="fade-up-3" style={{ color:"#1a1814", fontSize:"clamp(0.95rem, 1.1vw, 1.1rem)", lineHeight:1.65, maxWidth:"52ch", margin:"0 0 2.25rem", fontWeight:400 }}>
+        <p className="fade-up-3" style={{ color:"#1a1814", fontSize:"clamp(0.95rem, 1.1vw, 1.1rem)", lineHeight:1.65, maxWidth:"52ch", margin:"0 0 2rem", fontWeight:400 }}>
           List your 6–8 year old vehicle and watch 5 local dealers compete for it in a live auction. More competition. Bigger offers. No haggling.
         </p>
 
-        <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"2.75rem" }}>
+        <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"1.5rem" }}>
           <button className="lg-strong" onClick={() => { trackLead('seller_hero'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
-            See Dealer Offers ↗
+            See What Dealers Will Pay ↗
           </button>
           <button className="lg" onClick={() => { trackLead('dealer_hero'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
             I'm a Dealer →
           </button>
         </div>
 
-        <div className="fade-up-4" style={{ display:"flex", gap:"clamp(2rem, 5vw, 5rem)", justifyContent:"center", flexWrap:"wrap", marginBottom:"3rem" }}>
-          {[["$2,400", "avg. more vs private sale"],["Open-ended","live auction — no time pressure"],["5 dealers","compete per listing"]].map(([v,l]) => (
-            <div key={v} style={{ display:"flex", flexDirection:"column", alignItems:"center" }}>
-              <span className="serif-italic" style={{ fontSize:"clamp(1.4rem, 2vw, 1.8rem)", color:"var(--accent)", lineHeight:1 }}>{v}</span>
-              <span style={{ fontSize:"0.82rem", fontWeight:400, color:"rgba(26,24,20,0.72)", marginTop:"0.35rem" }}>{l}</span>
+        {/* Trust signal bar */}
+        <div className="fade-up-4" style={{ display:"flex", gap:"1.5rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"2.5rem" }}>
+          {trustSignals.map(t => (
+            <div key={t} style={{ display:"flex", alignItems:"center", gap:"0.4rem", fontSize:"0.82rem", color:"rgba(26,24,20,0.78)" }}>
+              <span style={{ color:"var(--accent3)", fontSize:"0.85rem" }}>✓</span> {t}
             </div>
           ))}
         </div>
 
-        {/* Hero car image strip */}
-        <div className="fade-up-4" style={{ display:"flex", gap:"1rem", marginBottom:"3rem", justifyContent:"center", width:"100%", maxWidth:"900px", height:140 }}>
-          {[
-            { url:"https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&q=80", flex:1.2 },
-            { url:"https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&q=80", flex:1 },
-            { url:"https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&q=80", flex:1.2 },
-          ].map((img, i) => (
-            <div key={i} className="car-img-card" style={{ flex:img.flex, height:"100%", minWidth:0 }}>
-              <img src={img.url} alt="vehicle" loading="lazy" />
-              <div style={{ position:"absolute", inset:0, background:"linear-gradient(to bottom, transparent 40%, rgba(26,24,20,0.3))" }} />
-            </div>
-          ))}
+        {/* Process visual — how it works, at a glance */}
+        <div className="fade-up-4 reveal" style={{ width:"100%", maxWidth:"760px", marginBottom:"2.5rem" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"0.5rem", flexWrap:"wrap" }}>
+            {processSteps.map((step, i, arr) => (
+              <div key={step.label} style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
+                <div style={{ display:"flex", flexDirection:"column", alignItems:"center", width:132 }}>
+                  <div style={{ width:44, height:44, borderRadius:"0.875rem", background:"rgba(255,255,255,0.7)", border:"1px solid rgba(26,24,20,0.10)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"0.5rem", boxShadow:"0 4px 14px rgba(26,24,20,0.08)" }}>
+                    <StepIcon name={step.icon} color={step.color} />
+                  </div>
+                  <div style={{ fontSize:"0.8rem", fontWeight:500, color:"#1a1814", lineHeight:1.3, textAlign:"center" }}>{step.label}</div>
+                  <div style={{ fontSize:"0.72rem", color:"rgba(26,24,20,0.62)", marginTop:"0.15rem" }}>{step.sub}</div>
+                </div>
+                {i < arr.length - 1 && (
+                  <span style={{ fontSize:"1.1rem", color:"rgba(26,24,20,0.28)", marginBottom:"1.6rem" }}>→</span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="fade-up-4" style={{ width:"100%", maxWidth:"680px" }}>
