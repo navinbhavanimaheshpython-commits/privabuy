@@ -262,7 +262,7 @@ const TrackingPixels = () => {
 
 function trackLead(type) {
   if (typeof window.fbq !== 'undefined') {
-    window.fbq('track', 'Lead', { content_name: type });
+    window.fbq('track', 'Lead', { content_name: type, value: 350.00, currency: 'USD' });
   }
   if (typeof window.gtag !== 'undefined') {
     window.gtag('event', 'conversion', {
