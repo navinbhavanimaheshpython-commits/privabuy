@@ -432,7 +432,7 @@ function CarMarquee() {
       <div className="marquee-wrap">
         <div className="marquee-track">
           {doubled.map((car, i) => (
-            <div key={i} className="car-img-card" style={{ width:300, height:190, flexShrink:0 }}>
+            <div key={i} className="car-img-card" onClick={() => { trackLead('seller_marquee_photo'); window.location.href='/portal?role=seller'; }} style={{ width:300, height:190, flexShrink:0, cursor:"pointer" }}>
               <img src={car.url} alt={car.label} loading="lazy" />
               <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"0.6rem 0.875rem", background:"linear-gradient(to top, rgba(26,24,20,0.65), transparent)", color:"#fff", fontSize:"0.75rem", fontWeight:400, letterSpacing:"0.02em" }}>
                 {car.label}
@@ -580,18 +580,17 @@ function Hero() {
         </div>
 
         {/* Hero car image strip */}
-        <div className="fade-up-4" style={{ display:"flex", gap:"1rem", marginBottom:"3rem", justifyContent:"center", width:"100%", maxWidth:"900px", height:140 }}>
-          {[
-            { url:"https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&q=80", flex:1.2 },
-            { url:"https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&q=80", flex:1 },
-            { url:"https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&q=80", flex:1.2 },
-          ].map((img, i) => (
-            <div key={i} className="car-img-card" style={{ flex:img.flex, height:"100%", minWidth:0 }}>
-              <img src={img.url} alt="vehicle" loading="lazy" />
-              <div style={{ position:"absolute", inset:0, background:"linear-gradient(to bottom, transparent 40%, rgba(26,24,20,0.3))" }} />
+        <div style={{ flex:"1 1 320px", display:"grid", gridTemplateColumns:"1fr 1fr", gridTemplateRows:"180px 180px", gap:"0.75rem" }} className="reveal">
+            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ gridRow:"1 / 3", cursor:"pointer" }}>
+              <img src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=400&q=80" alt="SUV" loading="lazy" />
             </div>
-          ))}
-        </div>
+            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ cursor:"pointer" }}>
+              <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&q=80" alt="Sedan" loading="lazy" />
+            </div>
+            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ cursor:"pointer" }}>
+              <img src="https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=400&q=80" alt="Truck" loading="lazy" />
+            </div>
+          </div>
 
         <div className="fade-up-4" style={{ width:"100%", maxWidth:"680px" }}>
           <AuctionDemo />
@@ -672,7 +671,7 @@ function ForSellers() {
               Stop leaving<br />money on<br />the table.
             </h2>
             <p style={{ color:"rgba(26,24,20,0.84)", fontSize:"1rem", lineHeight:1.65, maxWidth:420, marginBottom:"1.75rem" }}>
-              Facebook Marketplace and Craigslist mean one buyer, zero competition, and you absorbing all the lowball offers. PrivaBuy flips the dynamic — dealers fight for your car because they know these six to eight year old vehicles carry serious profit margins.
+              Facebook Marketplace gives you one buyer and zero competition — PrivaBuy gives you five dealers fighting for your car.
             </p>
             <div style={{ display:"flex", flexDirection:"column", gap:"0.6rem" }}>
               {["Minimal fees, dealers pay us","Instant VIN pull, no manual entry","Real offers from licensed dealers only","Pickup or drop-off arranged for you"].map(t => (
@@ -685,13 +684,13 @@ function ForSellers() {
 
           {/* Photo collage */}
           <div style={{ flex:"1 1 320px", display:"grid", gridTemplateColumns:"1fr 1fr", gridTemplateRows:"180px 180px", gap:"0.75rem" }} className="reveal">
-            <div className="car-img-card" style={{ gridRow:"1 / 3" }}>
+            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ gridRow:"1 / 3", cursor:"pointer" }}>
               <img src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=400&q=80" alt="SUV" loading="lazy" />
             </div>
-            <div className="car-img-card">
+            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ cursor:"pointer" }}>
               <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&q=80" alt="Sedan" loading="lazy" />
             </div>
-            <div className="car-img-card">
+            <div className="car-img-card" onClick={() => { trackLead('seller_forsellers_photo'); window.location.href='/portal?role=seller'; }} style={{ cursor:"pointer" }}>
               <img src="https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=400&q=80" alt="Truck" loading="lazy" />
             </div>
           </div>
