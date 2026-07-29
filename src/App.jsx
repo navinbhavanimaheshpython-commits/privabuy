@@ -480,7 +480,7 @@ function AuctionDemo() {
   const pct = Math.min(100, (900-timer)/900*100);
 
   return (
-    <div className="lg" style={{ borderRadius:"1.75rem", padding:"2.25rem", width:"100%", border:"1px solid rgba(26,24,20,0.08)" }}>
+    <div className="lg" onClick={() => { trackLead('seller_auction_demo'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"1.75rem", padding:"2.25rem", width:"100%", border:"1px solid rgba(26,24,20,0.08)", cursor:"pointer" }}>
       <div style={{ display:"flex", gap:"1rem", marginBottom:"1.25rem", alignItems:"center" }}>
         <div style={{ width:56, height:56, borderRadius:"0.875rem", overflow:"hidden", border:"1px solid rgba(26,24,20,0.10)", flexShrink:0 }}>
           <img src="https://images.unsplash.com/photo-1634737581963-5a22ba471961?w=120&q=80" alt="2019 Honda Accord" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
@@ -524,6 +524,9 @@ function AuctionDemo() {
             ))}
           </div>
           <span style={{ fontSize:"0.75rem", color:"rgba(26,24,20,0.80)" }}>5 dealers bidding</span>
+        </div>
+        <div style={{ marginTop:"0.75rem", textAlign:"center" }}>
+          <span style={{ fontSize:"0.78rem", color:"var(--accent)", fontWeight:500 }}>See what your car could get →</span>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:"0.35rem" }}>
           <div style={{ width:6, height:6, borderRadius:"50%", background:"#22a865", animation:"pulseRing 1.5s infinite" }} />
