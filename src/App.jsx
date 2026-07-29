@@ -422,7 +422,7 @@ function Navbar() {
         </div>
         {/* CTA */}
         <div style={{ flex:1, display:"flex", justifyContent:"flex-end" }}>
-          <button onClick={() => { trackLead('seller_nav'); window.location.href='/portal?role=seller'; }} style={{ background:"#1a1814", color:"#f5f3ef", border:"none", borderRadius:"9999px", padding:"0.4rem 1.1rem", fontSize:"0.82rem", fontWeight:500, cursor:"pointer", display:"flex", alignItems:"center", gap:"0.3rem", fontFamily:"Barlow, sans-serif" }}>
+          <button onClick={() => { trackEvent('seller_cta_clicked', { location: 'nav' }); trackLead('seller_nav'); window.location.href='/portal?role=seller'; }} style={{ background:"#1a1814", color:"#f5f3ef", border:"none", borderRadius:"9999px", padding:"0.4rem 1.1rem", fontSize:"0.82rem", fontWeight:500, cursor:"pointer", display:"flex", alignItems:"center", gap:"0.3rem", fontFamily:"Barlow, sans-serif" }}>
             See Dealer Offers <span style={{ fontSize:"0.85rem" }}>↗</span>
           </button>
         </div>
@@ -454,7 +454,7 @@ function CarMarquee() {
         <h2 className="serif-italic reveal" style={{ fontSize:"clamp(1.8rem,3.5vw,2.5rem)", letterSpacing:"-0.03em", margin:"0.5rem 0 0.75rem", fontWeight:400, color:"#000000" }}>
           Vehicles like yours, sold every day.
         </h2>
-        <button className="lg-strong reveal" onClick={() => { trackLead('seller_marquee'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.75rem 1.75rem", fontSize:"0.9rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"inline-flex", alignItems:"center", gap:"0.4rem" }}>
+        <button className="lg-strong reveal" onClick={() => { trackEvent('seller_cta_clicked', { location: 'marquee' }); trackLead('seller_marquee'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.75rem 1.75rem", fontSize:"0.9rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"inline-flex", alignItems:"center", gap:"0.4rem" }}>
           See Dealer Offers ↗
         </button>
       </div>
@@ -753,7 +753,7 @@ function ForSellers() {
 
         {/* CTA — keeps momentum going right where sellers tend to drop off */}
         <div className="reveal" style={{ textAlign:"center", marginTop:"2.5rem" }}>
-          <button className="lg-strong" onClick={() => { trackLead('seller_forsellers'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"inline-flex", alignItems:"center", gap:"0.4rem" }}>
+          <button className="lg-strong" onClick={() => { trackEvent('seller_cta_clicked', { location: 'for_sellers' }); trackLead('seller_forsellers'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"inline-flex", alignItems:"center", gap:"0.4rem" }}>
             See Dealer Offers ↗
           </button>
         </div>
