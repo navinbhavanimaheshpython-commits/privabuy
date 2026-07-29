@@ -461,7 +461,7 @@ function CarMarquee() {
       <div className="marquee-wrap">
         <div className="marquee-track">
           {doubled.map((car, i) => (
-            <div key={i} className="car-img-card" onClick={() => { trackLead('seller_marquee_photo'); window.location.href='/portal?role=seller'; }} style={{ width:300, height:190, flexShrink:0, cursor:"pointer" }}>
+            <div key={i} className="car-img-card" onClick={() => { trackEvent('seller_marquee_photo_clicked'); window.location.href='/portal?role=seller'; }} style={{ width:300, height:190, flexShrink:0, cursor:"pointer" }}>
               <img src={car.url} alt={car.label} loading="lazy" />
               <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"0.6rem 0.875rem", background:"linear-gradient(to top, rgba(26,24,20,0.65), transparent)", color:"#fff", fontSize:"0.75rem", fontWeight:400, letterSpacing:"0.02em" }}>
                 {car.label}
@@ -509,7 +509,7 @@ function AuctionDemo() {
   const pct = Math.min(100, (900-timer)/900*100);
 
   return (
-    <div className="lg" onClick={() => { trackLead('seller_auction_demo'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"1.75rem", padding:"2.25rem", width:"100%", border:"1px solid rgba(26,24,20,0.08)", cursor:"pointer" }}>
+    <div className="lg" onClick={() => { trackEvent('seller_auction_demo_clicked'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"1.75rem", padding:"2.25rem", width:"100%", border:"1px solid rgba(26,24,20,0.08)", cursor:"pointer" }}>
       <div style={{ display:"flex", gap:"1rem", marginBottom:"1.25rem", alignItems:"center" }}>
         <div style={{ width:56, height:56, borderRadius:"0.875rem", overflow:"hidden", border:"1px solid rgba(26,24,20,0.10)", flexShrink:0 }}>
           <img src="https://images.unsplash.com/photo-1634737581963-5a22ba471961?w=120&q=80" alt="2019 Honda Accord" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
