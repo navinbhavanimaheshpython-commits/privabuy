@@ -3361,7 +3361,7 @@ async function startAuction() {
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.detail || 'Failed to list car');
-    if(typeof fbq !== 'undefined') fbq('track', 'Lead');
+    if(typeof fbq !== 'undefined') fbq('track', 'Lead', { value: 350.00, currency: 'USD'});
     if(typeof gtag !== 'undefined') gtag('event', 'listing_submitted');
     if(typeof fbq !== 'undefined') fbq('trackCustom', 'listing_submitted');
     if(typeof gtag !== 'undefined') gtag('event', 'auction_live');
