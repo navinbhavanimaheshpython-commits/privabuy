@@ -671,7 +671,9 @@ function HowItWorks() {
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(240px, 1fr))", gap:"1.25rem" }}>
           {steps.map((s, i) => (
             <div key={s.n} className="reveal" style={{ transitionDelay:`${i*0.12}s` }}>
-              <div className="lg" style={{ borderRadius:"1.5rem", padding:"1.75rem", height:"100%", position:"relative", overflow:"hidden", border:"1px solid rgba(26,24,20,0.14)" }}>
+              <div className="lg" style={{ borderRadius:"1.5rem", padding:"1.75rem", height:"100%", position:"relative", overflow:"hidden", border:"1px solid rgba(26,24,20,0.14)", transition:"transform 0.3s, box-shadow 0.3s", cursor:"default" }}
+                onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-6px)"; e.currentTarget.style.boxShadow=`0 20px 60px ${s.color}33, 0 8px 24px rgba(26,24,20,0.14)`; }}
+                onMouseLeave={e=>{ e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow=""; }}>
                 <div style={{ position:"absolute", top:0, left:"1.5rem", right:"1.5rem", height:"1px", background:"linear-gradient(to right, transparent, rgba(255,255,255,0.9), transparent)" }} />
                 <div style={{ display:"flex", alignItems:"center", gap:"0.75rem", marginBottom:"1rem" }}>
                   <div style={{ width:42, height:42, borderRadius:"0.875rem", background:"linear-gradient(135deg, rgba(26,24,20,0.06), rgba(26,24,20,0.02))", border:"1px solid rgba(26,24,20,0.08)", display:"flex", alignItems:"center", justifyContent:"center" }}><StepIcon name={s.icon} color={s.color} /></div>
