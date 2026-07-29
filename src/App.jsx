@@ -260,14 +260,16 @@ const TrackingPixels = () => {
   return null;
 };
 
-// Non-conversion engagement events — same transport as trackLead, but tracked as
-// custom events rather than Lead/conversion so they don't inflate cost-per-lead reporting.
-function trackEvent(name, params = {}) {
+function trackLead(type) {
   if (typeof window.fbq !== 'undefined') {
-    window.fbq('trackCustom', name, params);
+    window.fbq('track', 'Lead', { content_name: type, value: 350.00, currency: 'USD' });
   }
   if (typeof window.gtag !== 'undefined') {
-    window.gtag('event', name, params);
+    window.gtag('event', 'conversion', {
+      'send_to': 'AW-18160958792/Lead',
+      'value': 1.0,
+      'currency': 'USD'
+    });
   }
 }
 
@@ -345,27 +347,6 @@ function ParticleCanvas() {
     return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
   }, []);
   return <canvas ref={ref} style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none", zIndex:2 }} />;
-}
-
-/* ─── SCROLL DEPTH TRACKING ──────────────────────────────────────────────── */
-function useScrollDepthTracking() {
-  useEffect(() => {
-    let fired25 = false;
-    const handler = () => {
-      if (fired25) return;
-      const scrolled = window.scrollY;
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      if (total <= 0) return;
-      const pct = scrolled / total;
-      if (pct >= 0.25) {
-        fired25 = true;
-        trackEvent('landing_scrolled_25pct');
-        window.removeEventListener('scroll', handler);
-      }
-    };
-    window.addEventListener('scroll', handler, { passive: true });
-    return () => window.removeEventListener('scroll', handler);
-  }, []);
 }
 
 /* ─── SCROLL REVEAL ─────────────────────────────────────────────────────── */
@@ -589,10 +570,10 @@ function Hero() {
         </p>
 
         <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"1.5rem" }}>
-          <button className="lg-strong" onClick={() => { trackEvent('hero_cta_clicked', { cta_type: 'seller' }); trackLead('seller_hero'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
+          <button className="lg-strong" onClick={() => { trackLead('seller_hero'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
             See What Dealers Will Pay ↗
           </button>
-          <button className="lg" onClick={() => { trackEvent('hero_cta_clicked', { cta_type: 'dealer' }); trackLead('dealer_hero'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
+          <button className="lg" onClick={() => { trackLead('dealer_hero'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
             I'm a Dealer →
           </button>
         </div>
@@ -964,7 +945,6 @@ function Footer() {
 /* ─── APP ───────────────────────────────────────────────────────────────── */
 export default function App() {
   useReveal();
-  useScrollDepthTracking();
   return (
     <>
       <FontLink />
