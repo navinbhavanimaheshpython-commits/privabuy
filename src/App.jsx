@@ -20,7 +20,7 @@ const FontLink = () => (
       --accent3: #2a9e7c;
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: auto; }
 
     body {
       margin: 0;
@@ -534,7 +534,7 @@ function AuctionDemo() {
 /* ─── HERO ──────────────────────────────────────────────────────────────── */
 function Hero() {
   return (
-    <section style={{ minHeight:"100vh", background:"#f5f3ef", overflow:"hidden", position:"relative", display:"flex", alignItems:"flex-start" }}>
+    <section style={{ minHeight:"100dvh", background:"#f5f3ef", overflow:"hidden", position:"relative", display:"flex", alignItems:"flex-start" }}>
       <div style={{ position:"absolute", inset:0, zIndex:1, overflow:"hidden", pointerEvents:"none" }}>
         <div style={{ position:"absolute", width:"55vw", height:"55vw", borderRadius:"50%", background:"radial-gradient(circle, rgba(124,92,191,0.18) 0%, transparent 68%)", top:"-20%", left:"-12%", animation:"drift1 18s ease-in-out infinite" }} />
         <div style={{ position:"absolute", width:"48vw", height:"48vw", borderRadius:"50%", background:"radial-gradient(circle, rgba(194,124,42,0.14) 0%, transparent 68%)", bottom:"-15%", right:"-10%", animation:"drift2 22s ease-in-out infinite" }} />
