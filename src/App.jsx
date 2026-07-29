@@ -703,6 +703,13 @@ function ForSellers() {
             </div>
           ))}
         </div>
+
+        {/* CTA — keeps momentum going right where sellers tend to drop off */}
+        <div className="reveal" style={{ textAlign:"center", marginTop:"2.5rem" }}>
+          <button className="lg-strong" onClick={() => { trackLead('seller_forsellers'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"inline-flex", alignItems:"center", gap:"0.4rem" }}>
+            See Dealer Offers ↗
+          </button>
+        </div>
       </div>
     </section>
   );
