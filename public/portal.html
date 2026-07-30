@@ -622,7 +622,7 @@ gtag('config', 'AW-18160958792');
 <div id="screen-login" class="screen active">
   <div class="login-card">
     <div class="login-logo">Priva<span>Buy</span> <span style="font-size:14px;color:var(--g4);font-family:var(--sans);font-weight:400"></span></div>
-    <div class="login-tagline" id="login-tagline">The auction platform for serious vehicle inventory.</div>
+    <div class="login-tagline" id="login-tagline">****STAGING****The auction platform for serious vehicle inventory.</div>
     <div class="role-select">
       <div class="role-btn " data-role="seller" onclick="selectRole('seller',this)"><div class="role-icon">&#x1F464;</div><div class="role-name">Seller</div></div>
       <div class="role-btn" data-role="dealer" onclick="selectRole('dealer',this)"><div class="role-icon">&#x1F3E2;</div><div class="role-name">Dealer</div></div>
@@ -2488,17 +2488,6 @@ async function loadSellerActiveAuction() {
       S.car_id = active.car_id;
       S.auctionActive = true;
       S.auctionData = active;
-
-      try {
-        const carRes = await fetch(`${API}/cars/${active.car_id}`);
-        if(carRes.ok) {
-          const carDetail = await carRes.json();
-          if(Array.isArray(carDetail.photos) && carDetail.photos.length) {
-            active.photos = carDetail.photos;
-          }
-        }
-      } catch(photoFetchErr) { console.warn('Could not refresh photo data:', photoFetchErr); }
-
       const rawTs = active.created_at;
       if (rawTs) {
         const normalized = rawTs.endsWith('Z') || rawTs.includes('+') ? rawTs : rawTs + 'Z';
@@ -2514,7 +2503,7 @@ async function loadSellerActiveAuction() {
         <div style="font-family:var(--serif);font-size:20px;margin-bottom:8px">${active.year} ${active.make} ${active.model}</div>
         <div class="vehicle-card-meta"><span class="meta-tag">${(active.mileage||0).toLocaleString()} mi</span><span class="meta-tag">${active.title_status||'Clean'}</span><span class="meta-tag">ZIP ${active.zip||''}</span></div>
         <div class="text-muted mt-16 text-sm">Floor: <strong style="color:var(--accent)">$${(active.floor_price||0).toLocaleString()}</strong></div>`;
-      S.photoUrls = (S.photoUrls && S.photoUrls.length) ? S.photoUrls : (active.photos || []);
+      S.photoUrls = active.photos || S.photoUrls || [];
       try { updatePhotoReminderBanner(S.photoUrls); } catch(bannerErr) { console.warn('Photo reminder banner failed to update:', bannerErr); }
       startAuctionTimer();
       startSellerBidPoll();
@@ -2527,6 +2516,7 @@ async function loadSellerActiveAuction() {
       document.getElementById('seller-dealflow-tab').style.display = '';
       sellerTab('dealflow', document.getElementById('seller-dealflow-tab'));
     } else {
+      // Check for any listing with a transaction even if status is unexpected
       const anyListing = listings[0];
       if(anyListing) {
         S.car_id = anyListing.car_id;
@@ -2535,6 +2525,7 @@ async function loadSellerActiveAuction() {
     }
   } catch(e) { console.error(e); }
 }
+
 
 async function loadSellerHistory() {
   if(!S.seller_id) return;
