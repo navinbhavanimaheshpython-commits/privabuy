@@ -2488,6 +2488,15 @@ async function loadSellerActiveAuction() {
       S.car_id = active.car_id;
       S.auctionActive = true;
       S.auctionData = active;
+
+      try {
+        const carRes = await fetch(`${API}/cars/${active.car_id}`);
+        if(carRes.ok) {
+          const carDetail = await carRes.json();
+          if(Array.isArray(carDetail.photos)) active.photos = carDetail.photos;
+        }
+      } catch(photoFetchErr) { console.warn('Could not refresh photo data:', photoFetchErr); }
+
       const rawTs = active.created_at;
       if (rawTs) {
         const normalized = rawTs.endsWith('Z') || rawTs.includes('+') ? rawTs : rawTs + 'Z';
@@ -2516,7 +2525,6 @@ async function loadSellerActiveAuction() {
       document.getElementById('seller-dealflow-tab').style.display = '';
       sellerTab('dealflow', document.getElementById('seller-dealflow-tab'));
     } else {
-      // Check for any listing with a transaction even if status is unexpected
       const anyListing = listings[0];
       if(anyListing) {
         S.car_id = anyListing.car_id;
