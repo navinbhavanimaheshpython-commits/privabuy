@@ -601,11 +601,13 @@ function Hero() {
           List your 6–8 year old vehicle and watch 5 local dealers compete for it in a live auction. More competition. Bigger offers. No haggling.
         </p>
 
-        {/* Trust signal bar — moved above the CTA, proof point leads it */}
-        <div className="fade-up-3" style={{ display:"flex", gap:"1.5rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"1.1rem" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:"0.4rem", fontSize:"0.85rem", fontWeight:600, color:"var(--accent)" }}>
-            <span style={{ fontSize:"0.9rem" }}>★</span> $2,400 more, on average
-          </div>
+        {/* Proof line — concrete number, sits right where the decision gets made */}
+        <div className="fade-up-4" style={{ fontSize:"0.92rem", fontWeight:500, color:"#1a1814", marginBottom:"0.75rem", display:"flex", alignItems:"center", gap:"0.4rem" }}>
+          <span style={{ color:"var(--accent)" }}>⚡</span> Sellers get <span style={{ color:"var(--accent)" }}>$2,400 more, on average</span>, than Facebook Marketplace
+        </div>
+
+        {/* Trust signal bar — now above the CTA, not below it */}
+        <div className="fade-up-4" style={{ display:"flex", gap:"1.5rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"1.5rem" }}>
           {trustSignals.map(t => (
             <div key={t} style={{ display:"flex", alignItems:"center", gap:"0.4rem", fontSize:"0.82rem", color:"rgba(26,24,20,0.78)" }}>
               <span style={{ color:"var(--accent3)", fontSize:"0.85rem" }}>✓</span> {t}
