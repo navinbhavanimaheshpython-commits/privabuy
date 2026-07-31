@@ -601,27 +601,22 @@ function Hero() {
           List your 6–8 year old vehicle and watch 5 local dealers compete for it in a live auction. More competition. Bigger offers. No haggling.
         </p>
 
-        {/* Proof block — sits directly above the CTA so trust lands before the ask */}
-        <div className="fade-up-4" style={{ marginBottom:"1.25rem", textAlign:"center" }}>
-          <div style={{ fontSize:"0.95rem", fontWeight:600, color:"var(--accent)", marginBottom:"0.6rem" }}>
-            Sellers get $2,400 more, on average, than Facebook Marketplace
-          </div>
-          <div style={{ display:"flex", gap:"1.5rem", flexWrap:"wrap", justifyContent:"center" }}>
-            {trustSignals.map(t => (
-              <div key={t} style={{ display:"flex", alignItems:"center", gap:"0.4rem", fontSize:"0.82rem", color:"rgba(26,24,20,0.78)" }}>
-                <span style={{ color:"var(--accent3)", fontSize:"0.85rem" }}>✓</span> {t}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"2.5rem" }}>
+        <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"1.5rem" }}>
           <button className="lg-strong" onClick={() => { trackEvent('hero_cta_clicked', { cta_type: 'seller' }); trackLead('seller_hero'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
             See What Dealers Will Pay ↗
           </button>
           <button className="lg" onClick={() => { trackEvent('hero_cta_clicked', { cta_type: 'dealer' }); trackLead('dealer_hero'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
             I'm a Dealer →
           </button>
+        </div>
+
+        {/* Trust signal bar */}
+        <div className="fade-up-4" style={{ display:"flex", gap:"1.5rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"2.5rem" }}>
+          {trustSignals.map(t => (
+            <div key={t} style={{ display:"flex", alignItems:"center", gap:"0.4rem", fontSize:"0.82rem", color:"rgba(26,24,20,0.78)" }}>
+              <span style={{ color:"var(--accent3)", fontSize:"0.85rem" }}>✓</span> {t}
+            </div>
+          ))}
         </div>
 
         {/* Process visual — how it works, at a glance */}
