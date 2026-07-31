@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 /* ─── FONTS ─────────────────────────────────────────────────────────────── */
 const FontLink = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap');
+    
 
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -20,7 +20,7 @@ const FontLink = () => (
       --accent3: #2a9e7c;
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: auto; }
 
     body {
       margin: 0;
@@ -56,6 +56,12 @@ const FontLink = () => (
       mask-composite: exclude;
       pointer-events: none;
     }
+
+    @media (max-width: 860px) {
+      .nav-links { display: none !important; }
+    }
+    
+ 
 
     .lg-strong {
       background: rgba(26,24,20,0.88);
@@ -228,6 +234,54 @@ const FontLink = () => (
   `}</style>
 );
 
+/* ─── META PIXEL + GOOGLE TAG ──────────────────────────────────────────── */
+const TrackingPixels = () => {
+  useEffect(() => {
+    if (!window.fbq) {
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+      document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      window.fbq('init', '1958235388393786');
+      window.fbq('track', 'PageView');
+    }
+    if (!window.gtag) {
+      const s1 = document.createElement('script');
+      s1.async = true;
+      s1.src = 'https://www.googletagmanager.com/gtag/js?id=AW-18160958792';
+      document.head.appendChild(s1);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(){ window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', 'AW-18160958792');
+    }
+  }, []);
+  return null;
+};
+
+function trackLead(type) {
+  if (typeof window.fbq !== 'undefined') {
+    window.fbq('track', 'Lead', { content_name: type, value: 350.00, currency: 'USD' });
+  }
+  if (typeof window.gtag !== 'undefined') {
+    window.gtag('event', 'conversion', {
+      'send_to': 'AW-18160958792/Lead',
+      'value': 1.0,
+      'currency': 'USD'
+    });
+  }
+}
+
+function trackEvent(name, params = {}) {
+  if (typeof window.fbq !== 'undefined') {
+    window.fbq('trackCustom', name, params);
+  }
+  if (typeof window.gtag !== 'undefined') {
+    window.gtag('event', name, params);
+  }
+}
+
 /* ─── SVG ICONS ─────────────────────────────────────────────────────────── */
 const iconStroke = { fill:"none", strokeLinecap:"round", strokeLinejoin:"round", strokeWidth:"1.6" };
 
@@ -305,6 +359,26 @@ function ParticleCanvas() {
 }
 
 /* ─── SCROLL REVEAL ─────────────────────────────────────────────────────── */
+function useScrollDepthTracking() {
+  useEffect(() => {
+    let fired25 = false;
+    const handler = () => {
+      if (fired25) return;
+      const scrolled = window.scrollY;
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      if (total <= 0) return;
+      const pct = scrolled / total;
+      if (pct >= 0.25) {
+        fired25 = true;
+        trackEvent('landing_scrolled_25pct');
+        window.removeEventListener('scroll', handler);
+      }
+    };
+    window.addEventListener('scroll', handler, { passive: true });
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
+}
+
 function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll(".reveal");
@@ -337,7 +411,7 @@ function Navbar() {
           </a>
         </div>
         {/* Nav links */}
-        <div style={{ display:"flex", gap:"1.75rem", flexShrink:0 }}>
+        <div className="nav-links" style={{ display:"flex", gap:"1.75rem", flexShrink:0 }}>
           {[["How It Works","#how-it-works"],["For Sellers","#for-sellers"],["For Dealers","#for-dealers"],["About","#about"],["FAQ","#faq"]].map(([l,h]) => (
             <a key={l} href={h}
               style={{ fontSize:"0.82rem", color:"rgba(26,24,20,0.88)", textDecoration:"none", fontWeight:400, transition:"color 0.2s" }}
@@ -348,8 +422,8 @@ function Navbar() {
         </div>
         {/* CTA */}
         <div style={{ flex:1, display:"flex", justifyContent:"flex-end" }}>
-          <button onClick={() => window.location.href='/portal?role=seller'} style={{ background:"#1a1814", color:"#f5f3ef", border:"none", borderRadius:"9999px", padding:"0.4rem 1.1rem", fontSize:"0.82rem", fontWeight:500, cursor:"pointer", display:"flex", alignItems:"center", gap:"0.3rem", fontFamily:"Barlow, sans-serif" }}>
-            List Your Car <span style={{ fontSize:"0.85rem" }}>↗</span>
+          <button onClick={() => { trackEvent('seller_cta_clicked', { location: 'nav' }); trackLead('seller_nav'); window.location.href='/portal?role=seller'; }} style={{ background:"#1a1814", color:"#f5f3ef", border:"none", borderRadius:"9999px", padding:"0.4rem 1.1rem", fontSize:"0.82rem", fontWeight:500, cursor:"pointer", display:"flex", alignItems:"center", gap:"0.3rem", fontFamily:"Barlow, sans-serif" }}>
+            See Dealer Offers <span style={{ fontSize:"0.85rem" }}>↗</span>
           </button>
         </div>
       </div>
@@ -377,14 +451,17 @@ function CarMarquee() {
     <div style={{ padding:"5rem 0", background:"#edeae4", overflow:"hidden" }}>
       <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
         <span className="section-badge">Real Vehicles. Real Auctions.</span>
-        <h2 className="serif-italic reveal" style={{ fontSize:"clamp(1.8rem,3.5vw,2.5rem)", letterSpacing:"-0.03em", margin:"0.5rem 0 0", fontWeight:400, color:"#ffffff" }}>
+        <h2 className="serif-italic reveal" style={{ fontSize:"clamp(1.8rem,3.5vw,2.5rem)", letterSpacing:"-0.03em", margin:"0.5rem 0 0.75rem", fontWeight:400, color:"#000000" }}>
           Vehicles like yours, sold every day.
         </h2>
+        <button className="lg-strong reveal" onClick={() => { trackEvent('seller_cta_clicked', { location: 'marquee' }); trackLead('seller_marquee'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.75rem 1.75rem", fontSize:"0.9rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"inline-flex", alignItems:"center", gap:"0.4rem" }}>
+          See Dealer Offers ↗
+        </button>
       </div>
       <div className="marquee-wrap">
         <div className="marquee-track">
           {doubled.map((car, i) => (
-            <div key={i} className="car-img-card" style={{ width:300, height:190, flexShrink:0 }}>
+            <div key={i} className="car-img-card" onClick={() => { trackEvent('seller_marquee_photo_clicked'); window.location.href='/portal?role=seller'; }} style={{ width:300, height:190, flexShrink:0, cursor:"pointer" }}>
               <img src={car.url} alt={car.label} loading="lazy" />
               <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"0.6rem 0.875rem", background:"linear-gradient(to top, rgba(26,24,20,0.65), transparent)", color:"#fff", fontSize:"0.75rem", fontWeight:400, letterSpacing:"0.02em" }}>
                 {car.label}
@@ -432,10 +509,12 @@ function AuctionDemo() {
   const pct = Math.min(100, (900-timer)/900*100);
 
   return (
-    <div className="lg" style={{ borderRadius:"1.75rem", padding:"2.25rem", width:"100%", border:"1px solid rgba(26,24,20,0.08)" }}>
+    <div className="lg" onClick={() => { trackEvent('seller_auction_demo_clicked'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"1.75rem", padding:"2.25rem", width:"100%", border:"1px solid rgba(26,24,20,0.08)", cursor:"pointer", transition:"transform 0.3s, box-shadow 0.3s" }}
+      onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-5px)"; e.currentTarget.style.boxShadow="0 20px 60px rgba(26,24,20,0.18)"; }}
+      onMouseLeave={e=>{ e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow=""; }}>
       <div style={{ display:"flex", gap:"1rem", marginBottom:"1.25rem", alignItems:"center" }}>
         <div style={{ width:56, height:56, borderRadius:"0.875rem", overflow:"hidden", border:"1px solid rgba(26,24,20,0.10)", flexShrink:0 }}>
-          <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=120&q=80" alt="2019 Honda Accord" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+          <img src="https://images.unsplash.com/photo-1634737581963-5a22ba471961?w=120&q=80" alt="2019 Honda Accord" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
         </div>
         <div>
           <div style={{ fontWeight:500, fontSize:"1.1rem", letterSpacing:"-0.01em", color:"#1a1814" }}>2019 Honda Accord EX</div>
@@ -443,13 +522,13 @@ function AuctionDemo() {
         </div>
         <div style={{ marginLeft:"auto", textAlign:"right" }}>
           <div style={{ fontSize:"0.65rem", color:"rgba(26,24,20,0.88)", marginBottom:"0.2rem", textTransform:"uppercase", letterSpacing:"0.06em" }}>Top Bid</div>
-          <div style={{ fontFamily:"Instrument Serif, serif", fontStyle:"italic", fontSize:"1.65rem", color:"var(--accent)" }}>${bids[0]?.amount.toLocaleString()}</div>
+          <div style={{ fontFamily:"'Barlow', sans-serif", fontVariantNumeric:"tabular-nums", fontWeight:600, fontSize:"1.65rem", color:"var(--accent)" }}>${bids[0]?.amount.toLocaleString()}</div>
         </div>
       </div>
       <div style={{ marginBottom:"1rem" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"0.5rem" }}>
           <span style={{ fontSize:"0.72rem", color:"rgba(26,24,20,0.88)", textTransform:"uppercase", letterSpacing:"0.06em" }}>Time Remaining</span>
-          <span style={{ fontFamily:"'Barlow', monospace", fontSize:"1.05rem", fontWeight:500, color:timer < 120 ? "#c05a2a" : "rgba(26,24,20,0.80)", animation: timer < 120 ? "timerTick 1s infinite" : "none" }}>{mm}:{ss}</span>
+          <span style={{ fontFamily:"'Barlow', sans-serif", fontVariantNumeric:"tabular-nums", fontSize:"1.05rem", fontWeight:600, color:timer < 120 ? "#c05a2a" : "rgba(26,24,20,0.80)", animation: timer < 120 ? "timerTick 1s infinite" : "none" }}>{mm}:{ss}</span>
         </div>
         <div className="progress-bar"><div className="progress-bar-fill" style={{ width:`${100 - pct}%` }} /></div>
       </div>
@@ -463,7 +542,7 @@ function AuctionDemo() {
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:"0.75rem" }}>
               <span style={{ fontSize:"0.7rem", color:"rgba(26,24,20,0.86)" }}>{b.time}</span>
-              <span style={{ fontSize:"1rem", fontWeight: i===0 ? 500 : 400, color: i===0 ? b.color : "rgba(26,24,20,0.42)" }}>${b.amount.toLocaleString()}</span>
+              <span style={{ fontFamily:"'Barlow', sans-serif", fontVariantNumeric:"tabular-nums", fontSize:"1rem", fontWeight: i===0 ? 600 : 400, color: i===0 ? b.color : "rgba(26,24,20,0.42)" }}>${b.amount.toLocaleString()}</span>
             </div>
           </div>
         ))}
@@ -477,6 +556,7 @@ function AuctionDemo() {
           </div>
           <span style={{ fontSize:"0.75rem", color:"rgba(26,24,20,0.80)" }}>5 dealers bidding</span>
         </div>
+          <span style={{ fontSize:"0.78rem", color:"var(--accent)", fontWeight:500, whiteSpace:"nowrap", position:"relative", top:"-1px"  }}>See what your car could get →</span>
         <div style={{ display:"flex", alignItems:"center", gap:"0.35rem" }}>
           <div style={{ width:6, height:6, borderRadius:"50%", background:"#22a865", animation:"pulseRing 1.5s infinite" }} />
           <span style={{ fontSize:"0.72rem", color:"#22a865" }}>Live</span>
@@ -488,8 +568,16 @@ function AuctionDemo() {
 
 /* ─── HERO ──────────────────────────────────────────────────────────────── */
 function Hero() {
+  const processSteps = [
+    { icon:"clipboard",   color:"var(--accent)",  label:"List your VIN",       sub:"3 minutes" },
+    { icon:"broadcast",   color:"var(--accent2)", label:"5 dealers notified",  sub:"instantly" },
+    { icon:"timer",       color:"var(--accent3)", label:"Live auction opens",  sub:"they compete" },
+    { icon:"checkCircle", color:"var(--accent)",  label:"Accept & get paid",   sub:"$2,400 more, avg." },
+  ];
+  const trustSignals = ["Licensed dealers only", "Free to list", "No obligation to accept"];
+
   return (
-    <section style={{ minHeight:"100vh", background:"#f5f3ef", overflow:"hidden", position:"relative", display:"flex", alignItems:"flex-start" }}>
+    <section style={{ minHeight:"100dvh", background:"#f5f3ef", overflow:"hidden", position:"relative", display:"flex", alignItems:"flex-start" }}>
       <div style={{ position:"absolute", inset:0, zIndex:1, overflow:"hidden", pointerEvents:"none" }}>
         <div style={{ position:"absolute", width:"55vw", height:"55vw", borderRadius:"50%", background:"radial-gradient(circle, rgba(124,92,191,0.18) 0%, transparent 68%)", top:"-20%", left:"-12%", animation:"drift1 18s ease-in-out infinite" }} />
         <div style={{ position:"absolute", width:"48vw", height:"48vw", borderRadius:"50%", background:"radial-gradient(circle, rgba(194,124,42,0.14) 0%, transparent 68%)", bottom:"-15%", right:"-10%", animation:"drift2 22s ease-in-out infinite" }} />
@@ -504,45 +592,56 @@ function Hero() {
         </div>
 
         <h1 className="serif-italic fade-up-2" style={{ fontSize:"clamp(3.5rem, 7.5vw, 8rem)", lineHeight:0.9, letterSpacing:"-0.04em", margin:"0 0 1.75rem", fontWeight:400, color:"#1a1814", maxWidth:"18ch" }}>
-          The <span style={{ color:"var(--accent)" }}>highest offer</span><br />
-          your car will ever get.<br />
-          Done in 15 minutes.
+          Real dealers.<br />
+          <span style={{ color:"var(--accent)" }}>Real competition.</span><br />
+          Done in minutes.<br />
         </h1>
 
-        <p className="fade-up-3" style={{ color:"#1a1814", fontSize:"clamp(0.95rem, 1.1vw, 1.1rem)", lineHeight:1.65, maxWidth:"52ch", margin:"0 0 2.25rem", fontWeight:400 }}>
+        <p className="fade-up-3" style={{ color:"#1a1814", fontSize:"clamp(0.95rem, 1.1vw, 1.1rem)", lineHeight:1.65, maxWidth:"52ch", margin:"0 0 2rem", fontWeight:400 }}>
           List your 6–8 year old vehicle and watch 5 local dealers compete for it in a live auction. More competition. Bigger offers. No haggling.
         </p>
 
-        <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"2.75rem" }}>
-          <button className="lg-strong" onClick={() => window.location.href='/portal?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
-            List Your Car ↗
+        {/* Proof block — sits directly above the CTA so trust lands before the ask */}
+        <div className="fade-up-4" style={{ marginBottom:"1.25rem", textAlign:"center" }}>
+          <div style={{ fontSize:"0.95rem", fontWeight:600, color:"var(--accent)", marginBottom:"0.6rem" }}>
+            Sellers get $2,400 more, on average, than Facebook Marketplace
+          </div>
+          <div style={{ display:"flex", gap:"1.5rem", flexWrap:"wrap", justifyContent:"center" }}>
+            {trustSignals.map(t => (
+              <div key={t} style={{ display:"flex", alignItems:"center", gap:"0.4rem", fontSize:"0.82rem", color:"rgba(26,24,20,0.78)" }}>
+                <span style={{ color:"var(--accent3)", fontSize:"0.85rem" }}>✓</span> {t}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="fade-up-4" style={{ display:"flex", gap:"0.75rem", flexWrap:"wrap", justifyContent:"center", marginBottom:"2.5rem" }}>
+          <button className="lg-strong" onClick={() => { trackEvent('hero_cta_clicked', { cta_type: 'seller' }); trackLead('seller_hero'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"flex", alignItems:"center", gap:"0.4rem" }}>
+            See What Dealers Will Pay ↗
           </button>
-          <button className="lg" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
+          <button className="lg" onClick={() => { trackEvent('hero_cta_clicked', { cta_type: 'dealer' }); trackLead('dealer_hero'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"1rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", background:"rgba(255,255,255,0.4)" }}>
             I'm a Dealer →
           </button>
         </div>
 
-        <div className="fade-up-4" style={{ display:"flex", gap:"clamp(2rem, 5vw, 5rem)", justifyContent:"center", flexWrap:"wrap", marginBottom:"3rem" }}>
-          {[["$2,400", "avg. more vs private sale"],["Open-ended","live auction — no time pressure"],["5 dealers","compete per listing"]].map(([v,l]) => (
-            <div key={v} style={{ display:"flex", flexDirection:"column", alignItems:"center" }}>
-              <span className="serif-italic" style={{ fontSize:"clamp(1.4rem, 2vw, 1.8rem)", color:"var(--accent)", lineHeight:1 }}>{v}</span>
-              <span style={{ fontSize:"0.82rem", fontWeight:400, color:"rgba(26,24,20,0.72)", marginTop:"0.35rem" }}>{l}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Hero car image strip */}
-        <div className="fade-up-4" style={{ display:"flex", gap:"1rem", marginBottom:"3rem", justifyContent:"center", width:"100%", maxWidth:"900px", height:140 }}>
-          {[
-            { url:"https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&q=80", flex:1.2 },
-            { url:"https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&q=80", flex:1 },
-            { url:"https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&q=80", flex:1.2 },
-          ].map((img, i) => (
-            <div key={i} className="car-img-card" style={{ flex:img.flex, height:"100%", minWidth:0 }}>
-              <img src={img.url} alt="vehicle" loading="lazy" />
-              <div style={{ position:"absolute", inset:0, background:"linear-gradient(to bottom, transparent 40%, rgba(26,24,20,0.3))" }} />
-            </div>
-          ))}
+        {/* Process visual — how it works, at a glance */}
+        <div className="fade-up-4 reveal" style={{ width:"100%", maxWidth:"760px", marginBottom:"2.5rem" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"0.5rem", flexWrap:"wrap" }}>
+            {processSteps.map((step, i, arr) => (
+              <div key={step.label} style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
+                <div style={{ display:"flex", flexDirection:"column", alignItems:"center", width:132 }}>
+                  <div style={{ width:44, height:44, borderRadius:"0.875rem", background:"rgba(255,255,255,0.7)", border:"1px solid rgba(26,24,20,0.10)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"0.5rem", boxShadow:"0 4px 14px rgba(26,24,20,0.08)" }}>
+                    <StepIcon name={step.icon} color={step.color} />
+                  </div>
+                  <div style={{ fontSize:"0.8rem", fontWeight:500, color:"#1a1814", lineHeight:1.3, textAlign:"center" }}>{step.label}</div>
+                  <div style={{ fontSize:"0.72rem", color:"rgba(26,24,20,0.62)", marginTop:"0.15rem" }}>{step.sub}</div>
+                </div>
+                {i < arr.length - 1 && (
+                  <span style={{ fontSize:"1.1rem", color:"rgba(26,24,20,0.28)", marginBottom:"1.6rem" }}>→</span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="fade-up-4" style={{ width:"100%", maxWidth:"680px" }}>
@@ -572,7 +671,7 @@ function HowItWorks() {
             List today.<br />Get paid today.
           </h2>
           <p style={{ color:"rgba(26,24,20,0.84)", fontSize:"1rem", maxWidth:480, margin:"0 auto" }}>
-            The whole process takes under an hour. Here's how we turn your used car into a competitive bidding war.
+            The whole process takes under an hour. Here's how we turn your unused car into a competitive bidding war.
           </p>
         </div>
 
@@ -585,7 +684,7 @@ function HowItWorks() {
                   <div style={{ width:42, height:42, borderRadius:"0.875rem", background:"linear-gradient(135deg, rgba(26,24,20,0.06), rgba(26,24,20,0.02))", border:"1px solid rgba(26,24,20,0.08)", display:"flex", alignItems:"center", justifyContent:"center" }}><StepIcon name={s.icon} color={s.color} /></div>
                   <span style={{ fontFamily:"Barlow", fontWeight:300, fontSize:"0.7rem", color:"rgba(26,24,20,0.86)", letterSpacing:"0.08em" }}>{s.n}</span>
                 </div>
-                <div style={{ fontSize:"0.95rem", fontWeight:500, marginBottom:"0.6rem", color:"#1a1814", letterSpacing:"-0.01em" }}>{s.title}</div>
+                <div style={{ fontSize:"1.15rem", fontWeight:500, marginBottom:"0.6rem", color:"#1a1814", letterSpacing:"-0.01em" }}>{s.title}</div>
                 <div style={{ fontSize:"0.85rem", color:"rgba(26,24,20,0.82)", lineHeight:1.65, fontWeight:300 }}>{s.body}</div>
                 <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"2px", background:`linear-gradient(to right, transparent, ${s.color}55, transparent)`, borderRadius:"0 0 1.5rem 1.5rem" }} />
               </div>
@@ -610,7 +709,7 @@ function ForSellers() {
     { value:"$2,400+", label:"avg. over private listing", color:"var(--accent)" },
     { value:"94%", label:"of listings receive 5 bids", color:"var(--accent2)" },
     { value:"< 1hr", label:"start to accepted offer", color:"var(--accent3)" },
-    { value:"Zero", label:"fees for sellers. Ever.", color:"var(--accent)" },
+    { value:"Minimal", label:"fees for sellers", color:"var(--accent)" },
   ];
   return (
     <section id="for-sellers" style={{ background:"#f5f3ef", padding:"7rem 1.5rem", overflow:"hidden" }}>
@@ -624,10 +723,10 @@ function ForSellers() {
               Stop leaving<br />money on<br />the table.
             </h2>
             <p style={{ color:"rgba(26,24,20,0.84)", fontSize:"1rem", lineHeight:1.65, maxWidth:420, marginBottom:"1.75rem" }}>
-              Facebook Marketplace and Craigslist mean one buyer, zero competition, and you absorbing all the lowball offers. PrivaBuy flips the dynamic — dealers fight for your car because they know these 6–8 year old vehicles carry serious profit margins.
+              Facebook Marketplace gives you one buyer and zero competition — PrivaBuy gives you five dealers fighting for your car.
             </p>
             <div style={{ display:"flex", flexDirection:"column", gap:"0.6rem" }}>
-              {["No fees, ever — dealers pay us","Instant VIN pull, no manual entry","Real offers from licensed dealers only","Pickup or drop-off arranged for you"].map(t => (
+              {["Minimal fees, dealers pay us","Instant VIN pull, no manual entry","Real offers from licensed dealers only","Pickup or drop-off arranged for you"].map(t => (
                 <div key={t} style={{ display:"flex", alignItems:"center", gap:"0.6rem", fontSize:"0.85rem", color:"rgba(26,24,20,0.88)" }}>
                   <span style={{ color:"var(--accent3)", fontSize:"0.75rem" }}>✦</span> {t}
                 </div>
@@ -653,10 +752,17 @@ function ForSellers() {
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(180px, 1fr))", gap:"1rem" }} className="reveal">
           {stats.map((s, i) => (
             <div key={s.label} className="lg stat-shimmer" style={{ borderRadius:"1.25rem", padding:"1.5rem", position:"relative", overflow:"hidden", border:"1px solid rgba(26,24,20,0.14)", transitionDelay:`${i*0.1}s` }}>
-              <div className="serif-italic" style={{ fontSize:"2rem", color:s.color, lineHeight:1, marginBottom:"0.4rem" }}>{s.value}</div>
+              <div style={{ fontFamily:"'Barlow', sans-serif", fontVariantNumeric:"tabular-nums", fontWeight:600, fontSize:"2rem", color:s.color, lineHeight:1, marginBottom:"0.4rem" }}>{s.value}</div>
               <div style={{ fontSize:"0.78rem", color:"rgba(26,24,20,0.88)", fontWeight:300, lineHeight:1.4 }}>{s.label}</div>
             </div>
           ))}
+        </div>
+
+        {/* CTA — keeps momentum going right where sellers tend to drop off */}
+        <div className="reveal" style={{ textAlign:"center", marginTop:"2.5rem" }}>
+          <button className="lg-strong" onClick={() => { trackEvent('seller_cta_clicked', { location: 'for_sellers' }); trackLead('seller_forsellers'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"1rem", fontWeight:500, color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", display:"inline-flex", alignItems:"center", gap:"0.4rem" }}>
+            See Dealer Offers ↗
+          </button>
         </div>
       </div>
     </section>
@@ -707,7 +813,7 @@ function ForDealers() {
         </div>
 
         <div className="reveal" style={{ textAlign:"center", marginTop:"2.5rem" }}>
-          <button className="lg-strong" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.85rem 2rem", fontSize:"0.9rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500 }}>
+          <button className="lg-strong" onClick={() => { trackLead('dealer_apply'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.85rem 2rem", fontSize:"0.9rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500 }}>
             Apply for Dealer Access ↗
           </button>
         </div>
@@ -772,7 +878,7 @@ function About() {
 /* ─── FAQ ───────────────────────────────────────────────────────────────── */
 const faqs = [
   { q:"What vehicles qualify?", a:"We focus on vehicles that are 6–8 years old with 70,000–130,000 miles. These are the highest-demand units for franchised dealers because they carry strong gross profit margins on pre-owned lots." },
-  { q:"Is there a fee for sellers?", a:"Zero. PrivaBuy is completely free for sellers. Dealers pay a transaction fee when they win an auction, so our incentives are aligned: we only make money when you get a great offer." },
+  { q:"Is there a fee for sellers?", a:"Just a small percentage of your sale price—typically less than 1% after you close a deal. It's minimal compared to traditional dealer markups, and dealers pay a fee too, so we're all invested in getting you top dollar." },
   { q:"What if no one bids on my car?", a:"It's rare — over 94% of listings receive the full 5 bids. If an auction closes without meeting your reserve, you keep the car with no obligation whatsoever." },
   { q:"How do dealers know my vehicle's condition?", a:"Before the auction opens, we surface your full VIN history report, any self-reported condition notes, and photos. Dealers can bid confidently; surprises at handoff are a policy violation." },
   { q:"Why only 5 dealers per auction?", a:"More isn't always better. Five geo-scoped dealers create competitive urgency without the chaotic noise of an open marketplace. Each dealer knows they're in a tight race — that's what pushes bids up." },
@@ -829,10 +935,10 @@ function CTA() {
             List in 3 minutes. Watch dealers compete. Walk away with more than you expected.
           </p>
           <div style={{ display:"flex", gap:"0.75rem", justifyContent:"center", flexWrap:"wrap" }}>
-            <button className="lg-strong" onClick={() => window.location.href='/portal?role=seller'} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"0.95rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500, display:"flex", alignItems:"center", gap:"0.4rem" }}>
+            <button className="lg-strong" onClick={() => { trackLead('seller_cta'); window.location.href='/portal?role=seller'; }} style={{ borderRadius:"9999px", padding:"0.9rem 2rem", fontSize:"0.95rem", color:"#f5f3ef", border:"none", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:500, display:"flex", alignItems:"center", gap:"0.4rem" }}>
               List My Car Free ↗
             </button>
-            <button className="lg" onClick={() => window.location.href='/dealer-signup'} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"0.95rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:300, background:"rgba(255,255,255,0.4)" }}>
+            <button className="lg" onClick={() => { trackLead('dealer_cta'); window.location.href='/dealer-signup'; }} style={{ borderRadius:"9999px", padding:"0.9rem 1.75rem", fontSize:"0.95rem", color:"rgba(26,24,20,0.88)", border:"1px solid rgba(26,24,20,0.12)", cursor:"pointer", fontFamily:"Barlow, sans-serif", fontWeight:300, background:"rgba(255,255,255,0.4)" }}>
               Dealer Access →
             </button>
           </div>
@@ -855,11 +961,12 @@ function Footer() {
                 Priva<span style={{ color:"var(--accent)" }}>Buy</span>
               </span>
             </a>
-            <div style={{ fontSize:"0.72rem", color:"rgba(26,24,20,0.88)", marginTop:"0.3rem" }}>© 2026 PrivaBuy. All rights reserved.</div>
+            <div style={{ fontSize:"0.72rem", color:"rgba(26,24,20,0.88)", marginTop:"0.3rem" }}>© 2026 PrivaBuy LLC. All rights reserved.</div>
+            <div style={{ fontSize:"0.68rem", color:"rgba(26,24,20,0.56)", marginTop:"0.2rem" }}>navin@privabuy.com &nbsp;·&nbsp; Fort Wayne, IN</div>
             <div style={{ fontSize:"0.68rem", color:"rgba(26,24,20,0.48)", marginTop:"0.2rem" }}>Founded by automotive and tech entrepreneurs.</div>
           </div>
           <div style={{ display:"flex", gap:"1.5rem" }}>
-            {[["Privacy","#"],["Terms","#"],["About","#about"],["For Dealers","#for-dealers"],["Contact","mailto:support@privabuy.com"]].map(([l,h]) => (
+            {[["Privacy","https://app.termly.io/policy-viewer/policy.html?policyUUID=6abbb706-fc72-4523-8ce5-653bf08b505e"],["Terms","https://app.termly.io/policy-viewer/policy.html?policyUUID=0f5c651f-5bb7-493b-9c66-8bf612ba7eae"],["About","#about"],["For Dealers","#for-dealers"],["Contact","mailto:navin@privabuy.com"]].map(([l,h]) => (
               <a key={l} href={h} style={{ fontSize:"0.75rem", color:"rgba(26,24,20,0.56)", textDecoration:"none", transition:"color 0.2s" }}
                 onMouseEnter={e=>e.target.style.color="rgba(26,24,20,0.80)"} onMouseLeave={e=>e.target.style.color="rgba(26,24,20,0.56)"}>
                 {l}
@@ -875,9 +982,11 @@ function Footer() {
 /* ─── APP ───────────────────────────────────────────────────────────────── */
 export default function App() {
   useReveal();
+  useScrollDepthTracking();
   return (
     <>
       <FontLink />
+      <TrackingPixels />
       <div className="grain" />
       <Navbar />
       <Hero />
