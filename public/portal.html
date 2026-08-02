@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PrivaBuy Platform v2.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://js.stripe.com/v3/"></script>
+
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -2029,8 +2029,7 @@ const API = window.location.hostname.includes('privabuy-git-staging-navinbhavani
   ? 'https://privabuy-staging-staging.up.railway.app'
   : 'https://privabuy-backend-production.up.railway.app';
   
-const STRIPE_PK = 'pk_live_51TNGzOPooe955nktS3X9HMO4xUU0gceM0XajI0KUEuYamGs6MY2QWLn0eiPb2HzOJO9OKdAUmIMcnN1UNuQPFqgb00fyoZL3LC';
-const stripeClient = Stripe(STRIPE_PK);
+
 const S = {
   role:'seller', auctionActive:false, auctionData:null,
   timerInterval:null, bidInterval:null, timeLeft:900,
@@ -5199,17 +5198,13 @@ async function dealFlowSendInvoice(txnId, winPrice) {
   if (btn) { btn.textContent = 'Sending invoice...'; btn.disabled = true; }
 
     try {
-    const res = await fetch(`${API}/transactions/${txnId}/send-dealer-invoice`, {
+    const res = await fetch(`${API}/payments/bill/create-dealer-invoice`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        dealer_id:  S.dealer_id,
-        dealer_fee: DEALER_FEE,
-        win_price:  winPrice
-      })
+      body: JSON.stringify({ transaction_id: txnId, dealer_id: S.dealer_id, amount: DEALER_FEE })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Failed to send invoice');
+    // data now returns: { invoice_number, pay_url, bill_invoice_id }    if (!res.ok) throw new Error(data.detail || 'Failed to send invoice');
 
      // ── ADD THIS: advance the transaction to the next step ──
     await fetch(`${API}/transactions/${txnId}/dealer-paid`, {method:'POST'});
@@ -5231,28 +5226,11 @@ async function dealFlowSendInvoice(txnId, winPrice) {
       const ack = dealFlowAckSection({transaction_id: txnId, amount: winPrice}, 'dealer');
       actionDiv.innerHTML = ack + `
         <div style="background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.22);border-radius:var(--r-lg);padding:24px;text-align:center;">
-          <div style="font-size:32px;margin-bottom:12px;">📄</div>
-          <div style="font-size:16px;font-weight:700;color:var(--accent3);margin-bottom:6px;">Invoice Sent to ${dealerEmail}</div>
-          <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Invoice <strong style="color:#1a1814;">${invoiceNum}</strong> has been sent to your dealership email.</div>
-          <div style="background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:var(--r);padding:16px;margin-bottom:16px;text-align:left;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <span style="font-size:12px;color:var(--g5);">Invoice number</span>
-              <span style="font-size:13px;font-weight:600;color:#1a1814;font-family:monospace;">${invoiceNum}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <span style="font-size:12px;color:var(--g5);">Amount due</span>
-              <span style="font-size:18px;font-weight:700;color:var(--accent);">$${DEALER_FEE}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:12px;color:var(--g5);">Pay by</span>
-              <span style="font-size:13px;color:#1a1814;">Check payable to <strong>PrivaBuy LLC</strong></span>
-            </div>
-          </div>
-          <div style="font-size:12px;color:var(--g5);line-height:1.6;">
-            Write a check for <strong style="color:#1a1814;">$${DEALER_FEE}</strong> payable to <strong style="color:#1a1814;">PrivaBuy LLC</strong> and mail to:<br>
-            <strong style="color:#1a1814;">PrivaBuy LLC<br>51 Front Street, Building A<br>Cumberland, RI 02864</strong><br><br>
-            Please mail within 3 business days of your win. Questions? <span style="color:var(--accent);">support@privabuy.com</span>
-          </div>
+          <div style="font-size:32px;margin-bottom:12px;">🏦</div>
+          <div style="font-size:16px;font-weight:700;color:var(--accent3);margin-bottom:6px;">Pay $${DEALER_FEE} via Bank Transfer</div>
+          <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Invoice <strong style="color:#1a1814;">${data.invoice_number}</strong> is ready. Pay directly from your bank account — no card fees, funds post automatically.</div>
+          <a href="${data.pay_url}" target="_blank" class="btn btn-primary btn-full" style="text-decoration:none;">Pay Now via Bank Account →</a>
+          <div style="font-size:11px;color:var(--g5);margin-top:12px;">We'll confirm receipt automatically once your bank payment clears (1–3 business days).</div>
         </div>`;
     }
  
