@@ -1,5 +1,5 @@
 {
-  "buildCommand": "vite build && node -e \"const fs=require('fs');['app','portal','dealer-signup','reset-password'].forEach(f=>{try{fs.copyFileSync('public/'+f+'.html','dist/'+f+'.html')}catch(e){}});fs.readdirSync('public').filter(f=>f.startsWith('sell-my-')&&f.endsWith('.html')).forEach(f=>fs.copyFileSync('public/'+f,'dist/'+f))\"",
+  "buildCommand": "vite build && node scripts/copy-static-pages.mjs",
   "outputDirectory": "dist",
   "headers": [
     { "source": "/app.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
