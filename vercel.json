@@ -1,17 +1,19 @@
 {
-  "buildCommand": "vite build && node -e \"const fs=require('fs');['app','portal','dealer-signup','reset-password'].forEach(f=>{try{fs.copyFileSync('public/'+f+'.html','dist/'+f+'.html')}catch(e){}})\"",
+  "buildCommand": "vite build && node -e \"const fs=require('fs');['app','portal','dealer-signup','reset-password'].forEach(f=>{try{fs.copyFileSync('public/'+f+'.html','dist/'+f+'.html')}catch(e){}});fs.readdirSync('public').filter(f=>f.startsWith('sell-my-')&&f.endsWith('.html')).forEach(f=>fs.copyFileSync('public/'+f,'dist/'+f))\"",
   "outputDirectory": "dist",
   "headers": [
     { "source": "/app.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
     { "source": "/portal.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
     { "source": "/dealer-signup.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
-    { "source": "/reset-password.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] }
+    { "source": "/reset-password.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] },
+    { "source": "/sell-my-:model.html", "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }] }
   ],
   "rewrites": [
     { "source": "/app", "destination": "/app.html" },
     { "source": "/portal", "destination": "/portal.html" },
     { "source": "/dealer-signup", "destination": "/dealer-signup.html" },
     { "source": "/reset-password", "destination": "/reset-password.html" },
-    { "source": "/((?!app|portal|dealer-signup|reset-password).*)", "destination": "/index.html" }
+    { "source": "/sell-my-:model", "destination": "/sell-my-:model.html" },
+    { "source": "/((?!app|portal|dealer-signup|reset-password|sell-my-).*)", "destination": "/index.html" }
   ]
 }
