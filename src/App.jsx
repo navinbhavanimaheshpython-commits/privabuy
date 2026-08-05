@@ -764,6 +764,37 @@ function ForSellers() {
   );
 }
 
+const POPULAR_MODELS = [
+  { slug: "sell-my-toyota-camry", label: "Toyota Camry" },
+  { slug: "sell-my-honda-accord", label: "Honda Accord" },
+  { slug: "sell-my-honda-civic", label: "Honda Civic" },
+  { slug: "sell-my-toyota-corolla", label: "Toyota Corolla" },
+  { slug: "sell-my-nissan-altima", label: "Nissan Altima" },
+];
+
+function PopularModels() {
+  return (
+    <section style={{ background:"#edeae4", padding:"4rem 1.5rem" }}>
+      <div style={{ maxWidth:"64rem", margin:"0 auto", textAlign:"center" }}>
+        <span className="section-badge">Popular Searches</span>
+        <h2 className="serif-italic reveal" style={{ fontSize:"clamp(1.6rem,3vw,2.2rem)", letterSpacing:"-0.03em", margin:"0.5rem 0 1.5rem", fontWeight:400, color:"#1a1814" }}>
+          Selling one of these?
+        </h2>
+        <div style={{ display:"flex", flexWrap:"wrap", gap:"0.75rem", justifyContent:"center" }} className="reveal">
+          {POPULAR_MODELS.map(m => (
+            <a key={m.slug} href={`/${m.slug}`}
+              style={{ display:"inline-block", padding:"0.7rem 1.3rem", borderRadius:"9999px", border:"1px solid rgba(26,24,20,0.16)", background:"#fff", color:"#1a1814", textDecoration:"none", fontSize:"0.9rem", transition:"border-color 0.2s" }}
+              onMouseEnter={e=>e.target.style.borderColor="rgba(124,92,191,0.5)"}
+              onMouseLeave={e=>e.target.style.borderColor="rgba(26,24,20,0.16)"}>
+              Sell My {m.label} →
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── FOR DEALERS ───────────────────────────────────────────────────────── */
 function ForDealers() {
   const perks = [
@@ -988,6 +1019,7 @@ export default function App() {
       <CarMarquee />
       <HowItWorks />
       <ForSellers />
+      <PopularModels />
       <ForDealers />
       <About />
       <FAQ />

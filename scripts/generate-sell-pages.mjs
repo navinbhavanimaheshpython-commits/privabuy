@@ -137,7 +137,7 @@ function pageHtml(page, allPages) {
     <h2>Selling something else?</h2>
     <ul>
             ${siblingLinks}
-      <li><a href="/sell-my-car">See all models we buy →</a></li>
+      <li><a href="/#for-sellers">See how PrivaBuy works →</a></li>
     </ul>
   </div>
 </main>
