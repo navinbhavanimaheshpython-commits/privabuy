@@ -2160,6 +2160,7 @@ async function login() {
         showToast('✓','Account Created', 'Welcome to PrivaBuy!');
         if(typeof gtag !== 'undefined') gtag('event', 'account_created');
         if(typeof fbq !== 'undefined') fbq('trackCustom', 'account_created');
+        if(typeof gtag !== 'undefined') gtag('event', 'conversion', {'send_to': 'AW-18160958792/0jZjCNK_s94cEMj66NND'});
         if(gsSessionId) {
           fetch(`${API}/cars/draft-guest/mark-converted`, {
             method: 'POST',
@@ -3102,6 +3103,7 @@ function guestQuickStartSubmit() {
   if(typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout');
   if(typeof gtag !== 'undefined') gtag('event', 'guest_start_complete');
   if(typeof fbq !== 'undefined') fbq('trackCustom', 'guest_start_complete');
+  if(typeof gtag !== 'undefined') gtag('event', 'conversion', {'send_to': 'AW-18160958792/hWtCCIz0st4cEMj66NND'});
 
 showScreen('screen-login');
   selectRole('seller', document.querySelector('.role-btn[data-role="seller"]'));
@@ -3123,6 +3125,7 @@ function quickStartSubmit() {
   document.getElementById('f-model').value = model;
   if(typeof gtag !== 'undefined') gtag('event', 'quick_start_submitted');
   if(typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout');
+  if(typeof gtag !== 'undefined') gtag('event', 'conversion', {'send_to': 'AW-18160958792/hWtCCIz0st4cEMj66NND'});
 
   const confirmBox = document.getElementById('quick-start-confirm');
   document.getElementById('quick-start-confirm-title').textContent = `${year} ${make} ${model} — got it!`;
@@ -3650,6 +3653,7 @@ async function startAuction() {
     if(typeof fbq !== 'undefined') fbq('trackCustom', 'listing_submitted');
     if(typeof gtag !== 'undefined') gtag('event', 'auction_live');
     if(typeof fbq !== 'undefined') fbq('trackCustom', 'auction_live');
+    if(typeof gtag !== 'undefined') gtag('event', 'conversion', {'send_to': 'AW-18160958792/hje7CM-_s94cEMj66NND'});
     S.car_id = data.car_id;
     S.auctionActive = true; S.bids = []; S.elapsedSeconds = 0;
     S.auctionStartTime = Date.now();
@@ -4403,6 +4407,7 @@ if(floorPrice > 0 && amount < floorPrice) {
     if(!res.ok) throw new Error(data.detail || 'Bid failed');
     showToast('✓','Bid Placed!', `$${amount.toLocaleString()} submitted`);
     await refreshRealAuctionBids(currentRealAuctionId);
+    if(typeof gtag !== 'undefined') gtag('event', 'conversion', {'send_to': 'AW-18160958792/AbcTCJ32st4cEMj66NND'});
   } catch(err) {
     showToast('❌','Bid Failed', err.message);
   }
