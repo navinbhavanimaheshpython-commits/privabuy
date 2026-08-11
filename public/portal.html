@@ -4963,6 +4963,158 @@ function signDealFlowSellerAck(txnId, bidAmount) {
   loadDealFlow('seller');
 }
 
+// ═══════════════════════════════════════════════════════
+//  PAPERWORK CHECKLIST + ODOMETER DISCLOSURE GENERATOR
+// ═══════════════════════════════════════════════════════
+
+function buildPaperworkChecklist(txn, role) {
+  const txnId = txn.transaction_id;
+  const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
+  const bothBosSigned = txn.bill_of_sale_dealer_acked && txn.bill_of_sale_seller_acked;
+  const odoKey = 'pb_odometer_' + txnId;
+  const odoDone = !!localStorage.getItem(odoKey);
+  const lienReqKey = 'pb_lien_release_requested_' + txnId;
+  const lienReqDone = !!localStorage.getItem(lienReqKey);
+
+  const items = [];
+
+  items.push({
+    done: bothBosSigned,
+    label: 'Bill of Sale',
+    sub: bothBosSigned ? 'Signed by both parties.' : 'Both parties must sign — handled earlier in Deal Flow.',
+    action: null
+  });
+
+  items.push({
+    done: odoDone,
+    label: 'Odometer Disclosure Statement',
+    sub: 'Federally required on the sale of most vehicles under 20 years old. Needs both signatures.',
+    action: `<button class="btn btn-primary btn-sm" onclick="openOdometerModal('${txnId}')">${odoDone ? 'View / Re-print' : 'Fill Out & Print'} →</button>`
+  });
+
+  items.push({
+    done: false,
+    label: 'Title — signed over to buyer',
+    sub: hasLien
+      ? 'Once the lienholder is paid, they release the title. Seller signs it over to the dealer at pickup.'
+      : 'Seller signs the back of the title over to the dealer at pickup.',
+    action: null
+  });
+
+  if (hasLien) {
+    items.push({
+      done: lienReqDone,
+      label: 'Lien Release Letter',
+      sub: `Request this from ${txn.lien_holder || 'the lienholder'} once the payoff is paid — it proves the loan is satisfied and the title is free to transfer.`,
+      action: `<button class="btn btn-secondary btn-sm" onclick="markLienReleaseRequested('${txnId}')">${lienReqDone ? '✓ Marked as Requested' : 'Mark as Requested'}</button>`
+    });
+  }
+
+  return `
+    <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.16);border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--g5);margin-bottom:14px;">📋 Paperwork Checklist</div>
+      ${items.map(it => `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+          <div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-width:0;">
+            <span style="font-size:16px;flex-shrink:0;margin-top:1px;">${it.done ? '✅' : '⬜'}</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#1a1814;">${it.label}</div>
+              <div style="font-size:12px;color:var(--g5);margin-top:2px;line-height:1.5;">${it.sub}</div>
+            </div>
+          </div>
+          ${it.action ? `<div style="flex-shrink:0;">${it.action}</div>` : ''}
+        </div>`).join('')}
+      <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:12px;line-height:1.5;">This checklist is a guide, not legal advice — requirements vary by state. Check your state DMV for exact title-transfer paperwork.</div>
+    </div>`;
+}
+
+function markLienReleaseRequested(txnId) {
+  localStorage.setItem('pb_lien_release_requested_' + txnId, '1');
+  showToast('✓','Marked','Noted — follow up with the lienholder for the release letter.');
+  loadDealFlow(S.dealer_id ? 'dealer' : 'seller');
+}
+
+function openOdometerModal(txnId) {
+  const txn = (S.allTxns && S.allTxns.find(t => t.transaction_id === txnId)) || S.currentTxn || {};
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.id = 'odometer-modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-header">
+        <div class="modal-title">Odometer Disclosure</div>
+        <button class="modal-close" onclick="document.getElementById('odometer-modal-overlay').remove()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">Federal law requires this on the sale of most vehicles under 20 years old. Fill it out together at pickup.</div>
+        <div class="form-group"><label class="form-label">Seller Legal Name</label><input class="form-input" id="odo-seller-name" placeholder="Full legal name"></div>
+        <div class="form-group"><label class="form-label">Buyer (Dealer) Legal Name</label><input class="form-input" id="odo-buyer-name" placeholder="Full legal name"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Odometer Reading (miles)</label><input class="form-input" id="odo-reading" type="number" placeholder="${txn.mileage || ''}"></div>
+          <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="odo-date" type="date"></div>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:12px;margin-top:8px;">
+          <input type="checkbox" id="odo-accurate-cb" style="width:16px;height:16px;margin-top:2px;">
+          <span style="font-size:12px;color:#1a1814;line-height:1.5;">Seller certifies to the best of their knowledge that the odometer reading reflects the actual mileage, unless a federal exception applies (odometer replaced, reading exceeds mechanical limits, etc.).</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="document.getElementById('odometer-modal-overlay').remove()">Cancel</button>
+        <button class="btn btn-primary" onclick="generateOdometerDoc('${txnId}')">Generate & Print →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function generateOdometerDoc(txnId) {
+  const sellerName = document.getElementById('odo-seller-name').value.trim();
+  const buyerName = document.getElementById('odo-buyer-name').value.trim();
+  const reading = document.getElementById('odo-reading').value.trim();
+  const date = document.getElementById('odo-date').value;
+  const accurate = document.getElementById('odo-accurate-cb').checked;
+  if (!sellerName || !buyerName || !reading || !date) { showToast('⚠️','Missing Info','Fill out all fields.'); return; }
+  if (!accurate) { showToast('⚠️','Required','Check the certification box.'); return; }
+
+  const txn = (S.allTxns && S.allTxns.find(t => t.transaction_id === txnId)) || S.currentTxn || {};
+  const vehicle = `${txn.year||''} ${txn.make||''} ${txn.model||''}`.trim();
+  const vin = txn.vin || '';
+
+  const docHtml = `
+    <html><head><title>Odometer Disclosure Statement</title>
+    <style>body{font-family:Georgia,serif;max-width:640px;margin:40px auto;color:#111;line-height:1.7;}
+    h1{font-size:20px;border-bottom:2px solid #111;padding-bottom:8px;}
+    table{width:100%;border-collapse:collapse;margin:16px 0;}
+    td{padding:6px 0;border-bottom:1px solid #ccc;}
+    .sig{margin-top:40px;display:flex;justify-content:space-between;}
+    .line{border-top:1px solid #111;width:220px;text-align:center;padding-top:4px;font-size:12px;}</style>
+    </head><body>
+    <h1>Federal Odometer Disclosure Statement</h1>
+    <table>
+      <tr><td><strong>Vehicle:</strong></td><td>${vehicle}</td></tr>
+      <tr><td><strong>VIN:</strong></td><td>${vin}</td></tr>
+      <tr><td><strong>Odometer Reading:</strong></td><td>${reading} miles</td></tr>
+      <tr><td><strong>Date:</strong></td><td>${date}</td></tr>
+      <tr><td><strong>Seller:</strong></td><td>${sellerName}</td></tr>
+      <tr><td><strong>Buyer:</strong></td><td>${buyerName}</td></tr>
+    </table>
+    <p>I, the seller named above, certify that the odometer reading above reflects the actual mileage of the vehicle described, unless one of the following applies: the odometer reading is in excess of its mechanical limits, or the odometer reading is NOT the actual mileage — WARNING: ODOMETER DISCREPANCY.</p>
+    <div class="sig">
+      <div class="line">${sellerName}<br>Seller Signature</div>
+      <div class="line">${buyerName}<br>Buyer Signature</div>
+    </div>
+    </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(docHtml);
+  w.document.close();
+  w.print();
+
+  localStorage.setItem('pb_odometer_' + txnId, JSON.stringify({sellerName, buyerName, reading, date, signedAt: Date.now()}));
+  document.getElementById('odometer-modal-overlay')?.remove();
+  showToast('✓','Generated','Odometer disclosure ready to print/sign.');
+  loadDealFlow(S.dealer_id ? 'dealer' : 'seller');
+}
+
 const DEAL_STEPS = [
   { key: 'awaiting_dealer_payment',    label: 'Confirm Win',      icon: '💳' },
   { key: 'awaiting_bill_of_sale',      label: 'Bill of Sale',          icon: '📄' },
@@ -5066,7 +5218,7 @@ function dealFlowActionHTML(txn, role) {
     if (status === 'awaiting_title_confirmation') {
       const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
       const titleConfirmed = S.titleConfirmed && S.titleConfirmed[txnId];
-      return ack + `
+      return ack + buildPaperworkChecklist(txn, 'dealer') + `
   <div style="background:rgba(217,48,37,0.05);border:2px solid rgba(217,48,37,0.30);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
     <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;">
       <span style="font-size:22px;flex-shrink:0;">🔒</span>
@@ -5227,6 +5379,18 @@ function dealFlowActionHTML(txn, role) {
       </div>`;
  
     if (status === 'pickup_scheduled') return ack + `<div class="alert alert-success">✅ Pickup confirmed for <strong>${txn.confirmed_pickup_slot ? new Date(txn.confirmed_pickup_slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'TBD'}</strong>. Have the title ready.</div>`;
+
+    if (status === 'awaiting_title_confirmation') {
+      const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
+      return ack + buildPaperworkChecklist(txn, 'seller') + `
+  <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
+    <div style="font-size:15px;font-weight:600;margin-bottom:8px;color:#1a1814;">Hand Over the Title</div>
+    <div style="font-size:13px;color:var(--g5);line-height:1.7;">
+      The dealer is confirming they have your signed title${hasLien ? ` and has paid ${txn.lien_holder || 'your lienholder'} the payoff` : ''} in hand right now.
+      ${hasLien ? `Don't hand over the title until you can confirm the payoff check has cleared or the lienholder has acknowledged receipt — ask the dealer for proof of payment before signing over the title.` : `Once you sign the title over, the dealer will move to paying you.`}
+    </div>
+  </div>`;
+    }
  
     if (status === 'awaiting_seller_payment_confirm') return ack + `
       <div style="background:rgba(194,124,42,0.06);border:1px solid rgba(194,124,42,0.18);border-radius:var(--r-lg);padding:20px;">
