@@ -4963,6 +4963,40 @@ function signDealFlowSellerAck(txnId, bidAmount) {
   loadDealFlow('seller');
 }
 
+
+
+
+// ═══════════════════════════════════════════════════════
+//  PRE-PICKUP READINESS CHECKLIST
+// ═══════════════════════════════════════════════════════
+
+function buildPrePickupReadiness(txn, role) {
+  const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
+  const items = role === 'seller'
+    ? [
+        'Signed title — sign the back over to the buyer (do this in front of the dealer, not before)',
+        'Valid photo ID matching the name on the title',
+        hasLien ? `Your 10-day payoff letter from ${txn.lien_holder || 'your lender'} — bring a copy` : null,
+        'All keys and key fobs',
+        hasLien ? 'Know your lienholder\'s payment instructions (mailing address or wire info) in case the dealer needs it' : null,
+      ].filter(Boolean)
+    : [
+        'Payment method ready for the seller (check or wire)',
+        hasLien ? `Separate payment method ready for ${txn.lien_holder || 'the lienholder'} — do not combine into one check` : null,
+        hasLien ? `Confirmed the payoff amount ($${(txn.lien_payoff_amount||0).toLocaleString()}) is still accurate — payoff letters expire after 10 days` : null,
+        'Camera/phone ready to photograph the signed title and odometer',
+        'A pen — for the Bill of Sale and Odometer Disclosure if not already signed',
+      ].filter(Boolean);
+
+  return `
+    <div style="background:rgba(124,92,191,0.05);border:1px solid rgba(124,92,191,0.20);border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:12px;">🧾 Have This Ready Before Pickup</div>
+      <ul style="margin:0;padding-left:18px;font-size:13px;color:#1a1814;line-height:2;">
+        ${items.map(i => `<li>${i}</li>`).join('')}
+      </ul>
+    </div>`;
+}
+
 // ═══════════════════════════════════════════════════════
 //  PAPERWORK CHECKLIST + ODOMETER DISCLOSURE GENERATOR
 // ═══════════════════════════════════════════════════════
@@ -5377,7 +5411,7 @@ function dealFlowActionHTML(txn, role) {
             <button class="btn btn-primary btn-sm" onclick="confirmSlot('${slot}','${txnId}')">Choose This →</button>
           </div>`).join('')}
       </div>` + buildPrePickupReadiness(txn, 'seller');
-      
+
     if (status === 'pickup_scheduled') return ack + `<div class="alert alert-success">✅ Pickup confirmed for <strong>${txn.confirmed_pickup_slot ? new Date(txn.confirmed_pickup_slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'TBD'}</strong>. Have the title ready.</div>`;
     
     if (status === 'awaiting_title_confirmation') {
