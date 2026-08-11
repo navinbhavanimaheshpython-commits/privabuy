@@ -4777,7 +4777,8 @@ let _dealerWinsRemaining = DEALER_FREE_WIN_THRESHOLD;
 function dealFlowAckSection(txn, role) {
   const bid   = parseFloat(txn.amount);
   const txnId = txn.transaction_id;
-  const net   = bid - SELLER_FEE;
+  const settlement = computeSettlement(txn);
+  const net   = settlement.net;
  
   if (role === 'dealer') {
     const acked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
@@ -4820,9 +4821,9 @@ function dealFlowAckSection(txn, role) {
               <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">PB Seller Fee</div>
               <div style="font-size:18px;font-weight:700;color:var(--red);">−$${SELLER_FEE}</div>
             </div>
-            <div style="padding:12px 14px;background:rgba(42,158,124,0.04);">
-              <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Seller Receives</div>
-              <div style="font-size:18px;font-weight:700;color:var(--accent3);">$${net.toLocaleString()}</div>
+            <div style="padding:12px 14px;background:${settlement.sellerOwes>0?'rgba(217,48,37,0.04)':'rgba(42,158,124,0.04)'};">
+              <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">${settlement.sellerOwes>0?'Seller Owes':'Seller Receives'}</div>
+              <div style="font-size:18px;font-weight:700;color:${settlement.sellerOwes>0?'var(--red)':'var(--accent3)'};">$${(settlement.sellerOwes>0?settlement.sellerOwes:net).toLocaleString()}</div>
             </div>
           </div>
           <div style="padding:10px 14px;border-top:1px solid rgba(0,0,0,0.08);background:#f8f8f8;">
@@ -4902,9 +4903,9 @@ function dealFlowAckSection(txn, role) {
               <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">PB Fee</div>
               <div style="font-size:18px;font-weight:700;color:var(--red);">−$${SELLER_FEE}</div>
             </div>
-            <div style="padding:12px 14px;background:rgba(42,158,124,0.04);">
-              <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">You Receive</div>
-              <div style="font-size:18px;font-weight:700;color:var(--accent3);">$${net.toLocaleString()}</div>
+            <div style="padding:12px 14px;background:${settlement.sellerOwes>0?'rgba(217,48,37,0.04)':'rgba(42,158,124,0.04)'};">
+              <div style="font-size:10px;color:var(--g5);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">${settlement.sellerOwes>0?'You Owe':'You Receive'}</div>
+              <div style="font-size:18px;font-weight:700;color:${settlement.sellerOwes>0?'var(--red)':'var(--accent3)'};">$${(settlement.sellerOwes>0?settlement.sellerOwes:net).toLocaleString()}</div>
             </div>
           </div>
         </div>
@@ -5188,6 +5189,7 @@ function dealFlowActionHTML(txn, role) {
  
   const ack = dealFlowAckSection(txn, role);
   const dealerAcked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
+  const settlement = computeSettlement(txn);
  
   if (role === 'dealer') {
  
@@ -5206,11 +5208,13 @@ function dealFlowActionHTML(txn, role) {
       <div style="font-size:13px;color:#1a1814;line-height:1.6;">Inspect the vehicle at pickup. If everything matches the listing, pay the seller on the spot. If you need a more thorough inspection, you may take it to a shop — <strong>must return and pay seller same day</strong>. If anything was misrepresented, void the sale and return the car for a full $450 refund.</div>
     </div>`}
     <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
-      <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">Seller nets from this sale</div>
-      <div style="font-size:22px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
-      <div style="font-size:11px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
+      <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">${settlement.sellerOwes > 0 ? 'Seller Owes (Negative Equity)' : 'Seller nets from this sale'}</div>
+      <div style="font-size:22px;font-weight:700;color:${settlement.sellerOwes > 0 ? 'var(--red)' : 'var(--accent3)'};">$${(settlement.sellerOwes > 0 ? settlement.sellerOwes : settlement.sellerReceives).toLocaleString()}</div>
+      <div style="font-size:11px;color:var(--g5);margin-top:2px;">${settlement.hasLien ? `$${settlement.bid.toLocaleString()} bid − $${settlement.payoff.toLocaleString()} payoff − $${settlement.sellerFee} PrivaBuy fee` : `$${settlement.bid.toLocaleString()} bid − $${settlement.sellerFee} PrivaBuy fee`}</div>
     </div>
-    <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;"><strong style="color:#1a1814;">Important:</strong> You'll confirm the title in hand at the next step before paying. Pay the seller the full bid amount of <strong style="color:#1a1814;">$${rawAmt.toLocaleString()}</strong> — PrivaBuy deducts our $${SELLER_FEE} fee from that automatically.</div>
+    <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;"><strong style="color:#1a1814;">Important:</strong> ${settlement.sellerOwes > 0
+      ? `This vehicle has negative equity — the seller owes <strong style="color:var(--red);">$${settlement.sellerOwes.toLocaleString()}</strong> to cover the gap between the payoff and the bid. Collect this from the seller before or at pickup — do not pay it out of pocket.`
+      : `You'll confirm the title in hand at the next step before paying. Pay the seller <strong style="color:#1a1814;">$${settlement.sellerReceives.toLocaleString()}</strong>${settlement.hasLien ? ' after paying the lienholder directly' : ''}.`}</div>
     <button class="btn btn-success btn-full mb-16" onclick="inspectionAccept('${txnId}')">✓ Vehicle Matches Listing — Continue</button>
   </div>`;
     }
@@ -5242,9 +5246,10 @@ function dealFlowActionHTML(txn, role) {
       <label class="form-label">Payoff Amount You Actually Paid</label>
       <div style="position:relative;">
         <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--g5);">$</span>
-        <input class="form-input" id="payoff-paid-${txnId}" type="number" placeholder="${txn.lien_payoff_amount||0}" style="padding-left:28px;">
+        <input class="form-input" id="payoff-paid-${txnId}" type="number" placeholder="${txn.lien_payoff_amount||0}" style="padding-left:28px;" oninput="updateSellerPayoutDisplay('${txnId}', ${rawAmt})">
       </div>
     </div>
+    <div id="seller-payout-display-${txnId}" style="background:#fff;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">${renderSellerPayoutHTML(settlement)}</div>
     <div class="form-group">
       <label class="form-label">Upload Proof of Payoff Payment</label>
       <div id="payoff-proof-slot-${txnId}" onclick="uploadPayoffProof('${txnId}')" style="background:#ffffff;border:1.5px dashed rgba(0,0,0,0.25);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;">
@@ -5308,7 +5313,7 @@ function dealFlowActionHTML(txn, role) {
         <button class="btn btn-primary btn-full" onclick="proposeSlots('${txnId}')">Send Pickup Options →</button>
       </div>`;
  
-    if (status === 'awaiting_slot_confirmation') return ack + `<div class="alert alert-info">📅 Pickup options sent. Waiting for seller to confirm a time.</div>`;
+    if (status === 'awaiting_slot_confirmation') return ack + `<div class="alert alert-info">📅 Pickup options sent. Waiting for seller to confirm a time.</div>` + buildPrePickupReadiness(txn, 'dealer');
  
     if (status === 'pickup_scheduled') {
       const hasAccident = txn.accidents && txn.accidents !== 'None';
@@ -5342,13 +5347,17 @@ function dealFlowActionHTML(txn, role) {
     if (status === 'inspection_period') return ack + `
       <div class="alert alert-warning" style="margin-bottom:12px;">🔍 The dealer is inspecting the vehicle. <strong>Have your signed title ready — you'll hand it over next, before the dealer pays you.</strong></div>
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:16px;margin-bottom:12px;">
-        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">You will receive</div>
-        <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
-        <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
+        <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">${settlement.sellerOwes > 0 ? 'You Owe (Negative Equity)' : 'You will receive'}</div>
+        <div style="font-size:28px;font-weight:700;color:${settlement.sellerOwes > 0 ? 'var(--red)' : 'var(--accent3)'};">$${(settlement.sellerOwes > 0 ? settlement.sellerOwes : settlement.sellerReceives).toLocaleString()}</div>
+        <div style="font-size:12px;color:var(--g5);margin-top:2px;">${settlement.hasLien ? `$${settlement.bid.toLocaleString()} bid − $${settlement.payoff.toLocaleString()} payoff − $${settlement.sellerFee} PrivaBuy fee` : `$${settlement.bid.toLocaleString()} bid − $${settlement.sellerFee} PrivaBuy fee`}</div>
       </div>
+      ${settlement.sellerOwes > 0 ? `
+      <div style="font-size:13px;color:#1a1814;line-height:1.6;padding:12px 14px;background:rgba(217,48,37,0.06);border:1px solid rgba(217,48,37,0.20);border-radius:var(--r);">
+         Your payoff amount is higher than the winning bid plus PrivaBuy's fee. You'll need to pay the dealer <strong style="color:var(--red);">$${settlement.sellerOwes.toLocaleString()}</strong> to cover the difference before this deal can close.
+      </div>` : `
       <div style="font-size:13px;color:#1a1814;line-height:1.6;padding:12px 14px;background:rgba(42,158,124,0.06);border:1px solid rgba(42,158,124,0.18);border-radius:var(--r);">
-         Next, you'll confirm the title transfer to the dealer. Once they have it in hand, they'll pay you <strong>$${(rawAmt - SELLER_FEE).toLocaleString()}</strong>.
-      </div>`;
+         Next, you'll confirm the title transfer to the dealer. Once they have it in hand, they'll pay you <strong>$${settlement.sellerReceives.toLocaleString()}</strong>.
+      </div>`}`;
  
     if (status === 'awaiting_dealer_payment') return ack + `
       <div class="alert alert-info">⏳ Waiting for dealer to confirm their auction win. You'll be notified when they proceed.</div>`;
@@ -5392,17 +5401,35 @@ function dealFlowActionHTML(txn, role) {
   </div>`;
     }
  
-    if (status === 'awaiting_seller_payment_confirm') return ack + `
+    if (status === 'awaiting_seller_payment_confirm') {
+      if (settlement.sellerOwes > 0) {
+        return ack + `
+      <div style="background:rgba(217,48,37,0.05);border:1px solid rgba(217,48,37,0.20);border-radius:var(--r-lg);padding:20px;">
+        <div style="font-size:15px;font-weight:600;color:var(--red);margin-bottom:4px;">Confirm You've Paid the Shortfall</div>
+        <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
+          <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">You owe the dealer</div>
+          <div style="font-size:28px;font-weight:700;color:var(--red);">$${settlement.sellerOwes.toLocaleString()}</div>
+          <div style="font-size:12px;color:var(--g5);margin-top:2px;">Payoff ($${settlement.payoff.toLocaleString()}) + PrivaBuy fee ($${settlement.sellerFee}) exceeded the bid ($${settlement.bid.toLocaleString()})</div>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:#fff;border:1px solid rgba(0,0,0,0.16);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;">
+          <input type="checkbox" id="seller-owes-cb-${txnId}" style="width:16px;height:16px;margin-top:2px;">
+          <span style="font-size:12px;color:#1a1814;line-height:1.5;">I confirm I have paid the dealer the $${settlement.sellerOwes.toLocaleString()} shortfall.</span>
+        </label>
+        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(217,48,37,0.08);color:var(--red);border:1px solid rgba(217,48,37,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ Confirm Shortfall Paid</button>
+      </div>`;
+      }
+      return ack + `
       <div style="background:rgba(194,124,42,0.06);border:1px solid rgba(194,124,42,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;color:var(--accent2);margin-bottom:4px;">Confirm Payment Received</div>
         <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
           <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">You should have received</div>
-          <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
-          <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
+          <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${settlement.sellerReceives.toLocaleString()}</div>
+          <div style="font-size:12px;color:var(--g5);margin-top:2px;">${settlement.hasLien ? `$${settlement.bid.toLocaleString()} bid − $${settlement.payoff.toLocaleString()} payoff − $${settlement.sellerFee} PrivaBuy fee` : `$${settlement.bid.toLocaleString()} bid − $${settlement.sellerFee} PrivaBuy fee`}</div>
         </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you have the funds in hand, confirm below and hand over the title.</div>
-        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Confirm That I Have Received $${(rawAmt - SELLER_FEE).toLocaleString()}</button>
+        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Confirm That I Have Received $${settlement.sellerReceives.toLocaleString()}</button>
       </div>`;
+    }
  
     if (status === 'awaiting_seller_fee') return ack + `
       <div style="background:rgba(42,158,124,0.06);border:1px solid rgba(42,158,124,0.18);border-radius:var(--r-lg);padding:20px;">
