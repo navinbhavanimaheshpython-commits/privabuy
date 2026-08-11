@@ -5308,7 +5308,7 @@ function dealFlowActionHTML(txn, role) {
         <button class="btn btn-primary btn-full" onclick="proposeSlots('${txnId}')">Send Pickup Options →</button>
       </div>`;
  
-    if (status === 'awaiting_slot_confirmation') return ack + `<div class="alert alert-info">📅 Pickup options sent. Waiting for seller to confirm a time.</div>`;
+    if (status === 'awaiting_slot_confirmation') return ack + `<div class="alert alert-info">📅 Pickup options sent. Waiting for seller to confirm a time.</div>` + buildPrePickupReadiness(txn, 'dealer');
  
     if (status === 'pickup_scheduled') {
       const hasAccident = txn.accidents && txn.accidents !== 'None';
@@ -5376,10 +5376,10 @@ function dealFlowActionHTML(txn, role) {
             <span style="font-size:13px;color:#1a1814;">${new Date(slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>
             <button class="btn btn-primary btn-sm" onclick="confirmSlot('${slot}','${txnId}')">Choose This →</button>
           </div>`).join('')}
-      </div>`;
- 
+      </div>` + buildPrePickupReadiness(txn, 'seller');
+      
     if (status === 'pickup_scheduled') return ack + `<div class="alert alert-success">✅ Pickup confirmed for <strong>${txn.confirmed_pickup_slot ? new Date(txn.confirmed_pickup_slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'TBD'}</strong>. Have the title ready.</div>`;
-
+    
     if (status === 'awaiting_title_confirmation') {
       const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
       return ack + buildPaperworkChecklist(txn, 'seller') + `
