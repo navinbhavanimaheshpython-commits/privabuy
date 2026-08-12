@@ -4981,7 +4981,7 @@ function buildPrePickupReadiness(txn, role) {
         hasLien ? 'Know your lienholder\'s payment instructions (mailing address or wire info) in case the dealer needs it' : null,
       ].filter(Boolean)
     : [
-        'Payment method ready for the seller (check or wire)',
+        'Payment method ready for the seller (check)',
         hasLien ? `Separate payment method ready for ${txn.lien_holder || 'the lienholder'} — do not combine into one check` : null,
         hasLien ? `Confirmed the payoff amount ($${(txn.lien_payoff_amount||0).toLocaleString()}) is still accurate — payoff letters expire after 10 days` : null,
         'Camera/phone ready to photograph the signed title and odometer',
