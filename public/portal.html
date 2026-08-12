@@ -4773,11 +4773,24 @@ async function getDealerFee(dealerId) {
 let DEALER_FEE = 0;
 let _dealerFeeExempt = true;
 let _dealerWinsRemaining = DEALER_FREE_WIN_THRESHOLD;
+
+function getSellerNet(txn) {
+  const bid = parseFloat(txn.amount) || 0;
+  const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
+  const payoff = hasLien ? (parseFloat(txn.lien_payoff_amount) || 0) : 0;
+  return Math.max(0, bid - payoff - SELLER_FEE);
+}
+function getSellerShortfall(txn) {
+  const bid = parseFloat(txn.amount) || 0;
+  const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
+  const payoff = hasLien ? (parseFloat(txn.lien_payoff_amount) || 0) : 0;
+  return Math.max(0, (payoff + SELLER_FEE) - bid);
+}
  
 function dealFlowAckSection(txn, role) {
   const bid   = parseFloat(txn.amount);
   const txnId = txn.transaction_id;
-  const net   = bid - SELLER_FEE;
+  const net   = getSellerNet(txn);
  
   if (role === 'dealer') {
     const acked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
@@ -4963,6 +4976,192 @@ function signDealFlowSellerAck(txnId, bidAmount) {
   loadDealFlow('seller');
 }
 
+
+
+
+// ═══════════════════════════════════════════════════════
+//  PRE-PICKUP READINESS CHECKLIST
+// ═══════════════════════════════════════════════════════
+
+function buildPrePickupReadiness(txn, role) {
+  const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
+  const items = role === 'seller'
+    ? [
+        'Signed title — sign the back over to the buyer (do this in front of the dealer, not before)',
+        'Valid photo ID matching the name on the title',
+        hasLien ? `Your 10-day payoff letter from ${txn.lien_holder || 'your lender'} — bring a copy` : null,
+        'All keys and key fobs',
+        hasLien ? 'Know your lienholder\'s payment instructions (mailing address or wire info) in case the dealer needs it' : null,
+      ].filter(Boolean)
+    : [
+        'Payment method ready for the seller (check)',
+        hasLien ? `Separate payment method ready for ${txn.lien_holder || 'the lienholder'} — do not combine into one check` : null,
+        hasLien ? `Confirmed the payoff amount ($${(txn.lien_payoff_amount||0).toLocaleString()}) is still accurate — payoff letters expire after 10 days` : null,
+        'Camera/phone ready to photograph the signed title and odometer',
+        'A pen — for the Bill of Sale and Odometer Disclosure if not already signed',
+      ].filter(Boolean);
+
+  return `
+    <div style="background:rgba(124,92,191,0.05);border:1px solid rgba(124,92,191,0.20);border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:12px;">🧾 Have This Ready Before Pickup</div>
+      <ul style="margin:0;padding-left:18px;font-size:13px;color:#1a1814;line-height:2;">
+        ${items.map(i => `<li>${i}</li>`).join('')}
+      </ul>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  PAPERWORK CHECKLIST + ODOMETER DISCLOSURE GENERATOR
+// ═══════════════════════════════════════════════════════
+
+function buildPaperworkChecklist(txn, role) {
+  const txnId = txn.transaction_id;
+  const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
+  const bothBosSigned = txn.bill_of_sale_dealer_acked && txn.bill_of_sale_seller_acked;
+  const odoKey = 'pb_odometer_' + txnId;
+  const odoDone = !!localStorage.getItem(odoKey);
+  const lienReqKey = 'pb_lien_release_requested_' + txnId;
+  const lienReqDone = !!localStorage.getItem(lienReqKey);
+
+  const items = [];
+
+  items.push({
+    done: bothBosSigned,
+    label: 'Bill of Sale',
+    sub: bothBosSigned ? 'Signed by both parties.' : 'Both parties must sign — handled earlier in Deal Flow.',
+    action: null
+  });
+
+  items.push({
+    done: odoDone,
+    label: 'Odometer Disclosure Statement',
+    sub: 'Federally required on the sale of most vehicles under 20 years old. Needs both signatures.',
+    action: `<button class="btn btn-primary btn-sm" onclick="openOdometerModal('${txnId}')">${odoDone ? 'View / Re-print' : 'Fill Out & Print'} →</button>`
+  });
+
+  items.push({
+    done: false,
+    label: 'Title — signed over to buyer',
+    sub: hasLien
+      ? 'Once the lienholder is paid, they release the title. Seller signs it over to the dealer at pickup.'
+      : 'Seller signs the back of the title over to the dealer at pickup.',
+    action: null
+  });
+
+  if (hasLien) {
+    items.push({
+      done: lienReqDone,
+      label: 'Lien Release Letter',
+      sub: `Request this from ${txn.lien_holder || 'the lienholder'} once the payoff is paid — it proves the loan is satisfied and the title is free to transfer.`,
+      action: `<button class="btn btn-secondary btn-sm" onclick="markLienReleaseRequested('${txnId}')">${lienReqDone ? '✓ Marked as Requested' : 'Mark as Requested'}</button>`
+    });
+  }
+
+  return `
+    <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.16);border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--g5);margin-bottom:14px;">📋 Paperwork Checklist</div>
+      ${items.map(it => `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+          <div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-width:0;">
+            <span style="font-size:16px;flex-shrink:0;margin-top:1px;">${it.done ? '✅' : '⬜'}</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#1a1814;">${it.label}</div>
+              <div style="font-size:12px;color:var(--g5);margin-top:2px;line-height:1.5;">${it.sub}</div>
+            </div>
+          </div>
+          ${it.action ? `<div style="flex-shrink:0;">${it.action}</div>` : ''}
+        </div>`).join('')}
+      <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:12px;line-height:1.5;">This checklist is a guide, not legal advice — requirements vary by state. Check your state DMV for exact title-transfer paperwork.</div>
+    </div>`;
+}
+
+function markLienReleaseRequested(txnId) {
+  localStorage.setItem('pb_lien_release_requested_' + txnId, '1');
+  showToast('✓','Marked','Noted — follow up with the lienholder for the release letter.');
+  loadDealFlow(S.dealer_id ? 'dealer' : 'seller');
+}
+
+function openOdometerModal(txnId) {
+  const txn = (S.allTxns && S.allTxns.find(t => t.transaction_id === txnId)) || S.currentTxn || {};
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.id = 'odometer-modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-header">
+        <div class="modal-title">Odometer Disclosure</div>
+        <button class="modal-close" onclick="document.getElementById('odometer-modal-overlay').remove()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">Federal law requires this on the sale of most vehicles under 20 years old. Fill it out together at pickup.</div>
+        <div class="form-group"><label class="form-label">Seller Legal Name</label><input class="form-input" id="odo-seller-name" placeholder="Full legal name"></div>
+        <div class="form-group"><label class="form-label">Buyer (Dealer) Legal Name</label><input class="form-input" id="odo-buyer-name" placeholder="Full legal name"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Odometer Reading (miles)</label><input class="form-input" id="odo-reading" type="number" placeholder="${txn.mileage || ''}"></div>
+          <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="odo-date" type="date"></div>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:12px;margin-top:8px;">
+          <input type="checkbox" id="odo-accurate-cb" style="width:16px;height:16px;margin-top:2px;">
+          <span style="font-size:12px;color:#1a1814;line-height:1.5;">Seller certifies to the best of their knowledge that the odometer reading reflects the actual mileage, unless a federal exception applies (odometer replaced, reading exceeds mechanical limits, etc.).</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="document.getElementById('odometer-modal-overlay').remove()">Cancel</button>
+        <button class="btn btn-primary" onclick="generateOdometerDoc('${txnId}')">Generate & Print →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function generateOdometerDoc(txnId) {
+  const sellerName = document.getElementById('odo-seller-name').value.trim();
+  const buyerName = document.getElementById('odo-buyer-name').value.trim();
+  const reading = document.getElementById('odo-reading').value.trim();
+  const date = document.getElementById('odo-date').value;
+  const accurate = document.getElementById('odo-accurate-cb').checked;
+  if (!sellerName || !buyerName || !reading || !date) { showToast('⚠️','Missing Info','Fill out all fields.'); return; }
+  if (!accurate) { showToast('⚠️','Required','Check the certification box.'); return; }
+
+  const txn = (S.allTxns && S.allTxns.find(t => t.transaction_id === txnId)) || S.currentTxn || {};
+  const vehicle = `${txn.year||''} ${txn.make||''} ${txn.model||''}`.trim();
+  const vin = txn.vin || '';
+
+  const docHtml = `
+    <html><head><title>Odometer Disclosure Statement</title>
+    <style>body{font-family:Georgia,serif;max-width:640px;margin:40px auto;color:#111;line-height:1.7;}
+    h1{font-size:20px;border-bottom:2px solid #111;padding-bottom:8px;}
+    table{width:100%;border-collapse:collapse;margin:16px 0;}
+    td{padding:6px 0;border-bottom:1px solid #ccc;}
+    .sig{margin-top:40px;display:flex;justify-content:space-between;}
+    .line{border-top:1px solid #111;width:220px;text-align:center;padding-top:4px;font-size:12px;}</style>
+    </head><body>
+    <h1>Federal Odometer Disclosure Statement</h1>
+    <table>
+      <tr><td><strong>Vehicle:</strong></td><td>${vehicle}</td></tr>
+      <tr><td><strong>VIN:</strong></td><td>${vin}</td></tr>
+      <tr><td><strong>Odometer Reading:</strong></td><td>${reading} miles</td></tr>
+      <tr><td><strong>Date:</strong></td><td>${date}</td></tr>
+      <tr><td><strong>Seller:</strong></td><td>${sellerName}</td></tr>
+      <tr><td><strong>Buyer:</strong></td><td>${buyerName}</td></tr>
+    </table>
+    <p>I, the seller named above, certify that the odometer reading above reflects the actual mileage of the vehicle described, unless one of the following applies: the odometer reading is in excess of its mechanical limits, or the odometer reading is NOT the actual mileage — WARNING: ODOMETER DISCREPANCY.</p>
+    <div class="sig">
+      <div class="line">${sellerName}<br>Seller Signature</div>
+      <div class="line">${buyerName}<br>Buyer Signature</div>
+    </div>
+    </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(docHtml);
+  w.document.close();
+  w.print();
+
+  localStorage.setItem('pb_odometer_' + txnId, JSON.stringify({sellerName, buyerName, reading, date, signedAt: Date.now()}));
+  document.getElementById('odometer-modal-overlay')?.remove();
+  showToast('✓','Generated','Odometer disclosure ready to print/sign.');
+  loadDealFlow(S.dealer_id ? 'dealer' : 'seller');
+}
+
 const DEAL_STEPS = [
   { key: 'awaiting_dealer_payment',    label: 'Confirm Win',      icon: '💳' },
   { key: 'awaiting_bill_of_sale',      label: 'Bill of Sale',          icon: '📄' },
@@ -5012,6 +5211,8 @@ function dealFlowActionHTML(txn, role) {
     return `<div class="alert alert-warning">⚠️ This deal was forfeited.</div>`;
   if (status === 'dispute_flagged')
     return `<div class="alert" style="background:rgba(217,48,37,0.07);border:1px solid rgba(217,48,37,0.2);color:var(--red);">⚠️ A discrepancy was flagged. PrivaBuy support will reach out within 24 hours.</div>`;
+  if (status === 'payoff_discrepancy_flagged')
+    return `<div class="alert" style="background:rgba(217,48,37,0.07);border:1px solid rgba(217,48,37,0.2);color:var(--red);">⚠️ A payoff discrepancy was flagged. PrivaBuy support will reach out within 24 hours.</div>`;
   if (status === 'completed')
     return `<div class="alert alert-success">🎉 Deal complete! Thank you for using PrivaBuy.</div>`;
   if (status === 'dispute_resolved_refund') {
@@ -5055,8 +5256,12 @@ function dealFlowActionHTML(txn, role) {
     </div>`}
     <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
       <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">Seller nets from this sale</div>
-      <div style="font-size:22px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
-      <div style="font-size:11px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
+      <div style="font-size:22px;font-weight:700;color:var(--accent3);">$${getSellerNet(txn).toLocaleString()}</div>
+      <div style="font-size:11px;color:var(--g5);margin-top:2px;">
+      $${rawAmt.toLocaleString()} bid
+      ${(txn.loan_status==='Loan'||txn.loan_status==='Lease') ? ` − $${(parseFloat(txn.lien_payoff_amount)||0).toLocaleString()} lien payoff` : ''}
+      − $${SELLER_FEE} PrivaBuy fee
+    </div>
     </div>
     <div style="font-size:13px;color:var(--g5);margin-bottom:16px;line-height:1.6;"><strong style="color:#1a1814;">Important:</strong> You'll confirm the title in hand at the next step before paying. Pay the seller the full bid amount of <strong style="color:#1a1814;">$${rawAmt.toLocaleString()}</strong> — PrivaBuy deducts our $${SELLER_FEE} fee from that automatically.</div>
     <button class="btn btn-success btn-full mb-16" onclick="inspectionAccept('${txnId}')">✓ Vehicle Matches Listing — Continue</button>
@@ -5066,7 +5271,27 @@ function dealFlowActionHTML(txn, role) {
     if (status === 'awaiting_title_confirmation') {
       const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
       const titleConfirmed = S.titleConfirmed && S.titleConfirmed[txnId];
-      return ack + `
+      const payoffAgeDays = txn.lien_payoff_entered_at
+        ? Math.floor((Date.now() - new Date(txn.lien_payoff_entered_at).getTime()) / 86400000)
+        : 0;
+      const payoffStale = hasLien && payoffAgeDays > 7;
+      const shortfall = getSellerShortfall(txn);
+      const shortfallPaid = txn.shortfall_paid_confirmed;
+      return ack + buildPaperworkChecklist(txn, 'dealer') + `
+  ${shortfall > 0 ? `
+  <div style="background:rgba(217,48,37,0.05);border:2px solid rgba(217,48,37,0.30);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
+    <div style="font-size:15px;font-weight:700;color:#1a1814;margin-bottom:8px;">⚠️ Seller Owes a Shortfall</div>
+    <div style="font-size:13px;color:var(--g5);line-height:1.6;margin-bottom:14px;">
+      The lien payoff ($${(txn.lien_payoff_amount||0).toLocaleString()}) plus the $${SELLER_FEE} PrivaBuy fee exceeds the winning bid ($${rawAmt.toLocaleString()}) by
+      <strong style="color:var(--red);">$${shortfall.toLocaleString()}</strong>. The seller must pay this before the title transfers.
+    </div>
+    ${shortfallPaid ? `
+      <div class="alert alert-success" style="margin:0;">✓ Seller confirmed the $${shortfall.toLocaleString()} shortfall was paid.</div>
+    ` : `
+      <div class="alert alert-warning" style="margin:0;">Waiting on seller to pay the $${shortfall.toLocaleString()} shortfall — you can't complete title transfer until this clears.</div>
+    `}
+  </div>
+  ` : ''}
   <div style="background:rgba(217,48,37,0.05);border:2px solid rgba(217,48,37,0.30);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
     <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;">
       <span style="font-size:22px;flex-shrink:0;">🔒</span>
@@ -5077,7 +5302,13 @@ function dealFlowActionHTML(txn, role) {
           : "You cannot pay the seller until you have the signed title in hand. If you don't get the title, don't pay."}</div>
       </div>
     </div>
-    ${hasLien ? `
+    ${hasLien ? (payoffStale ? `
+    <div style="background:rgba(217,48,37,0.06);border:2px solid rgba(217,48,37,0.30);border-radius:var(--r);padding:16px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px;">⚠️ Payoff Quote May Be Stale</div>
+      <div style="font-size:13px;color:#1a1814;line-height:1.6;">This payoff amount was entered ${payoffAgeDays} days ago. Payoff quotes typically expire after 10 days and accrue daily interest. The seller needs to get a fresh payoff statement before you pay.</div>
+      <button class="btn btn-secondary btn-sm mt-8" onclick="requestFreshPayoff('${txnId}')">Notify Seller to Re-confirm →</button>
+    </div>
+    ` : `
     <div style="background:rgba(194,124,42,0.08);border:1px solid rgba(194,124,42,0.25);border-radius:var(--r);padding:14px;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:6px;">⚠️ Two Payments Required</div>
       <div style="font-size:13px;color:#1a1814;line-height:1.7;">
@@ -5099,7 +5330,15 @@ function dealFlowActionHTML(txn, role) {
         <div style="font-size:24px;margin-bottom:6px;">🧾</div>
         <div style="font-size:13px;color:var(--g5);">Wire confirmation, cashier's check receipt, or payoff company confirmation</div>
       </div>
-    </div>` : ''}
+    </div>
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:rgba(194,124,42,0.06);border:1px solid rgba(194,124,42,0.25);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;">
+      <input type="checkbox" id="lienholder-verified-cb-${txnId}" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent2);flex-shrink:0;">
+      <span style="font-size:12px;color:#1a1814;line-height:1.5;">
+        I called <strong>${txn.lien_holder || 'the lienholder'}</strong> today and confirmed the payoff amount of
+        <strong>$${(txn.lien_payoff_amount||0).toLocaleString()}</strong> is still accurate as of the date of payment.
+      </span>
+    </label>
+    `) : ''}
     <div class="form-group">
       <label class="form-label">Upload Photo of Signed Title</label>
       <div id="title-upload-slot-${txnId}" onclick="uploadTitlePhoto('${txnId}')" style="background:#ffffff;border:1.5px dashed rgba(0,0,0,0.25);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;">
@@ -5112,6 +5351,7 @@ function dealFlowActionHTML(txn, role) {
       <span style="font-size:12px;color:#1a1814;line-height:1.5;">I confirm I have physically received the signed title${hasLien ? ' and paid the lienholder directly' : ''} from the seller.</span>
     </label>
     <button class="btn btn-success btn-full" onclick="confirmTitleReceived('${txnId}', ${hasLien})">✓ Confirm — Proceed to Seller Payment</button>
+    ${hasLien && !payoffStale ? `<button class="btn btn-secondary btn-sm" onclick="openPayoffDisputeModal('${txnId}')" style="margin-top:8px;width:100%;">⚠️ Payoff Amount Doesn't Match — Flag It</button>` : ''}
   </div>`;
     }
  
@@ -5156,7 +5396,7 @@ function dealFlowActionHTML(txn, role) {
         <button class="btn btn-primary btn-full" onclick="proposeSlots('${txnId}')">Send Pickup Options →</button>
       </div>`;
  
-    if (status === 'awaiting_slot_confirmation') return ack + `<div class="alert alert-info">📅 Pickup options sent. Waiting for seller to confirm a time.</div>`;
+    if (status === 'awaiting_slot_confirmation') return ack + `<div class="alert alert-info">📅 Pickup options sent. Waiting for seller to confirm a time.</div>` + buildPrePickupReadiness(txn, 'dealer');
  
     if (status === 'pickup_scheduled') {
       const hasAccident = txn.accidents && txn.accidents !== 'None';
@@ -5191,11 +5431,11 @@ function dealFlowActionHTML(txn, role) {
       <div class="alert alert-warning" style="margin-bottom:12px;">🔍 The dealer is inspecting the vehicle. <strong>Have your signed title ready — you'll hand it over next, before the dealer pays you.</strong></div>
       <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:16px;margin-bottom:12px;">
         <div style="font-size:11px;color:var(--g5);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.07em;">You will receive</div>
-        <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
+        <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${getSellerNet(txn).toLocaleString()}</div>
         <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
       </div>
       <div style="font-size:13px;color:#1a1814;line-height:1.6;padding:12px 14px;background:rgba(42,158,124,0.06);border:1px solid rgba(42,158,124,0.18);border-radius:var(--r);">
-         Next, you'll confirm the title transfer to the dealer. Once they have it in hand, they'll pay you <strong>$${(rawAmt - SELLER_FEE).toLocaleString()}</strong>.
+         Next, you'll confirm the title transfer to the dealer. Once they have it in hand, they'll pay you <strong>$${getSellerNet(txn).toLocaleString()}</strong>.
       </div>`;
  
     if (status === 'awaiting_dealer_payment') return ack + `
@@ -5224,26 +5464,54 @@ function dealFlowActionHTML(txn, role) {
             <span style="font-size:13px;color:#1a1814;">${new Date(slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>
             <button class="btn btn-primary btn-sm" onclick="confirmSlot('${slot}','${txnId}')">Choose This →</button>
           </div>`).join('')}
-      </div>`;
- 
+      </div>` + buildPrePickupReadiness(txn, 'seller');
+
     if (status === 'pickup_scheduled') return ack + `<div class="alert alert-success">✅ Pickup confirmed for <strong>${txn.confirmed_pickup_slot ? new Date(txn.confirmed_pickup_slot).toLocaleString('en-US',{weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'TBD'}</strong>. Have the title ready.</div>`;
+    
+    if (status === 'awaiting_title_confirmation') {
+      const hasLien = txn.loan_status === 'Loan' || txn.loan_status === 'Lease';
+      const shortfall = getSellerShortfall(txn);
+      const shortfallPaid = txn.shortfall_paid_confirmed;
+      return ack + buildPaperworkChecklist(txn, 'seller') + `
+  ${shortfall > 0 && !shortfallPaid ? `
+  <div style="background:rgba(217,48,37,0.05);border:2px solid rgba(217,48,37,0.30);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;">
+    <div style="font-size:15px;font-weight:700;color:#1a1814;margin-bottom:8px;">You Owe a Shortfall</div>
+    <div style="font-size:13px;color:var(--g5);line-height:1.6;margin-bottom:14px;">
+      Your payoff ($${(txn.lien_payoff_amount||0).toLocaleString()}) plus the $${SELLER_FEE} PrivaBuy fee is more than the winning bid.
+      You owe <strong style="color:var(--red);">$${shortfall.toLocaleString()}</strong> to complete this sale — pay the dealer directly, then confirm below.
+    </div>
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:#fff;border:1px solid rgba(0,0,0,0.16);border-radius:var(--r-sm);padding:12px;margin-bottom:12px;">
+      <input type="checkbox" id="shortfall-paid-cb-${txnId}" style="width:16px;height:16px;margin-top:2px;">
+      <span style="font-size:12px;color:#1a1814;">I have paid the $${shortfall.toLocaleString()} shortfall to the dealer.</span>
+    </label>
+    <button class="btn btn-primary btn-full" onclick="confirmShortfallPaid('${txnId}')">Confirm Shortfall Paid →</button>
+  </div>
+  ` : ''}
+  <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.18);border-radius:var(--r-lg);padding:20px;">
+    <div style="font-size:15px;font-weight:600;margin-bottom:8px;color:#1a1814;">Hand Over the Title</div>
+    <div style="font-size:13px;color:var(--g5);line-height:1.7;">
+      The dealer is confirming they have your signed title${hasLien ? ` and has paid ${txn.lien_holder || 'your lienholder'} the payoff` : ''} in hand right now.
+      ${hasLien ? `Don't hand over the title until you can confirm the payoff check has cleared or the lienholder has acknowledged receipt — ask the dealer for proof of payment before signing over the title.` : `Once you sign the title over, the dealer will move to paying you.`}
+    </div>
+  </div>`;
+    }
  
     if (status === 'awaiting_seller_payment_confirm') return ack + `
       <div style="background:rgba(194,124,42,0.06);border:1px solid rgba(194,124,42,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;color:var(--accent2);margin-bottom:4px;">Confirm Payment Received</div>
         <div style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:14px;margin-bottom:16px;">
           <div style="font-size:11px;color:var(--g5);margin-bottom:4px;">You should have received</div>
-          <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</div>
+          <div style="font-size:28px;font-weight:700;color:var(--accent3);">$${getSellerNet(txn).toLocaleString()}</div>
           <div style="font-size:12px;color:var(--g5);margin-top:2px;">$${rawAmt.toLocaleString()} bid − $${SELLER_FEE} PrivaBuy fee</div>
         </div>
         <div style="font-size:13px;color:var(--g5);margin-bottom:16px;">Once you have the funds in hand, confirm below and hand over the title.</div>
-        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Confirm That I Have Received $${(rawAmt - SELLER_FEE).toLocaleString()}</button>
+        <button class="btn btn-full" onclick="sellerConfirmDealPayment('${txnId}')" style="background:rgba(194,124,42,0.10);color:var(--accent2);border:1px solid rgba(194,124,42,0.25);border-radius:50px;font-weight:600;font-size:14px;padding:12px;">✓ I Confirm That I Have Received $${getSellerNet(txn).toLocaleString()}</button>
       </div>`;
  
     if (status === 'awaiting_seller_fee') return ack + `
       <div style="background:rgba(42,158,124,0.06);border:1px solid rgba(42,158,124,0.18);border-radius:var(--r-lg);padding:20px;">
         <div style="font-size:15px;font-weight:600;color:var(--accent3);margin-bottom:4px;">🎉 Deal Almost Done</div>
-        <div style="font-size:13px;color:var(--g5);margin-bottom:8px;line-height:1.6;">The dealer paid you <strong style="color:#1a1814;">$${rawAmt.toLocaleString()}</strong>. PrivaBuy's $${SELLER_FEE} fee comes out of that — you net <strong style="color:var(--accent3);">$${(rawAmt - SELLER_FEE).toLocaleString()}</strong>.</div>
+        <div style="font-size:13px;color:var(--g5);margin-bottom:8px;line-height:1.6;">The dealer paid you <strong style="color:#1a1814;">$${rawAmt.toLocaleString()}</strong>. PrivaBuy's $${SELLER_FEE} fee comes out of that — you net <strong style="color:var(--accent3);">$${getSellerNet(txn).toLocaleString()}</strong>.</div>
         <div class="alert alert-success" style="margin:0;">✓ No further action needed. PrivaBuy will mark this deal complete shortly.</div>
       </div>`;
   }
@@ -5460,6 +5728,19 @@ async function sellerConfirmDealPayment(txnId) {
   } catch(e) { showToast('❌','Error','Could not confirm.'); }
 }
 
+async function confirmShortfallPaid(txnId) {
+  const checked = document.getElementById(`shortfall-paid-cb-${txnId}`)?.checked;
+  if(!checked) { showToast('⚠️','Required','Check the box to confirm.'); return; }
+  try {
+    await fetch(`${API}/transactions/${txnId}/shortfall-confirmed`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({seller_id: S.seller_id})
+    });
+    showToast('✓','Confirmed','Dealer can now proceed with title transfer.');
+    loadDealFlow('seller');
+  } catch(e) { showToast('❌','Error','Could not confirm.'); }
+}
+
 // ─────────────────────────────────────────────
 //  DISPUTE / INSPECTION
 // ─────────────────────────────────────────────
@@ -5539,8 +5820,25 @@ async function uploadPayoffProof(txnId) {
   input.click();
 }
 
+async function requestFreshPayoff(txnId) {
+  try {
+    await fetch(`${API}/transactions/${txnId}/request-fresh-payoff`, {method:'POST'});
+    showToast('✓','Sent','Seller notified to re-confirm their payoff amount.');
+  } catch(e) { showToast('❌','Error','Could not send request.'); }
+}
+
+
+
+
 async function confirmTitleReceived(txnId, hasLien) {
+  const txn = (S.allTxns && S.allTxns.find(t => t.transaction_id === txnId)) || S.currentTxn;
+  const shortfall = getSellerShortfall(txn || {});
+  if(shortfall > 0 && !(txn && txn.shortfall_paid_confirmed)) {
+    showToast('⚠️','Shortfall Unpaid','Waiting on the seller to pay the shortfall before you can confirm the title.');
+    return;
+  }
   const checked = document.getElementById(`title-confirm-cb-${txnId}`)?.checked;
+  const lienVerified = !hasLien || document.getElementById(`lienholder-verified-cb-${txnId}`)?.checked;
   const photoUrl = S.titlePhotoUrls && S.titlePhotoUrls[txnId];
   if(!photoUrl) { showToast('⚠️','Photo Required','Upload a photo of the signed title first.'); return; }
 
@@ -5550,6 +5848,7 @@ async function confirmTitleReceived(txnId, hasLien) {
     payoffPaid = parseFloat(document.getElementById(`payoff-paid-${txnId}`)?.value) || 0;
     if(!payoffUrl) { showToast('⚠️','Proof Required','Upload proof you paid the lienholder.'); return; }
     if(!payoffPaid) { showToast('⚠️','Amount Required','Enter the payoff amount you actually paid.'); return; }
+    if(!lienVerified) { showToast('⚠️','Verify Payoff First','Confirm you called the lienholder before continuing.'); return; }
   }
   if(!checked) { showToast('⚠️','Required','Check the box to confirm.'); return; }
 
@@ -5561,6 +5860,7 @@ async function confirmTitleReceived(txnId, hasLien) {
         title_photo_url: photoUrl,
         payoff_proof_url: payoffUrl,
         payoff_amount_paid: payoffPaid,
+        lienholder_verified_at: hasLien ? new Date().toISOString() : null,
       })
     });
     if(!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Could not confirm'); }
@@ -5569,6 +5869,44 @@ async function confirmTitleReceived(txnId, hasLien) {
     showToast('✓','Confirmed','You can now pay the seller.');
     loadDealFlow('dealer');
   } catch(e) { showToast('❌','Error', e.message); }
+}
+
+function openPayoffDisputeModal(txnId) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.id = 'payoff-dispute-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:460px;">
+      <div class="modal-header"><div class="modal-title">Payoff Discrepancy</div><button class="modal-close" onclick="document.getElementById('payoff-dispute-overlay').remove()">✕</button></div>
+      <div class="modal-body">
+        <div class="alert alert-warning">This pauses title transfer until PrivaBuy or the seller resolves it.</div>
+        <div class="form-group"><label class="form-label">Actual Payoff Quoted by Bank</label>
+          <div style="position:relative;"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--g5);">$</span>
+          <input class="form-input" id="pd-actual-amount" type="number" style="padding-left:28px;"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="pd-notes" placeholder="e.g. Bank quoted $10,400, listing said $10,000"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="document.getElementById('payoff-dispute-overlay').remove()">Cancel</button>
+        <button class="btn btn-danger" onclick="submitPayoffDispute('${txnId}')">Flag Discrepancy →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function submitPayoffDispute(txnId) {
+  const actual = parseFloat(document.getElementById('pd-actual-amount').value) || 0;
+  const notes = document.getElementById('pd-notes').value.trim();
+  if(!actual) { showToast('⚠️','Missing Amount','Enter the actual payoff amount.'); return; }
+  try {
+    await fetch(`${API}/transactions/${txnId}/payoff-discrepancy`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({dealer_id: S.dealer_id, actual_payoff: actual, notes})
+    });
+    document.getElementById('payoff-dispute-overlay').remove();
+    showToast('⚠️','Flagged','Title transfer is paused until this is resolved.');
+    loadDealFlow('dealer');
+  } catch(e) { showToast('❌','Error','Could not submit.'); }
 }
 
 
