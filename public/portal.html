@@ -4020,9 +4020,15 @@ async function acceptTopBid() {
   const top = S.bids[0];
     // ── CONFIRMATION POPUP ──
   const anonName = getAnon(top.dealer);
+  const hasLien = S.formData?.loan === 'Loan' || S.formData?.loan === 'Lease';
+  const payoff = hasLien ? (S.lienPayoffAmount || 0) : 0;
+  const estNet = Math.max(0, top.amount - payoff - 350);
+  const netLine = hasLien
+    ? `After your $${payoff.toLocaleString()} lien payoff and $350 PrivaBuy fee, <strong style="color:${estNet < 500 ? '#d93025' : '#1a1814'}">you will net approximately $${estNet.toLocaleString()}</strong>.`
+    : `After the $350 PrivaBuy fee, <strong>you will net $${(top.amount - 350).toLocaleString()}</strong>.`;
   const confirmed = await showConfirmModal(
     `Accept $${top.amount.toLocaleString()} from ${anonName}?`,
-    `This is binding. Once confirmed, the dealer will be notified and the deal flow begins. You cannot undo this.`
+    `This is binding. Once confirmed, the dealer will be notified and the deal flow begins. You cannot undo this.<br><br>${netLine}`
   );
   if(!confirmed) return;
 
