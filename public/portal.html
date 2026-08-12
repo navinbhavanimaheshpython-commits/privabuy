@@ -4790,7 +4790,7 @@ function getSellerShortfall(txn) {
 function dealFlowAckSection(txn, role) {
   const bid   = parseFloat(txn.amount);
   const txnId = txn.transaction_id;
-  const net   = bid - SELLER_FEE;
+  const net   = getSellerNet(txn);
  
   if (role === 'dealer') {
     const acked = S.dealerAckSigned && S.dealerAckSigned.transaction_id === txnId;
