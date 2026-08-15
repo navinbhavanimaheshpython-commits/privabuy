@@ -1239,7 +1239,7 @@ gtag('config', 'AW-18160958792');
         <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:rgba(217,48,37,0.04);border:1px solid rgba(217,48,37,0.20);border-radius:var(--r);padding:14px;">
           <input type="checkbox" id="exclusivity-checkbox" onchange="updateStartBtn()" style="width:18px;height:18px;margin-top:2px;accent-color:var(--red);flex-shrink:0;cursor:pointer;">
           <span style="font-size:13px;line-height:1.6;color:#1a1814;">
-            <strong>I understand and agree:</strong> This vehicle is exclusively available through PrivaBuy while my auction is active. I will not sell it elsewhere. If I accept a bid, I am legally obligated to complete the sale with the winning dealer. If I fail to do so, I forfeit my $250 PrivaBuy fee and may be held liable for additional damages.
+            <strong>I understand and agree:</strong> This vehicle is exclusively available through PrivaBuy while my auction is active. I will not sell it elsewhere. If I accept a bid, I am legally obligated to complete the sale with the winning dealer. If I fail to do so, I forfeit my $350 PrivaBuy fee and may be held liable for additional damages.
           </span>
         </label>
       </div>
@@ -1366,9 +1366,8 @@ gtag('config', 'AW-18160958792');
       <button class="tab-btn active" onclick="dealerTab('feed',this)">Live Feed</button>
       <button class="tab-btn" onclick="dealerTab('watchlist',this)">Watchlist</button>
       <button class="tab-btn" onclick="dealerTab('won',this)">Won Vehicles</button>
-      <button class="tab-btn hidden" id="dealer-pay-fee-tab" onclick="dealerTab('payment',this)" style="position:relative;display:none!important">
-         Pay Fee <span id="dealer-fee-badge" style="display:none;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:50px;margin-left:4px;vertical-align:middle">0</span>
-      </button>
+
+      
       <button class="tab-btn" id="dealer-dealflow-tab" onclick="dealerTab('dealflow',this)" style="display:none">📋 Deal Flow<span class="dfn-badge" id="dealer-dfn-badge" style="display:none"></span></button>
       <button class="tab-btn" onclick="dealerTab('analytics',this)">Analytics</button>
     </div>
@@ -1399,36 +1398,6 @@ gtag('config', 'AW-18160958792');
     <div id="dealer-tab-won" class="hidden">
       <div class="section-title mb-16">Won Vehicles</div>
       <div id="won-vehicles-content"><div class="text-muted" style="text-align:center;padding:40px">Loading...</div></div>
-    </div>
-
-    <div id="dealer-tab-payment" class="hidden">
-      <div class="flex-between mb-24">
-        <div><div class="section-title">Outstanding Platform Fees</div><div class="section-sub" style="margin-bottom:0">$0 per vehicle won fro your first 5 wins</div></div>
-        <div class="badge badge-live" style="font-size:13px;padding:8px 16px"> Secure Checkout</div>
-      </div>
-      <div id="dealer-pending-fees-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px"></div>
-      <div id="dealer-payment-form-wrap" class="hidden">
-        <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start">
-          <div class="card">
-            <div class="card-header"><div class="card-title">Pay for: <span id="dealer-paying-for" style="color:var(--accent)"></span></div></div>
-            <div class="card-body">
-              <div class="alert alert-info"> Secure payment. PrivaBuy never stores your card details.</div>
-              <div class="form-group"><label class="form-label">Cardholder Name</label><input class="form-input" id="dealer-card-name" placeholder="James Kowalski"></div>
-              <div class="form-group"><label class="form-label">Card Details</label><div id="dealer-card-element" style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.20);border-radius:8px;padding:14px;"></div></div>
-              <div style="height:1px;background:rgba(0,0,0,0.07);margin:20px 0"></div>
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:var(--r);margin-bottom:20px">
-                <span style="font-size:15px;font-weight:600;color:#1a1814">Total Due</span>
-                <span style="font-size:22px;font-weight:700;color:var(--accent)">$450.00</span>
-              </div>
-              <button class="btn btn-primary btn-full btn-lg" id="dealer-pay-btn" onclick="processDealerPayment()" style="border-radius:12px;font-size:15px;font-weight:600">Pay $450.00 →</button>
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:16px">
-            <div class="card"><div class="card-header"><div class="card-title">Fee Summary</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:10px"><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Vehicle</span><span style="font-size:13px;color:#1a1814" id="fee-summary-vehicle"></span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Win price</span><span style="font-size:13px;color:#1a1814" id="fee-summary-price"></span></div><div class="flex-between"><span style="font-size:13px;color:var(--g5)">Fee type</span><span style="font-size:13px;color:#1a1814">One-time · Per vehicle</span></div></div></div></div>
-            <div class="card"><div class="card-body"><div style="display:flex;gap:10px"><div><div style="font-size:13px;font-weight:500;margin-bottom:4px;color:#1a1814">Questions?</div><div style="font-size:12px;color:var(--g5)">Email <span style="color:var(--accent)">navin@privabuy.com</span></div></div></div></div></div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div id="dealer-tab-dealflow" class="hidden">
@@ -3996,7 +3965,6 @@ function showRealDealerStatus(amount, isWon) {
   if(isWon){
     const d = S.auctionData || {};
     const vehicle = `${d.year||2017} ${d.make||'Honda'} ${d.model||'CR-V'} ${d.trim||''}`.trim();
-    dealerAddPendingFee(vehicle,amount,'Sarah Mitchell','(312) 555-0100','sarah.m@email.com');
     if(!S._winPopupShown) { S._winPopupShown = true; showDealerWinPopup(vehicle, amount); }
     banner.innerHTML=`
       <div style="background:linear-gradient(135deg,rgba(42,158,124,0.15),rgba(42,158,124,0.07));border:1px solid rgba(42,158,124,0.30);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:14px">
@@ -4095,7 +4063,6 @@ async function checkDealerHasTransaction() {
     const list = await res.json();
     if(list.length > 0) {
       document.getElementById('dealer-dealflow-tab').style.display = '';
-      // Auto-populate pending fees from active transactions
       list.forEach(txn => {
         if(txn.status === 'awaiting_dealer_payment' && !txn.dealer_fee_paid) {
           const vehicle = `${txn.year||''} ${txn.make||''} ${txn.model||''}`.trim();
@@ -4104,24 +4071,8 @@ async function checkDealerHasTransaction() {
             localStorage.setItem(seenKey, '1');
             showDealerWinPopup(vehicle, parseFloat(txn.amount));
           }
-          // Avoid duplicates
-          const exists = D_pendingFees.find(f => f.transaction_id === txn.transaction_id);
-          if(!exists) {
-            const id = 'fee_' + txn.transaction_id;
-            D_pendingFees.push({
-              id, 
-              transaction_id: txn.transaction_id,
-              vehicle, 
-              winPrice: parseFloat(txn.amount),
-              sellerName: 'Seller',
-              sellerPhone: '',
-              sellerEmail: '',
-              paid: false
-            });
-          }
         }
       });
-      updateDealerFeeTab();
       showToast('📋', 'Deal In Progress', 'You have an active deal — check the Deal Flow tab.');
     }
   } catch(e) { console.error(e); }
@@ -4220,9 +4171,8 @@ async function loadDealerAnalytics() {
 }
 
 function dealerTab(tab,el) {
-  if(S._currentDealerTab === 'payment' && tab !== 'payment') restoreSellerCard();
   S._currentDealerTab = tab;
-  ['feed','watchlist','won','payment','analytics','dealflow'].forEach(t=>document.getElementById(`dealer-tab-${t}`).classList.add('hidden'));
+  ['feed','watchlist','won','analytics','dealflow'].forEach(t=>document.getElementById(`dealer-tab-${t}`).classList.add('hidden'));
   document.getElementById(`dealer-tab-${tab}`).classList.remove('hidden');
   document.querySelectorAll('#dealer-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   if(el) el.classList.add('active');
@@ -4535,105 +4485,7 @@ function showToast(icon,title,desc){
   setTimeout(()=>{t.classList.add('removing');setTimeout(()=>t.remove(),300);},4000);
 }
 
-const D_pendingFees = [];
-let D_selectedFeeId = null;
-function dealerAddPendingFee(vehicle,winPrice,sellerName,sellerPhone,sellerEmail) {
-  const id='fee_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
-  D_pendingFees.push({id,vehicle,winPrice,sellerName,sellerPhone,sellerEmail,paid:false});
-  updateDealerFeeTab();
-}
-function updateDealerFeeTab() {
-  const unpaid=D_pendingFees.filter(f=>!f.paid);
-  const tab=document.getElementById('dealer-pay-fee-tab');
-  const badge=document.getElementById('dealer-fee-badge');
-  if(!tab)return;
-  if(unpaid.length>0){tab.classList.remove('hidden');tab.style.color='var(--accent)';badge.style.display='inline';badge.textContent=unpaid.length;}
-  else{tab.classList.add('hidden');badge.style.display='none';}
-  renderDealerFeeList();
-}
-function renderDealerFeeList() {
-  const list=document.getElementById('dealer-pending-fees-list');
-  if(!list)return;
-  const unpaid=D_pendingFees.filter(f=>!f.paid);
-  if(unpaid.length===0){list.innerHTML=`<div class="card"><div class="card-body" style="text-align:center;padding:40px"><div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#1a1814">All fees paid</div></div></div>`;document.getElementById('dealer-payment-form-wrap').classList.add('hidden');return;}
-  list.innerHTML=unpaid.map(f=>`
-    <div class="card" style="border:1px solid ${D_selectedFeeId===f.id?'rgba(124,92,191,0.35)':'rgba(0,0,0,0.08)'}">
-      <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
-        <div style="display:flex;align-items:center;gap:14px;flex:1">
-          <div style="width:44px;height:44px;border-radius:10px;background:rgba(124,92,191,0.08);border:1px solid rgba(124,92,191,0.18);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🚗</div>
-          <div><div style="font-size:14px;font-weight:600;margin-bottom:3px;color:#1a1814">${f.vehicle}</div><div style="font-size:12px;color:var(--g5)">Winning bid: <strong style="color:var(--accent)">$${f.winPrice.toLocaleString()}</strong> · Fee: <strong style="color:#1a1814">$450</strong></div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
-          <span style="font-size:11px;color:var(--accent2);background:rgba(194,124,42,0.08);border:1px solid rgba(194,124,42,0.18);padding:3px 10px;border-radius:50px">Fee Due</span>
-          <button onclick="selectDealerFee('${f.id}')" style="padding:9px 18px;background:var(--accent);color:#ffffff;border:1px solid var(--accent);border-radius:50px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Pay $450 →</button>
-        </div>
-      </div>
-    </div>`).join('');
-}
-function selectDealerFee(id) {
-  D_selectedFeeId=id;
-  const fee=D_pendingFees.find(f=>f.id===id); if(!fee)return;
-  document.getElementById('dealer-payment-form-wrap').classList.remove('hidden');
-  document.getElementById('dealer-paying-for').textContent=fee.vehicle;
-  document.getElementById('fee-summary-vehicle').textContent=fee.vehicle;
-  document.getElementById('fee-summary-price').textContent='$'+fee.winPrice.toLocaleString();
-  const btn=document.getElementById('dealer-pay-btn');
-  if(btn){btn.textContent='Pay $450.00 →';btn.disabled=false;btn.style.cssText='';}
-  renderDealerFeeList();
-  document.getElementById('dealer-payment-form-wrap').scrollIntoView({behavior:'smooth',block:'start'});
-  setTimeout(() => mountDealerStripeCard(), 100);
-}
-async function processDealerPayment() {
-  const name = document.getElementById('dealer-card-name').value;
-  if(!name) { showToast('⚠️','Missing Name','Enter cardholder name.'); return; }
-  if(!D_selectedFeeId) { showToast('⚠️','No Vehicle Selected','Please select a vehicle to pay for.'); return; }
-  const btn = document.getElementById('dealer-pay-btn');
-  btn.textContent = 'Processing...'; btn.disabled = true;
-  try {
-    const res = await fetch(`${API}/payments/create-intent`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({amount: 20000, description: 'PrivaBuy Dealer Platform Fee'})
-    });
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.detail || 'Failed to create payment');
-    const result = await stripeClient.confirmCardPayment(data.client_secret, {
-      payment_method: { card: dealerCardElement, billing_details: { name } }
-    });
-    if(result.error) throw new Error(result.error.message);
-    const fee = D_pendingFees.find(f=>f.id===D_selectedFeeId);
-    if(fee) fee.paid = true;
-    D_selectedFeeId = null;
-    btn.textContent = '✓ Payment Successful';
-    btn.style.background = 'rgba(42,158,124,0.12)';
-    btn.style.color = 'var(--accent3)';
-    btn.style.borderColor = 'rgba(42,158,124,0.25)';
-    const form = btn.closest('.card-body');
-    if(form && fee) {
-      const existing = form.querySelector('.seller-contact-reveal');
-      if(!existing) {
-        const reveal = document.createElement('div');
-        reveal.className = 'seller-contact-reveal';
-        reveal.style.cssText = 'margin-top:16px;padding:16px;background:rgba(42,158,124,0.07);border:1px solid rgba(42,158,124,0.20);border-radius:var(--r)';
-        reveal.innerHTML = `<div style="font-size:13px;font-weight:600;color:var(--accent3);margin-bottom:8px">Seller Contact Unlocked — ${fee.vehicle}</div><div style="font-size:13px;margin-bottom:4px;font-weight:500;color:#1a1814">${fee.sellerName}</div><div style="font-size:12px;color:var(--g5)">${fee.sellerPhone}</div><div style="font-size:12px;color:var(--g5)">${fee.sellerEmail}</div><div style="font-size:11px;color:rgba(0,0,0,0.30);margin-top:8px">Arrange pickup within 2 business days</div>`;
-        form.appendChild(reveal);
-      }
-    }
-    updateDealerFeeTab();
-    showToast('✓','Payment Complete','$450 paid. Seller contact unlocked.');
-    // Advance transaction status to awaiting_bill_of_sale
-    const txnIdToPay = fee?.transaction_id || S.currentTxn?.transaction_id;
-    if(txnIdToPay) {
-      await fetch(`${API}/transactions/${txnIdToPay}/dealer-paid`, {method:'POST'});
-    }
-    document.getElementById('dealer-dealflow-tab').style.display = '';
-  } catch(err) {
-    btn.textContent = 'Pay $450.00 →';
-    btn.disabled = false;
-    showToast('❌','Payment Failed', err.message);
-    console.error(err);
-  }
-}
+
 function highlightSellerPayment() {
   setTimeout(()=>{const tab=document.querySelector('#screen-seller .tabs');if(tab){const payBtn=[...tab.querySelectorAll('.tab-btn')].find(b=>b.textContent.includes('Pay'));if(payBtn){payBtn.style.color='var(--accent)';}}},100);
 }
@@ -4715,34 +4567,8 @@ let dealerBidPollInterval = null;
 let sellerCardElement, dealerCardElement;
 let stripeElements, stripeElementsDealer;
 
-setTimeout(() => {
-  const cardStyle = {
-    style: {
-      base: { color: '#1a1814', fontFamily: 'Inter, sans-serif', fontSize: '14px', '::placeholder': { color: 'rgba(0,0,0,0.30)' } },
-      invalid: { color: '#d93025' }
-    }
-  };
-  stripeElementsDealer = stripeClient.elements();
-  dealerCardElement = stripeElementsDealer.create('card', cardStyle);
-}, 500);
 
-function mountDealerStripeCard() {
-  try {
-    dealerCardElement.unmount();
-  } catch(e) {}
-  try {
-    dealerCardElement.mount('#dealer-card-element');
-  } catch(e) { console.log(e); }
-}
 
-function restoreSellerCard() {
-  const dealerSlot = document.getElementById('dealer-card-element');
-  const sellerSlot = document.getElementById('seller-card-element');
-  if(!dealerSlot || !sellerSlot) return;
-  while(dealerSlot.firstChild) {
-    sellerSlot.appendChild(dealerSlot.firstChild);
-  }
-}
 
 const dealerModal = document.getElementById('dealer-auction-modal');
 if(dealerModal && dealerModal.parentElement !== document.body) {
@@ -5428,7 +5254,11 @@ function dealFlowActionHTML(txn, role) {
     }
  
     if (status === 'awaiting_seller_payment_confirm') return ack + `<div class="alert alert-info">💰 Pay the seller now. Once they confirm receipt, the deal will complete.</div>`;
-    if (status === 'awaiting_seller_fee') return ack + `<div class="alert alert-success">✓ Seller confirmed payment received. Deal is wrapping up!</div>`;
+    if (status === 'awaiting_seller_fee') return ack + `
+      <div class="alert alert-success" style="margin-bottom:12px;">✓ Seller confirmed payment received.</div>
+      <div id="df-invoice-status-${txnId}" style="background:#f8f8f8;border:1px solid rgba(0,0,0,0.14);border-radius:var(--r);padding:16px;">
+        <div class="text-muted text-sm">Loading invoice status...</div>
+      </div>`;
   }
  
   if (role === 'seller') {
@@ -5525,20 +5355,6 @@ function dealFlowActionHTML(txn, role) {
   return `<div class="alert alert-info">Status: ${status}</div>`;
 }
 
-async function dealFlowPayNow(txnId, winPrice) {
-  if (!S.dealerAckSigned || S.dealerAckSigned.transaction_id !== txnId) {
-    showToast('⚠️', 'Sign Acknowledgement First', 'Please sign the facilitation acknowledgement above before proceeding.');
-    return;
-  }
-  const exists = D_pendingFees.find(f => f.transaction_id === txnId);
-  if (!exists) {
-    D_pendingFees.push({ id:'fee_'+txnId, transaction_id:txnId, vehicle:'Vehicle', winPrice:winPrice, sellerName:'Seller', sellerPhone:'', sellerEmail:'', paid:false });
-  }
-  const feeId = exists ? exists.id : 'fee_' + txnId;
-  dealerTab('payment', document.getElementById('dealer-pay-fee-tab'));
-  setTimeout(() => selectDealerFee(feeId), 100);
-}
- 
 async function dealFlowSendInvoice(txnId, winPrice) {
   if (!S.dealerAckSigned || S.dealerAckSigned.transaction_id !== txnId) {
     showToast('⚠️', 'Sign First', 'Please sign the acknowledgement above before proceeding.');
@@ -5583,6 +5399,25 @@ async function dealFlowSendInvoice(txnId, winPrice) {
     showToast('❌', 'Failed', err.message);
   }
 }
+
+async function loadInvoiceStatus(txnId) {
+  const el = document.getElementById(`df-invoice-status-${txnId}`);
+  if(!el) return;
+  try {
+    const res = await fetch(`${API}/transactions/invoices/transaction/${txnId}`);
+    const invoices = await res.json();
+    if(!invoices.length) { el.innerHTML = '<div class="text-muted text-sm">Invoice not yet issued — fires once BILL processes your payment confirmation.</div>'; return; }
+    const paid = invoices.every(i => i.status === 'paid');
+    const total = invoices.reduce((sum,i) => sum + parseFloat(i.amount), 0);
+    el.innerHTML = `
+      <div style="font-size:13px;font-weight:600;color:#1a1814;margin-bottom:6px;">Invoice ${invoices[0].invoice_number}</div>
+      <div style="font-size:12px;color:var(--g5);margin-bottom:10px;">${invoices.map(i=>`${i.fee_type==='seller_fee'?'Seller fee':'Dealer fee'}: $${parseFloat(i.amount).toLocaleString()}`).join(' + ')} = $${total.toLocaleString()} total</div>
+      <span class="badge badge-${paid?'live':'pending'}">${paid ? '✓ Paid' : 'Awaiting Payment'}</span>
+      ${!paid && invoices[0].pay_url ? `<a href="${invoices[0].pay_url}" target="_blank" class="btn btn-primary btn-sm" style="margin-left:8px;">Pay Online →</a>` : ''}
+    `;
+  } catch(e) { el.innerHTML = '<div class="text-muted text-sm">Could not load invoice status.</div>'; }
+}
+
 
 async function loadDealFlow(role) {
   const el = document.getElementById(`${role}-dealflow-content`);
@@ -5660,6 +5495,10 @@ if(S.car_id) {
             </div>
           </div>
         </div>`).join('');
+
+      list.forEach(txn => {
+        if (['awaiting_seller_fee','completed'].includes(txn.status)) loadInvoiceStatus(txn.transaction_id);
+      });
     }
   } catch(e) {
     el.innerHTML = '<div class="alert alert-warning">Could not load deal status.</div>';
@@ -5725,13 +5564,20 @@ async function confirmPickup(asDescribed, txnId) {
 
 async function sellerConfirmDealPayment(txnId) {
   try {
-    await fetch(`${API}/transactions/seller/confirm-payment-received`, {
+    const res = await fetch(`${API}/transactions/seller/confirm-payment-received`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({transaction_id: txnId, seller_id: S.seller_id})
     });
-    showToast('✓','Confirmed!','Now pay your $250 PrivaBuy fee to complete.');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Request failed (${res.status})`);
+    }
+    showToast('✓','Confirmed!','Deal is wrapping up.');
     loadDealFlow('seller');
-  } catch(e) { showToast('❌','Error','Could not confirm.'); }
+  } catch(e) {
+    console.error('confirm-payment-received failed:', e);
+    showToast('❌','Error', e.message || 'Could not confirm.');
+  }
 }
 
 async function confirmShortfallPaid(txnId) {
