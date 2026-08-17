@@ -856,7 +856,7 @@ gtag('config', 'AW-18160958792');
                     <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
                       <input type="checkbox" id="lien-ack-checkbox" onchange="checkLienAck()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;">
                       <span style="font-size:12px;color:#1a1814;line-height:1.6;">
-                        I understand that if the winning bid does not cover my <strong id="lien-ack-payoff-amount">payoff amount</strong>, I am personally responsible for the difference. I have a valid 10-day payoff statement from <strong id="lien-ack-holder">my lender</strong>. <strong>Once my auction goes live, it cannot be cancelled or withdrawn.</strong>
+                        I understand that if the winning bid does not cover my <strong id="lien-ack-payoff-amount">payoff amount</strong>, I am personally responsible for the difference. I have a valid 10-day payoff statement from <strong id="lien-ack-holder">my lender</strong>. <strong>If my listing has zero bids I may withdraw it free of charge; once a bid is placed, self-serve withdrawal is disabled and I must contact PrivaBuy support.</strong>
                       </span>
                     </label>
                   </div>
@@ -1234,6 +1234,10 @@ gtag('config', 'AW-18160958792');
             <span style="color:var(--red);font-weight:700;flex-shrink:0;font-size:15px;">3</span>
             <div style="font-size:13px;color:#1a1814;line-height:1.7;"><strong>If you accept a bid and fail to deliver the vehicle, you forfeit your $250 platform fee.</strong> The fee is non-refundable in all cases of seller non-performance. PrivaBuy reserves the right to pursue additional damages on behalf of the affected dealer, including recovery of any costs incurred by the dealer in preparation for the transaction.</div>
           </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid rgba(0,0,0,0.10);border-radius:var(--r);padding:14px;">
+            <span style="color:var(--accent3);font-weight:700;flex-shrink:0;font-size:15px;">4</span>
+            <div style="font-size:13px;color:#1a1814;line-height:1.7;"><strong>If your listing has zero bids, you can withdraw it at any time, free of charge, with no strings attached.</strong> Withdrawing releases you from the exclusivity commitment above immediately — you're free to list or sell the vehicle anywhere else right away. Once your listing has one or more bids, self-serve withdrawal is disabled to protect the dealers bidding in good faith — contact support if you need to withdraw at that point. Listings that receive zero bids are automatically withdrawn after 14 days, with the same no-strings-attached release.</div>
+          </div>
         </div>
 
         <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:rgba(217,48,37,0.04);border:1px solid rgba(217,48,37,0.20);border-radius:var(--r);padding:14px;">
@@ -1256,8 +1260,8 @@ gtag('config', 'AW-18160958792');
                 <strong style="color:#1a1814;display:block;margin-bottom:8px">3. Platform Fee</strong>
                 Upon accepting an offer, a one-time platform fee of $250 is due to PrivaBuy before dealer contact information is released. This fee is non-refundable once processed.
                 <br><br>
-                <strong style="color:#1a1814;display:block;margin-bottom:8px">4. No Time Limit</strong>
-                My auction has no mandatory expiration. It remains open until I choose to accept or close it.
+                <strong style="color:#1a1814;display:block;margin-bottom:8px">4. No Time Limit & Right to Withdraw</strong>
+                My auction has no mandatory expiration and I am not obligated to accept any bid. If my listing has received no bids, I may withdraw it at any time with no penalty, no fee, and no restriction on listing the vehicle elsewhere — this releases me from the exclusivity commitment above immediately upon withdrawal. Once my listing has received one or more bids, self-serve withdrawal is disabled; I must contact PrivaBuy support to withdraw, and accepted bids remain binding as described in Section 2. Listings that receive zero bids within 14 days are automatically withdrawn, and I am free to sell the vehicle through any channel from that point forward.
                 <br><br>
                 <strong style="color:#1a1814;display:block;margin-bottom:8px">5. Data & Privacy</strong>
                 My contact information will only be shared with the winning dealer after I accept their bid and the platform fee is paid.
@@ -1322,7 +1326,8 @@ gtag('config', 'AW-18160958792');
                   <div class="text-muted text-sm mb-16">Your auction is open. Accept a bid whenever you're satisfied.</div>
                   <div id="floor-warning" class="alert alert-warning hidden">Current top bid is below your floor price of <strong id="floor-display"></strong>. You are not required to accept.</div>
                   <button class="btn btn-success btn-full mb-16" id="accept-bid-btn" onclick="acceptTopBid()" disabled> Accept Top Bid — <span id="top-bid-display">$0</span></button>
-                  <button class="btn btn-secondary btn-full" onclick="openCounterModal()"> Counter Offer</button>
+                  <button class="btn btn-secondary btn-full mb-16" onclick="openCounterModal()"> Counter Offer</button>
+                  <button class="btn btn-secondary btn-full" onclick="openWithdrawModal()" style="color:var(--red);border-color:rgba(217,48,37,0.25);background:rgba(217,48,37,0.04);">✕ Withdraw Listing</button>
                 </div>
                 <div id="seller-auction-closed" class="hidden">
                                   <div class="alert alert-success"> Offer accepted! You agreed to <strong id="accepted-amount"></strong></div>
@@ -1778,6 +1783,7 @@ gtag('config', 'AW-18160958792');
           <li><strong>"Accept Top Bid" button:</strong> Disabled until at least one bid comes in. Clicking it opens a confirmation — accepting is binding and starts the Deal Flow.</li>
           <li><strong>"Counter Offer" button:</strong> Lets you propose a higher amount to the current top bidder, who then has a window to respond.</li>
           <li>If the top bid is below your floor price, a warning banner appears — you're never required to accept a bid below your floor.</li>
+          <li><strong>"Withdraw Listing" button:</strong> Free at any time if you have zero bids — releases you from exclusivity immediately, list elsewhere right away. Once you have a bid, self-serve withdrawal turns off to protect dealers bidding in good faith — contact support if you need to withdraw at that point. Zero-bid listings auto-withdraw after 14 days with the same free release.</li>
         </ul>
       </div>
 
@@ -3709,11 +3715,17 @@ function startSellerBidPoll() {
       return;
     }
     const auctionAge = (Date.now() - S.auctionStartTime) / (1000 * 60 * 60 * 24);
-    if(auctionAge > 14) {
+    if(auctionAge > 14 && S.bids.length === 0) {
       clearInterval(S.bidPollInterval);
+      clearInterval(S.timerInterval);
       S.auctionActive = false;
-      showToast('⚠️', 'Auction Expired', 'Your auction has been open for 14 days and has been closed.');
-      document.getElementById('seller-elapsed').textContent = 'EXPIRED';
+      document.getElementById('live-auction-view').classList.add('hidden');
+      document.getElementById('no-auction-msg').classList.remove('hidden');
+      showToast('✓', 'Listing Auto-Withdrawn', 'No bids came in within 14 days, so your listing was automatically withdrawn — you\'re free to sell elsewhere.');
+      fetch(`${API}/cars/${S.car_id}/withdraw`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ seller_id: S.seller_id, reason: 'auto_expired_no_bids' })
+      }).catch(()=>{});
       return;
     }
     try {
@@ -4023,7 +4035,7 @@ async function acceptTopBid() {
   sellerTab('dealflow', document.getElementById('seller-dealflow-tab'));
 }
 
-function showConfirmModal(title, message) {
+function showConfirmModal(title, message, confirmLabel = 'Yes, Accept Bid') {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px);';
@@ -4033,7 +4045,7 @@ function showConfirmModal(title, message) {
         <div style="font-size:15px;color:rgba(0,0,0,0.75);font-weight:500;line-height:1.6;margin-bottom:28px;">${message}</div>
         <div style="display:flex;gap:10px;">
           <button id="confirm-cancel" style="flex:1;padding:13px;background:#f2f2f2;color:#1a1814;border:1px solid rgba(0,0,0,0.18);border-radius:50px;font-family:Inter,sans-serif;font-size:14px;font-weight:500;cursor:pointer;">Cancel</button>
-          <button id="confirm-ok" style="flex:1;padding:13px;background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:50px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Yes, Accept Bid</button>
+          <button id="confirm-ok" style="flex:1;padding:13px;background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:50px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;cursor:pointer;">${confirmLabel}</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);
@@ -4041,6 +4053,51 @@ function showConfirmModal(title, message) {
     document.getElementById('confirm-cancel').onclick = () => { overlay.remove(); resolve(false); };
     overlay.onclick = (e) => { if(e.target === overlay) { overlay.remove(); resolve(false); } };
   });
+}
+
+function openWithdrawModal() {
+  if (S.bids.length > 0) {
+    showConfirmModal(
+      `Can't self-withdraw with active bids`,
+      `You have a top bid of <strong>$${S.bids[0].amount.toLocaleString()}</strong>. Once a dealer has bid in good faith, self-serve withdrawal is turned off to protect our dealer network. If you still need to withdraw, contact support at <a href="mailto:support@privabuy.com">support@privabuy.com</a> or (929) 289-0668 and we'll review it.`,
+      'Got It'
+    );
+    return;
+  }
+
+  showConfirmModal(
+    `Withdraw your listing?`,
+    `You haven't received any bids yet. You're free to withdraw and list your vehicle anywhere else — no penalty, no fee, no strings attached.`,
+    'Withdraw Listing'
+  ).then(confirmed => {
+    if (confirmed) confirmWithdrawListing();
+  });
+}
+
+async function confirmWithdrawListing() {
+  if (!S.car_id || !S.seller_id) return;
+  try {
+    const res = await fetch(`${API}/cars/${S.car_id}/withdraw`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ seller_id: S.seller_id })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Could not withdraw listing');
+
+    clearInterval(S.timerInterval);
+    clearInterval(S.bidPollInterval);
+    S.auctionActive = false;
+    S.car_id = null;
+    S.bids = [];
+
+    document.getElementById('live-auction-view').classList.add('hidden');
+    document.getElementById('no-auction-msg').classList.remove('hidden');
+    showToast('✓', 'Listing Withdrawn', 'You\'re free to list this vehicle anywhere else, effective now.');
+    if (typeof gtag !== 'undefined') gtag('event', 'listing_withdrawn');
+  } catch (err) {
+    showToast('❌', 'Could Not Withdraw', err.message);
+  }
 }
 
 function clearAuction() { clearInterval(S.timerInterval); S.auctionActive=false; S.bids=[]; clearInterval(S.dealerCardTimerInterval); }
