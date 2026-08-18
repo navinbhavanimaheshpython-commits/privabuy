@@ -760,7 +760,11 @@ gtag('config', 'AW-18160958792');
                 <div class="form-group"><label class="form-label">Mileage</label><input class="form-input" id="f-mileage" type="number" placeholder="94200" style="font-size:18px;padding:14px;"></div>
                 <div class="form-group"><label class="form-label">ZIP Code</label><input class="form-input" id="f-zip" placeholder="60601" maxlength="5" type="number" style="font-size:18px;padding:14px;"></div>
               </div>
-              <div class="quick-start-hint" style="text-align:left;">ZIP is how we match you with nearby dealers.</div>
+              <div class="form-group mt-16">
+                <label class="form-label">Pickup Street Address - needed for dealer pickup</label>
+                <input class="form-input" id="f-address" placeholder="123 Main St, Fort Wayne, IN 46805">
+              </div>
+              <div class="quick-start-hint" style="text-align:left;">ZIP is how we match you with nearby dealers. Your full address is only shown to the dealer after you accept their bid.</div>
             </div>
 
             <!-- Q3: Ownership & Drivetrain -->
@@ -1232,7 +1236,7 @@ gtag('config', 'AW-18160958792');
           </div>
           <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid rgba(0,0,0,0.10);border-radius:var(--r);padding:14px;">
             <span style="color:var(--red);font-weight:700;flex-shrink:0;font-size:15px;">3</span>
-            <div style="font-size:13px;color:#1a1814;line-height:1.7;"><strong>If you accept a bid and fail to deliver the vehicle, you forfeit your $250 platform fee.</strong> The fee is non-refundable in all cases of seller non-performance. PrivaBuy reserves the right to pursue additional damages on behalf of the affected dealer, including recovery of any costs incurred by the dealer in preparation for the transaction.</div>
+            <div style="font-size:13px;color:#1a1814;line-height:1.7;"><strong>If you accept a bid and fail to hand over the vehicle during pickup and title transfer, you forfeit your $350 platform fee.</strong> The fee is non-refundable in all cases of seller non-performance. PrivaBuy reserves the right to pursue additional damages on behalf of the affected dealer, including recovery of any costs incurred by the dealer in preparation for the transaction.</div>
           </div>
           <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid rgba(0,0,0,0.10);border-radius:var(--r);padding:14px;">
             <span style="color:var(--accent3);font-weight:700;flex-shrink:0;font-size:15px;">4</span>
@@ -1258,13 +1262,13 @@ gtag('config', 'AW-18160958792');
                 I understand that listing my vehicle on PrivaBuy initiates a live auction. I am not obligated to accept any bid. Once I accept a bid, I am entering a binding agreement to sell at the accepted price.
                 <br><br>
                 <strong style="color:#1a1814;display:block;margin-bottom:8px">3. Platform Fee</strong>
-                Upon accepting an offer, a one-time platform fee of $250 is due to PrivaBuy before dealer contact information is released. This fee is non-refundable once processed.
+                Upon a successful sale, a one-time platform fee of $350 is deducted from the winning dealer's payment to you — you are never billed or charged separately. This fee is non-refundable once the sale is complete.
                 <br><br>
                 <strong style="color:#1a1814;display:block;margin-bottom:8px">4. No Time Limit & Right to Withdraw</strong>
                 My auction has no mandatory expiration and I am not obligated to accept any bid. If my listing has received no bids, I may withdraw it at any time with no penalty, no fee, and no restriction on listing the vehicle elsewhere — this releases me from the exclusivity commitment above immediately upon withdrawal. Once my listing has received one or more bids, self-serve withdrawal is disabled; I must contact PrivaBuy support to withdraw, and accepted bids remain binding as described in Section 2. Listings that receive zero bids within 14 days are automatically withdrawn, and I am free to sell the vehicle through any channel from that point forward.
                 <br><br>
                 <strong style="color:#1a1814;display:block;margin-bottom:8px">5. Data & Privacy</strong>
-                My contact information will only be shared with the winning dealer after I accept their bid and the platform fee is paid.
+                My contact information will only be shared with the winning dealer after I accept their bid.
               </div>
               <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer">
                 <input type="checkbox" id="terms-checkbox" onchange="updateStartBtn()" style="width:18px;height:18px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;cursor:pointer">
@@ -2715,6 +2719,8 @@ function v1ValidateStep(step) {
     if(!mileage) { showToast('⚠️','Missing Field','Please enter the mileage.'); return false; }
     const zip = document.getElementById('f-zip')?.value.trim() || '';
     if(!zip || zip.length < 5) { showToast('⚠️','Missing Field','Please enter a valid ZIP code.'); return false; }
+    const address = document.getElementById('f-address')?.value.trim() || '';
+    if(!address) { showToast('⚠️','Missing Field','Please enter your pickup address.'); return false; }
   }
   if(step === 3) {
     if(!getRadio('title-group')) { showToast('⚠️','Missing Field','Select your title status.'); return false; }
@@ -3602,6 +3608,7 @@ async function startAuction() {
         color: document.getElementById('f-color')?.value.trim() || d.color || '',
         mileage: parseInt(document.getElementById('f-mileage')?.value) || parseInt(d.mileage) || 0,
         zip: document.getElementById('f-zip')?.value.trim() || d.zip || '',
+        address: document.getElementById('f-address')?.value.trim() || d.address || '',
         addons: document.getElementById('f-addons')?.value.trim() || d.addons || '',
         photos: S.photoUrls || [],
         condition: (getRadio('overall-condition-group') || 'good').toLowerCase().replace(/ /g,'-'),
@@ -3682,16 +3689,42 @@ function notifyDealerPortal() {
   document.getElementById('real-seller-auction-card').classList.remove('hidden');
 }
 
-function sellerConfirmReceivedPayment() {
-  const awaiting = document.getElementById('seller-awaiting-payment');
-  if(awaiting) {
-    awaiting.style.borderColor = 'rgba(42,158,124,0.25)';
-    awaiting.style.background = 'rgba(42,158,124,0.05)';
-    awaiting.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">✓</span><div><div style="font-size:13px;font-weight:600;color:var(--accent3)">Dealer Payment Confirmed</div><div style="font-size:12px;color:var(--g5);margin-top:2px">Great — your PrivaBuy platform fee is now due below.</div></div></div>`;
+function highlightSellerPayment() {
+  setTimeout(()=>{const tab=document.querySelector('#screen-seller .tabs');if(tab){const payBtn=[...tab.querySelectorAll('.tab-btn')].find(b=>b.textContent.includes('Pay'));if(payBtn){payBtn.style.color='var(--accent)';}}},100);
+}
+async function processSellerPayment() {
+  const name = document.getElementById('seller-card-name').value;
+  if(!name) { showToast('','Missing Name','Enter cardholder name.'); return; }
+  const btn = event.target;
+  btn.textContent = 'Processing...'; btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/payments/create-intent`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({amount: 25000, description: 'PrivaBuy Seller Platform Fee'})
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.detail || 'Failed to create payment');
+    const result = await stripeClient.confirmCardPayment(data.client_secret, {
+      payment_method: { card: sellerCardElement, billing_details: { name } }
+    });
+    if(result.error) throw new Error(result.error.message);
+    if(S.currentTxn?.transaction_id) {
+      await fetch(`${API}/transactions/${S.currentTxn.transaction_id}/seller-paid`, {method:'POST'});
+    }
+    loadDealFlow('seller');
+    btn.textContent = '✓ Payment Successful';
+    btn.style.background = 'rgba(42,158,124,0.12)';
+    btn.style.color = 'var(--accent3)';
+    btn.style.borderColor = 'rgba(42,158,124,0.25)';
+    const prompt = document.getElementById('seller-fee-prompt');
+    if(prompt){ prompt.style.borderColor='rgba(42,158,124,0.25)'; prompt.style.background='rgba(42,158,124,0.05)'; prompt.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">✓</span><div><div style="font-size:13px;font-weight:600;color:var(--accent3)">Payment Complete</div><div style="font-size:12px;color:var(--g5);margin-top:2px">Dealer pickup will be arranged within 1–2 business days.</div></div></div>`; }
+    showToast('','Payment Received','$250.00 received. Your auction is fully processed. Thank you!');
+  } catch(err) {
+    btn.textContent = 'Pay $250.00 →'; btn.disabled = false;
+    showToast('','Payment Failed', err.message);
+    console.error(err);
   }
-  const fee = document.getElementById('seller-fee-prompt');
-  if(fee) fee.classList.remove('hidden');
-  showToast('','Payment Confirmed','Now please complete your $250 PrivaBuy platform fee.');
 }
 
 function updateStartBtn() {
@@ -5476,6 +5509,31 @@ async function loadInvoiceStatus(txnId) {
 }
 
 
+function sellerContactBlock(txn) {
+  if (txn.status === 'awaiting_dealer_payment') {
+    return `<div class="alert alert-info" style="margin-bottom:16px;">📍 Seller contact and pickup address unlock once you confirm your win.</div>`;
+  }
+  const mapsUrl = txn.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(txn.address)}` : null;
+  const phoneDigits = (txn.seller_phone || '').replace(/[^\d+]/g, '');
+
+  return `
+    <div style="background:rgba(124,92,191,0.05);border:1px solid rgba(124,92,191,0.18);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:10px;">📍 Seller & Pickup Info</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;color:#1a1814;margin-bottom:12px;">
+        <div><div style="font-size:10px;color:var(--g5);text-transform:uppercase;margin-bottom:2px;">Seller</div><div>${txn.seller_name || '—'}</div></div>
+        <div><div style="font-size:10px;color:var(--g5);text-transform:uppercase;margin-bottom:2px;">Phone</div><div>${txn.seller_phone || '—'}</div></div>
+        <div><div style="font-size:10px;color:var(--g5);text-transform:uppercase;margin-bottom:2px;">Email</div><div>${txn.seller_email || '—'}</div></div>
+        <div><div style="font-size:10px;color:var(--g5);text-transform:uppercase;margin-bottom:2px;">Pickup Address</div><div>${txn.address || 'Not provided'}</div></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${phoneDigits ? `<a href="tel:${phoneDigits}" class="btn btn-secondary btn-sm">📞 Call Seller</a>` : ''}
+        ${phoneDigits ? `<a href="sms:${phoneDigits}" class="btn btn-secondary btn-sm">💬 Text Seller</a>` : ''}
+        ${txn.seller_email ? `<a href="mailto:${txn.seller_email}?subject=${encodeURIComponent('PrivaBuy Pickup — ' + (txn.year||'') + ' ' + (txn.make||'') + ' ' + (txn.model||''))}" class="btn btn-secondary btn-sm">✉️ Email Seller</a>` : ''}
+        ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" class="btn btn-secondary btn-sm">🗺️ Get Directions</a>` : ''}
+      </div>
+    </div>`;
+}
+
 async function loadDealFlow(role) {
   const el = document.getElementById(`${role}-dealflow-content`);
   if(!el) return;
@@ -5547,6 +5605,7 @@ if(S.car_id) {
           </div>
           <div class="card-body">
             ${dealFlowStepsHTML(txn.status)}
+            ${sellerContactBlock(txn)}
             <div id="dealer-dealflow-action-${txn.transaction_id}">
               ${dealFlowActionHTML(txn,'dealer')}
             </div>
